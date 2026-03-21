@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "macro-screener"
+version = "0.1.0"
+description = "Macro regime-based two-stage screening system MVP"
+readme = "doc/prd.md"
+requires-python = ">=3.11"
+dependencies = [
+  "APScheduler>=3.10,<4",
+  "httpx>=0.27,<1",
+  "numpy>=1.26,<3",
+  "pandas>=2.2,<3",
+  "pyarrow>=15,<19",
+  "PyYAML>=6,<7",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.10,<2",
+  "pytest>=8.0,<9",
+  "ruff>=0.4,<1",
+]
+
+[project.scripts]
+macro-screener = "macro_screener.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src", "tests"]
+strict = true
+warn_unused_ignores = true
+pretty = true
