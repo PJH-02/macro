@@ -256,8 +256,6 @@ class Snapshot(SerializableMixin):
             industry_scores=[
                 IndustryScore.from_dict(item) for item in payload.get("industry_scores", [])
             ],
-            stock_scores=[
-                StockScore.from_dict(item) for item in payload.get("stock_scores", [])
-            ],
+            stock_scores=[StockScore.from_dict(item) for item in payload.get("stock_scores", [])],
             warnings=[str(item) for item in payload.get("warnings", [])],
         )

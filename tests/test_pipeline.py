@@ -76,7 +76,9 @@ class PipelinePublicationTests(unittest.TestCase):
                 [run["run_id"] for run in result["runs"]],
                 ["2026-03-20-post_close", "2026-03-23-post_close"],
             )
-            self.assertTrue(result["output_dir"].endswith("backtest/2026-03-20_2026-03-23_post_close"))
+            self.assertTrue(
+                result["output_dir"].endswith("backtest/2026-03-20_2026-03-23_post_close")
+            )
 
     def test_cli_demo_run_smoke(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

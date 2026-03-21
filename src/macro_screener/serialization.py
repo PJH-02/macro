@@ -8,9 +8,7 @@ from typing import Any, Mapping, Sequence, TypeVar, cast
 
 SerializablePrimitive = str | int | float | bool | None
 SerializableValue = (
-    SerializablePrimitive
-    | list["SerializableValue"]
-    | dict[str, "SerializableValue"]
+    SerializablePrimitive | list["SerializableValue"] | dict[str, "SerializableValue"]
 )
 
 T = TypeVar("T")
@@ -26,10 +24,7 @@ class SerializableMixin:
 
 def _serialize(value: Any) -> SerializableValue:
     if is_dataclass(value):
-        return {
-            field.name: _serialize(getattr(value, field.name))
-            for field in fields(value)
-        }
+        return {field.name: _serialize(getattr(value, field.name)) for field in fields(value)}
     if isinstance(value, Enum):
         return cast(SerializablePrimitive, value.value)
     if isinstance(value, datetime):
@@ -39,10 +34,7 @@ def _serialize(value: Any) -> SerializableValue:
     if isinstance(value, Path):
         return str(value)
     if isinstance(value, Mapping):
-        return {
-            str(key): _serialize(item)
-            for key, item in value.items()
-        }
+        return {str(key): _serialize(item) for key, item in value.items()}
     if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
         return [_serialize(item) for item in value]
     return cast(SerializablePrimitive, value)

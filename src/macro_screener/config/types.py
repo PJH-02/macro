@@ -165,9 +165,7 @@ class RuntimePolicyConfig(SerializableMixin):
             retries=int(payload.get("retries", 3)),
             scheduler_enabled=bool(payload.get("scheduler_enabled", True)),
             dart_api_key_env=str(payload.get("dart_api_key_env", "DART_API_KEY")),
-            stage1_only_on_stage2_failure=bool(
-                payload.get("stage1_only_on_stage2_failure", True)
-            ),
+            stage1_only_on_stage2_failure=bool(payload.get("stage1_only_on_stage2_failure", True)),
             stale_dart_after_retries=bool(payload.get("stale_dart_after_retries", True)),
             reuse_last_known_channel_states=bool(
                 payload.get("reuse_last_known_channel_states", True)
