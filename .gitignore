@@ -1,0 +1,6 @@
+.omx/
+.omc
+.codex
+.venv
+__pycache__
+.env
