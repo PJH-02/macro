@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 
+from .config import load_config
 from .mvp import (
     DEFAULT_BACKTEST_RUN_TYPE,
     DEFAULT_DEMO_AS_OF,
@@ -20,6 +22,16 @@ def build_parser() -> argparse.ArgumentParser:
         description="Deterministic MVP helpers for macro screener verification"
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    show_config = subparsers.add_parser(
+        "show-config", help="load effective config and print it as JSON"
+    )
+    show_config.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        help="optional path to a YAML config file",
+    )
 
     demo = subparsers.add_parser("demo-run", help="run the deterministic local MVP demo")
     demo.add_argument("--output-dir", required=True)
@@ -49,6 +61,10 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
+    if args.command == "show-config":
+        config = load_config(args.config)
+        print(json.dumps(config.to_dict(), ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
     if args.command == "demo-run":
         result = run_demo(
             output_dir=args.output_dir,

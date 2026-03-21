@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+import os
+import subprocess
+import tempfile
 from pathlib import Path
 
 from _pytest.monkeypatch import MonkeyPatch
@@ -40,3 +44,40 @@ def test_missing_config_uses_repo_defaults(tmp_path: Path, monkeypatch: MonkeyPa
 
     assert config.stage2.decay_half_lives["governance_risk"] == 120
     assert config.universe.markets == ("KOSPI", "KOSDAQ")
+
+
+def test_show_config_cli_uses_custom_file() -> None:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        config_path = Path(tmpdir) / "custom.yaml"
+        config_path.write_text(
+            """
+config_version: "cli-custom"
+schedule:
+  pre_open_time: "08:45"
+paths:
+  latest_snapshot_pointer: "custom/latest.json"
+            """.strip(),
+            encoding="utf-8",
+        )
+
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(Path(__file__).resolve().parents[2] / "src")
+        completed = subprocess.run(
+            [
+                "python3",
+                "-m",
+                "macro_screener.cli",
+                "show-config",
+                "--config",
+                str(config_path),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+
+        payload = json.loads(completed.stdout)
+        assert payload["config_version"] == "cli-custom"
+        assert payload["schedule"]["pre_open_time"] == "08:45"
+        assert payload["paths"]["latest_snapshot_pointer"] == "custom/latest.json"
