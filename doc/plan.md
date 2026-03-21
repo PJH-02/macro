@@ -1,5 +1,8 @@
 # Implementation Plan: Macro Regime-Based Two-Stage Screening System (MVP)
 
+[한국어 버전](plan.ko.md)
+
+
 > Purpose: define the implementation order, delivery milestones, stack choices, testing expectations, and operational rules for the MVP.
 
 ## 1. Inputs to this plan

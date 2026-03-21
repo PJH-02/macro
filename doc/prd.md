@@ -1,5 +1,8 @@
 # Product Requirements Document (PRD): Macro Regime-Based Two-Stage Screening System (MVP)
 
+[한국어 버전](prd.ko.md)
+
+
 > Purpose: define the product-level requirements, boundaries, outputs, and success criteria for the MVP.
 
 ## 1. Product overview

@@ -1,5 +1,7 @@
 # Macro Screener MVP
 
+[한국어 버전](README.ko.md)
+
 A minimal, runnable MVP for a **macro regime-based two-stage Korean equity screener**.
 
 The program reads the strategy and product rules from:
@@ -7,21 +9,34 @@ The program reads the strategy and product rules from:
 - `doc/prd.md`
 - `doc/plan.md`
 
-and implements a deterministic local MVP that:
-- scores **industries** from macro channel states,
-- scores **stocks** from DART-style disclosure events plus industry context,
+The current implementation is a locally reproducible MVP that:
+- computes **industry scores** from macro channel states,
+- computes **stock scores** from DART-style disclosure events plus industry context,
 - publishes immutable snapshots to **parquet + SQLite**,
-- and supports **manual**, **demo**, **scheduled**, and **backtest** runs.
+- supports **manual**, **demo**, **scheduled**, and **backtest** execution paths.
 
-> Important: this is still an MVP.
-> It now has real runtime seams and persistence, but several data sources still
-> rely on manual, file-backed, cached, or demo fallbacks.
+> Important: this project is still an MVP.
+> It now has real runtime seams and persistence, but some data sources still rely on manual input, file-backed input, cache, or demo fallback behavior.
+
+## Core docs
+
+### English
+- `README.md`
+- `doc/strategy.md`
+- `doc/prd.md`
+- `doc/plan.md`
+
+### Korean
+- `README.ko.md`
+- `doc/strategy.ko.md`
+- `doc/prd.ko.md`
+- `doc/plan.ko.md`
 
 ---
 
 ## 1. What this program does
 
-The screener has two stages.
+This screener works in two stages.
 
 ### Stage 1 — Industry ranking
 It converts 5 macro channel states into industry scores.
@@ -33,24 +48,23 @@ Channels:
 - `ED` — External Demand
 - `FX` — Foreign Exchange
 
-For the MVP, channel states come from **manual/stub input**.
+In the MVP, channel states come from **manual/stub input**.
 
 ### Stage 2 — Stock ranking
-It converts DART-style disclosure events into stock scores and combines them with Stage 1 industry scores.
+It converts DART-style disclosure events into stock scores and combines them with the Stage 1 industry score.
 
-The result is:
+Outputs:
 - full industry ranking
 - full stock ranking
 - published snapshot artifacts
 
-There is **no hard cutoff** in the MVP. The output is a full ranking, not a final trading list.
+There is **no hard cutoff** in the MVP. The result is a full ranking, not a final trading list.
 
 ---
 
 ## 2. How the program gets data
 
-Current MVP data sources are exposed behind real package boundaries, with
-manual/file/live-fallback behavior depending on what is configured.
+Current MVP data sources live behind real package boundaries and behave differently depending on configuration: manual, file-backed, live attempt, or fallback.
 
 ### Current implemented data path
 - `src/macro_screener/data/macro_client.py`
@@ -60,7 +74,7 @@ manual/file/live-fallback behavior depending on what is configured.
   - `KRXClient`
   - reads `stock_classification.csv` if available
   - reads `data/industry_exposures.json` if available
-  - falls back to the built-in demo universe/exposure set when inputs are missing
+  - falls back to the built-in demo stock universe and exposure set when inputs are missing
 - `src/macro_screener/data/dart_client.py`
   - `DARTClient`
   - reads local disclosure files if available
@@ -68,11 +82,11 @@ manual/file/live-fallback behavior depending on what is configured.
   - caches the last successful disclosure payload for stale fallback
   - falls back to demo disclosures when nothing else is configured
 
-### What is deferred
+### What is still deferred
 The docs still intentionally defer:
 - KRX official market-data endpoint integration
 - frozen production macro formulas / thresholds / source mapping
-- Korea-related macro sources: `ECOS`, `KOSIS`, `DART`-derived inputs where relevant
+- Korea-related macro sources: `ECOS`, `KOSIS`, and `DART`-derived inputs where needed
 - global macro source: `BIS`
 - any public downstream service/API contract beyond files
 
@@ -81,7 +95,7 @@ So the current program is best understood as:
 - **real ranking logic**
 - **real runtime/persistence flow**
 - **file/live-fallback adapter seams**
-- **real publication behavior**
+- **real snapshot publication behavior**
 
 ---
 
@@ -89,7 +103,7 @@ So the current program is best understood as:
 
 ## 3.1 Stage 1 formula
 
-Industry scoring is implemented mainly through:
+Industry scoring is mainly implemented in:
 - `src/macro_screener/stage1/base_score.py`
 - `src/macro_screener/stage1/overlay.py`
 - `src/macro_screener/stage1/ranking.py`
@@ -121,14 +135,14 @@ If two industries have the same final score, sort by:
 
 ## 3.2 Stage 2 formula
 
-Stock scoring is implemented mainly through:
+Stock scoring is mainly implemented in:
 - `src/macro_screener/stage2/classifier.py`
 - `src/macro_screener/stage2/decay.py`
 - `src/macro_screener/stage2/normalize.py`
 - `src/macro_screener/stage2/ranking.py`
 
 ### Classification
-Disclosures are mapped to blocks such as:
+Disclosures are mapped into blocks such as:
 - `supply_contract`
 - `treasury_stock`
 - `facility_investment`
@@ -137,12 +151,12 @@ Disclosures are mapped to blocks such as:
 - `governance_risk`
 - `neutral`
 
-Classification uses:
+Classification order:
 - event code first
-- title pattern fallback second
+- title-pattern fallback second
 
 ### Decay
-Each classified event contributes a decayed score:
+Each disclosure event contributes a decayed score:
 
 ```text
 DecayedContribution = BlockWeight * exp(-ln(2) * elapsed_days / half_life)
@@ -153,7 +167,7 @@ The program computes cross-sectional z-scores for:
 - raw DART score
 - raw industry score
 
-If variance is zero, z-score becomes `0.0`.
+If variance is zero, the z-score becomes `0.0`.
 
 ### Final stock score
 
@@ -172,7 +186,7 @@ If two stocks have the same final score, sort by:
 
 ---
 
-## 4. How screening works end-to-end
+## 4. End-to-end screening flow
 
 ### High-level flow
 
@@ -228,11 +242,11 @@ flowchart LR
 ```
 
 ### Practical meaning
-- `data/` provides input boundaries
-- `stage1/` turns macro state into industry ranks
-- `stage2/` turns disclosures into stock ranks
-- `pipeline/` creates/publishes snapshots
-- `backtest/` replays the same ideas across trading days
+- `data/` provides input boundaries.
+- `stage1/` turns macro state into industry ranks.
+- `stage2/` turns disclosures into stock ranks.
+- `pipeline/` creates and publishes snapshots.
+- `backtest/` replays the same idea across historical trading dates.
 
 ---
 
@@ -241,15 +255,15 @@ flowchart LR
 ```text
 src/macro_screener/
 ├── cli.py                  # CLI entrypoints
-├── contracts.py            # simple runtime-facing contracts
-├── models/                 # richer contract models
+├── contracts.py            # runtime compatibility shim
+├── models/                 # canonical contract models
 ├── config/                 # typed config loading
 ├── data/                   # KRX / DART / macro boundaries
 ├── stage1/                 # industry scoring
 ├── stage2/                 # stock scoring
 ├── pipeline/               # runner / scheduler / publisher
 ├── backtest/               # replay helpers
-└── mvp.py                  # convenience exports/glue for the MVP flow
+└── mvp.py                  # convenience exports / glue for the MVP flow
 ```
 
 ### Key files to read first
@@ -263,7 +277,7 @@ src/macro_screener/
 
 ## 6. Outputs
 
-The program publishes snapshot artifacts under the output directory you pass.
+The program publishes snapshot artifacts under the output directory you provide.
 
 Expected files:
 - `data/snapshots/<run_id>/industry_scores.parquet`
@@ -276,7 +290,7 @@ Expected files:
 - parquet files = canonical reader-facing snapshot artifacts
 - `snapshot.json` = readable structured snapshot
 - `latest.json` = pointer to the latest published snapshot
-- SQLite = operational/audit store
+- SQLite = operational / audit store
 
 ---
 
@@ -290,7 +304,7 @@ From the project root:
 pip install -e .[dev]
 ```
 
-If you only want to run from source without editable install:
+If you want to run directly from source without editable install:
 
 ```bash
 PYTHONPATH=src python3 -m macro_screener.cli show-config
@@ -318,10 +332,10 @@ PYTHONPATH=src python3 -m macro_screener.cli manual-run \
   --channel-state ED=1
 ```
 
-What it does:
+What this does:
 - uses the normal pipeline/runtime path
 - uses manual macro states
-- uses KRX/DART adapters with file/cache/demo fallback behavior
+- uses KRX / DART adapters with file / cache / demo fallback behavior
 - writes immutable snapshot artifacts and updates `latest.json`
 
 ## 7.4 Run the demo wrapper
@@ -332,9 +346,9 @@ PYTHONPATH=src python3 -m macro_screener.cli demo-run \
   --run-id demo-run-001
 ```
 
-What it does:
+What this does:
 - uses demo KRX + demo DART + manual/stub macro states
-- computes industry and stock ranks
+- computes industry and stock rankings
 - writes snapshot artifacts
 
 ## 7.5 Run a scheduled batch
@@ -385,26 +399,26 @@ PYTHONPATH=src python3 -m compileall src tests
 
 ---
 
-## 9. Limitations of the current MVP
+## 9. Current MVP limitations
 
 This implementation is intentionally limited.
 
 ### Current limitations
 - KRX official endpoint integration is still deferred
-- macro policy is still manual-first; production formulas/thresholds are not frozen
-- DART live ingestion is best-effort and still relies on fallback/cache behavior in local development
-- SQLite is now unified, but further physical tuning and migrations remain minimal by design
+- macro policy is still manual-first; production formulas / thresholds are not frozen
+- DART live ingestion is best-effort and still depends on fallback/cache behavior in local development
+- SQLite is now unified, but further physical schema tuning and migrations remain minimal by design
 
 ### What is already real
-- package/module layout
+- package / module layout
 - ranking logic
-- one canonical contract layer (`models/contracts.py`) with a compatibility shim
-- publication flow
+- canonical contract layer (`models/contracts.py`) plus a compatibility shim
+- snapshot publication flow
 - latest snapshot pointer
 - scheduled-window identity
 - duplicate scheduled-window protection
 - PIT-aware backtest flow
-- local deterministic verification
+- locally reproducible deterministic verification
 
 ---
 

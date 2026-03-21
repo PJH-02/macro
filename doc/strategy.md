@@ -1,5 +1,8 @@
 # Strategy: Macro Regime-Based Two-Stage Screening System (MVP)
 
+[한국어 버전](strategy.ko.md)
+
+
 > Purpose: one concise source-of-truth for product intent, architecture strategy, and final MVP operating decisions.
 
 ## 1. Why this exists
