@@ -8,27 +8,28 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import pandas as pd
+import pandas as pd  # type: ignore[import-untyped]
 
 from macro_screener.mvp import (
     DEFAULT_DEMO_RUN_ID,
-    build_backtest_stub_plan,
+    build_backtest_plan,
     run_backtest_stub,
     run_demo,
+    run_manual,
     run_scheduled_stub,
 )
 
 
 class PipelinePublicationTests(unittest.TestCase):
-    def test_demo_run_publishes_expected_artifacts(self) -> None:
+    def test_manual_run_publishes_expected_artifacts(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            result = run_demo(tmpdir)
+            result = run_manual(tmpdir, run_id="manual-test-run")
             latest = result["latest"]
             latest_path = Path(tmpdir) / "data" / "snapshots" / "latest.json"
             snapshot_path = Path(latest["snapshot_json"])
             stock_parquet = Path(latest["stock_parquet"])
             industry_parquet = Path(latest["industry_parquet"])
-            database_path = Path(tmpdir) / "data" / "snapshots" / "mvp.sqlite"
+            database_path = Path(tmpdir) / "data" / "macro_screener.sqlite3"
 
             self.assertTrue(latest_path.exists())
             self.assertTrue(snapshot_path.exists())
@@ -38,7 +39,7 @@ class PipelinePublicationTests(unittest.TestCase):
 
             latest_payload = json.loads(latest_path.read_text(encoding="utf-8"))
             snapshot_payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
-            self.assertEqual(latest_payload["run_id"], DEFAULT_DEMO_RUN_ID)
+            self.assertEqual(latest_payload["run_id"], "manual-test-run")
             self.assertEqual(snapshot_payload["status"], "published")
             self.assertEqual(pd.read_parquet(stock_parquet).iloc[0]["rank"], 1)
             self.assertEqual(pd.read_parquet(industry_parquet).iloc[0]["rank"], 1)
@@ -48,7 +49,7 @@ class PipelinePublicationTests(unittest.TestCase):
                 rows = connection.execute("SELECT run_id, status FROM snapshots").fetchall()
             finally:
                 connection.close()
-            self.assertEqual(rows, [(DEFAULT_DEMO_RUN_ID, "published")])
+            self.assertEqual(rows, [("manual-test-run", "published")])
 
     def test_publish_is_immutable_for_duplicate_run_ids(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -56,29 +57,91 @@ class PipelinePublicationTests(unittest.TestCase):
             with self.assertRaisesRegex(FileExistsError, "duplicate-run"):
                 run_demo(tmpdir, run_id="duplicate-run")
 
-    def test_scheduled_stub_uses_documented_window_defaults(self) -> None:
+    def test_scheduled_run_uses_window_defaults_and_attempt_unique_run_id(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            result = run_scheduled_stub(tmpdir, trading_date="2026-03-23", run_type="pre_open")
+            result = run_scheduled_stub(
+                tmpdir,
+                trading_date="2026-03-23",
+                run_type="pre_open",
+                attempted_at="2026-03-23T08:29:00+09:00",
+            )
 
-            self.assertEqual(result["context"]["run_id"], "2026-03-23-pre_open")
+            self.assertTrue(result["context"]["run_id"].startswith("2026-03-23-pre_open-"))
             self.assertEqual(result["context"]["as_of_timestamp"], "2026-03-23T08:30:00+09:00")
             self.assertEqual(result["context"]["input_cutoff"], "2026-03-20T18:00:00+09:00")
+            self.assertEqual(result["scheduled_window_key"]["trading_date"], "2026-03-23")
+            self.assertEqual(result["scheduled_window_key"]["run_type"], "pre_open")
             self.assertEqual(result["snapshot"]["run_type"], "pre_open")
 
-    def test_backtest_stub_skips_weekends_and_uses_isolated_namespace(self) -> None:
+    def test_scheduled_duplicate_window_is_skipped_after_publication(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            plan = build_backtest_stub_plan(start_date="2026-03-20", end_date="2026-03-23")
+            first = run_scheduled_stub(
+                tmpdir,
+                trading_date="2026-03-23",
+                run_type="post_close",
+                attempted_at="2026-03-23T15:46:00+09:00",
+            )
+            second = run_scheduled_stub(
+                tmpdir,
+                trading_date="2026-03-23",
+                run_type="post_close",
+                attempted_at="2026-03-23T15:47:00+09:00",
+            )
+            database_path = Path(tmpdir) / "data" / "macro_screener.sqlite3"
+
+            self.assertEqual(first["snapshot"]["status"], "published")
+            self.assertEqual(second["snapshot"]["status"], "duplicate")
+            self.assertIn("duplicate_scheduled_window_skipped", second["warnings"])
+
+            connection = sqlite3.connect(database_path)
+            try:
+                count = connection.execute("SELECT COUNT(*) FROM published_snapshots").fetchone()[0]
+            finally:
+                connection.close()
+            self.assertEqual(count, 1)
+
+    def test_backtest_run_skips_weekends_and_uses_isolated_namespace(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            plan = build_backtest_plan(start_date="2026-03-20", end_date="2026-03-23")
             result = run_backtest_stub(tmpdir, start_date="2026-03-20", end_date="2026-03-23")
 
             self.assertEqual([item["trading_date"] for item in plan], ["2026-03-20", "2026-03-23"])
             self.assertEqual(result["trading_dates"], ["2026-03-20", "2026-03-23"])
-            self.assertEqual(
-                [run["run_id"] for run in result["runs"]],
-                ["2026-03-20-post_close", "2026-03-23-post_close"],
-            )
+            self.assertTrue(all(run["run_id"].startswith("backtest-") for run in result["runs"]))
             self.assertTrue(
                 result["output_dir"].endswith("backtest/2026-03-20_2026-03-23_post_close")
             )
+            self.assertTrue(
+                (Path(result["output_dir"]) / "data" / "snapshots" / "latest.json").exists()
+            )
+
+    def test_cli_manual_run_smoke(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            env = os.environ.copy()
+            env["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
+            completed = subprocess.run(
+                [
+                    "python3",
+                    "-m",
+                    "macro_screener.cli",
+                    "manual-run",
+                    "--output-dir",
+                    tmpdir,
+                    "--run-id",
+                    "cli-manual-run",
+                    "--channel-state",
+                    "G=1",
+                    "--channel-state",
+                    "ED=1",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+                env=env,
+            )
+            payload = json.loads(completed.stdout)
+            self.assertEqual(payload["snapshot"]["run_id"], "cli-manual-run")
+            self.assertTrue((Path(tmpdir) / "data" / "snapshots" / "latest.json").exists())
 
     def test_cli_demo_run_smoke(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -93,7 +156,7 @@ class PipelinePublicationTests(unittest.TestCase):
                     "--output-dir",
                     tmpdir,
                     "--run-id",
-                    "cli-demo-run",
+                    DEFAULT_DEMO_RUN_ID,
                 ],
                 check=True,
                 capture_output=True,
@@ -101,10 +164,10 @@ class PipelinePublicationTests(unittest.TestCase):
                 env=env,
             )
             payload = json.loads(completed.stdout)
-            self.assertEqual(payload["snapshot"]["run_id"], "cli-demo-run")
+            self.assertEqual(payload["snapshot"]["run_id"], DEFAULT_DEMO_RUN_ID)
             self.assertTrue((Path(tmpdir) / "data" / "snapshots" / "latest.json").exists())
 
-    def test_cli_backtest_stub_smoke(self) -> None:
+    def test_cli_backtest_run_smoke(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             env = os.environ.copy()
             env["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
@@ -113,7 +176,7 @@ class PipelinePublicationTests(unittest.TestCase):
                     "python3",
                     "-m",
                     "macro_screener.cli",
-                    "backtest-stub",
+                    "backtest-run",
                     "--output-dir",
                     tmpdir,
                     "--start-date",

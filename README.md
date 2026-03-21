@@ -11,10 +11,11 @@ and implements a deterministic local MVP that:
 - scores **industries** from macro channel states,
 - scores **stocks** from DART-style disclosure events plus industry context,
 - publishes immutable snapshots to **parquet + SQLite**,
-- and supports **manual/demo**, **scheduled**, and **backtest-stub** runs.
+- and supports **manual**, **demo**, **scheduled**, and **backtest** runs.
 
-> Important: this is an MVP **program baseline**, not a live production data integration yet.
-> Current data access is intentionally **stub/manual + interface-first**.
+> Important: this is still an MVP.
+> It now has real runtime seams and persistence, but several data sources still
+> rely on manual, file-backed, cached, or demo fallbacks.
 
 ---
 
@@ -48,31 +49,38 @@ There is **no hard cutoff** in the MVP. The output is a full ranking, not a fina
 
 ## 2. How the program gets data
 
-Current MVP data sources are **local deterministic stubs** exposed behind package boundaries.
+Current MVP data sources are exposed behind real package boundaries, with
+manual/file/live-fallback behavior depending on what is configured.
 
 ### Current implemented data path
 - `src/macro_screener/data/macro_client.py`
-  - `ManualMacroDataSource`
-  - returns channel states from a local dictionary
+  - uses **manual channel states** as the documented MVP source
+  - supports **last-known persisted channel-state fallback**
 - `src/macro_screener/data/krx_client.py`
   - `KRXClient`
-  - returns demo industry exposures and demo stock universe
-  - can also read `stock_classification.csv` if available
+  - reads `stock_classification.csv` if available
+  - reads `data/industry_exposures.json` if available
+  - falls back to the built-in demo universe/exposure set when inputs are missing
 - `src/macro_screener/data/dart_client.py`
   - `DARTClient`
-  - returns demo disclosure events
+  - reads local disclosure files if available
+  - can attempt DART OpenAPI list ingestion when `DART_API_KEY` is set
+  - caches the last successful disclosure payload for stale fallback
+  - falls back to demo disclosures when nothing else is configured
 
 ### What is deferred
-The docs define the intended future live sources, but they are **not** wired in this MVP code yet:
-- KRX official market data
-- DART OpenAPI
+The docs still intentionally defer:
+- KRX official market-data endpoint integration
+- frozen production macro formulas / thresholds / source mapping
 - Korea-related macro sources: `ECOS`, `KOSIS`, `DART`-derived inputs where relevant
 - global macro source: `BIS`
+- any public downstream service/API contract beyond files
 
 So the current program is best understood as:
 - **real package structure**
 - **real ranking logic**
-- **stubbed data inputs**
+- **real runtime/persistence flow**
+- **file/live-fallback adapter seams**
 - **real publication behavior**
 
 ---
@@ -177,30 +185,31 @@ flowchart TD
     E --> F[latest.json Pointer]
 
     A1[Manual Macro States] --> A
-    A2[Demo KRX Universe + Exposures] --> A
-    A3[Demo DART Events] --> A
+    A2[KRX CSV / Demo Fallback] --> A
+    A3[DART File/API/Cache/Demo Fallback] --> A
 ```
 
 ### Function flow
 
 ```mermaid
 flowchart TD
-    CLI[src/macro_screener/cli.py] --> DEMO[run_demo]
-    CLI --> SCHED[run_scheduled_stub]
-    CLI --> BT[run_backtest_stub]
+    CLI[src/macro_screener/cli.py] --> MANUAL[run_manual]
+    CLI --> DEMO[run_demo]
+    CLI --> SCHED[run_scheduled]
+    CLI --> BT[run_backtest]
     CLI --> CFG[show-config]
 
-    DEMO --> STAGE1[stage1.compute_stage1_result]
-    DEMO --> STAGE2[stage2.compute_stock_scores]
-    STAGE1 --> SNAP[build_demo_snapshot]
-    STAGE2 --> SNAP
-    SNAP --> PUB[pipeline.publish_snapshot]
-
+    MANUAL --> PIPE[pipeline.run_pipeline_context]
+    DEMO --> PIPE
     SCHED --> CTX[pipeline.build_scheduled_context]
-    CTX --> DEMO
+    CTX --> PIPE
+    BT --> PLAN[backtest.build_backtest_plan]
+    PLAN --> PIPE
 
-    BT --> PLAN[backtest.build_backtest_stub_plan]
-    PLAN --> DEMO
+    PIPE --> STAGE1[stage1.compute_stage1_result]
+    PIPE --> STAGE2[stage2.compute_stock_scores]
+    STAGE1 --> PUB[pipeline.publish_snapshot]
+    STAGE2 --> PUB
 ```
 
 ### Package structure
@@ -261,7 +270,7 @@ Expected files:
 - `data/snapshots/<run_id>/stock_scores.parquet`
 - `data/snapshots/<run_id>/snapshot.json`
 - `data/snapshots/latest.json`
-- `data/snapshots/mvp.sqlite`
+- `data/macro_screener.sqlite3`
 
 ### Meaning of outputs
 - parquet files = canonical reader-facing snapshot artifacts
@@ -278,8 +287,7 @@ Expected files:
 From the project root:
 
 ```bash
-pip install -r requirements.txt
-pip install -e .
+pip install -e .[dev]
 ```
 
 If you only want to run from source without editable install:
@@ -300,7 +308,23 @@ Use a custom config file:
 PYTHONPATH=src python3 -m macro_screener.cli show-config --config config/default.yaml
 ```
 
-## 7.3 Run the demo/manual flow
+## 7.3 Run the real manual flow
+
+```bash
+PYTHONPATH=src python3 -m macro_screener.cli manual-run \
+  --output-dir ./tmp/manual \
+  --run-id manual-run-001 \
+  --channel-state G=1 \
+  --channel-state ED=1
+```
+
+What it does:
+- uses the normal pipeline/runtime path
+- uses manual macro states
+- uses KRX/DART adapters with file/cache/demo fallback behavior
+- writes immutable snapshot artifacts and updates `latest.json`
+
+## 7.4 Run the demo wrapper
 
 ```bash
 PYTHONPATH=src python3 -m macro_screener.cli demo-run \
@@ -313,7 +337,7 @@ What it does:
 - computes industry and stock ranks
 - writes snapshot artifacts
 
-## 7.4 Run a scheduled stub
+## 7.5 Run a scheduled batch
 
 ```bash
 PYTHONPATH=src python3 -m macro_screener.cli scheduled-run \
@@ -322,10 +346,10 @@ PYTHONPATH=src python3 -m macro_screener.cli scheduled-run \
   --run-type pre_open
 ```
 
-## 7.5 Run a backtest stub
+## 7.6 Run a backtest
 
 ```bash
-PYTHONPATH=src python3 -m macro_screener.cli backtest-stub \
+PYTHONPATH=src python3 -m macro_screener.cli backtest-run \
   --output-dir ./tmp/backtest \
   --start-date 2026-03-20 \
   --end-date 2026-03-23
@@ -344,7 +368,13 @@ ruff check src tests
 ### Tests
 
 ```bash
-PYTHONPATH=src python3 -m unittest discover -s tests -p 'test_*.py'
+PYTHONPATH=src python3 -m pytest -q tests
+```
+
+### Collection smoke
+
+```bash
+PYTHONPATH=src python3 -m pytest --collect-only -q tests
 ```
 
 ### Compile smoke
@@ -360,21 +390,20 @@ PYTHONPATH=src python3 -m compileall src tests
 This implementation is intentionally limited.
 
 ### Current limitations
-- external data APIs are not yet live-integrated
-- macro states are still manual/stub-driven
-- KRX and DART modules are interface-first demo loaders
-- SQLite schema/index tuning is still deferred
-- there are still two contract surfaces:
-  - `src/macro_screener/contracts.py`
-  - `src/macro_screener/models/contracts.py`
+- KRX official endpoint integration is still deferred
+- macro policy is still manual-first; production formulas/thresholds are not frozen
+- DART live ingestion is best-effort and still relies on fallback/cache behavior in local development
+- SQLite is now unified, but further physical tuning and migrations remain minimal by design
 
 ### What is already real
 - package/module layout
 - ranking logic
+- one canonical contract layer (`models/contracts.py`) with a compatibility shim
 - publication flow
 - latest snapshot pointer
 - scheduled-window identity
-- backtest stub behavior
+- duplicate scheduled-window protection
+- PIT-aware backtest flow
 - local deterministic verification
 
 ---
@@ -385,4 +414,3 @@ This implementation is intentionally limited.
 2. `doc/strategy.md`
 3. `doc/prd.md`
 4. `doc/plan.md`
-

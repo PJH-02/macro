@@ -1,6 +1,6 @@
-"""Minimal deterministic MVP helpers for the macro screener."""
+"""Macro screener MVP package."""
 
-from .contracts import IndustryScore, Snapshot, Stage1Result, StockScore
+from .models import IndustryScore, Snapshot, Stage1Result, StockScore
 from .mvp import (
     CHANNELS,
     DEFAULT_BACKTEST_RUN_TYPE,
@@ -8,14 +8,19 @@ from .mvp import (
     DEFAULT_DEMO_INPUT_CUTOFF,
     DEFAULT_DEMO_RUN_ID,
     DEFAULT_DEMO_RUN_TYPE,
+    build_backtest_plan,
     build_backtest_stub_plan,
+    build_manual_context,
     build_scheduled_stub_context,
     classify_disclosure,
     compute_stage1_result,
     compute_stock_scores,
     publish_snapshot,
+    run_backtest,
     run_backtest_stub,
     run_demo,
+    run_manual,
+    run_scheduled,
     run_scheduled_stub,
 )
 
@@ -30,13 +35,18 @@ __all__ = [
     "Snapshot",
     "Stage1Result",
     "StockScore",
+    "build_backtest_plan",
     "build_backtest_stub_plan",
+    "build_manual_context",
     "build_scheduled_stub_context",
     "classify_disclosure",
     "compute_stage1_result",
     "compute_stock_scores",
     "publish_snapshot",
+    "run_backtest",
     "run_backtest_stub",
     "run_demo",
+    "run_manual",
+    "run_scheduled",
     "run_scheduled_stub",
 ]

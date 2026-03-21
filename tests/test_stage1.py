@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 
+from macro_screener.models import RunType
 from macro_screener.mvp import compute_stage1_result
 
 
@@ -32,6 +33,8 @@ class Stage1RankingTests(unittest.TestCase):
         self.assertEqual([score.rank for score in result.industry_scores], [1, 2, 3])
         self.assertEqual(result.industry_scores[0].negative_penalty, 0.0)
         self.assertEqual(result.industry_scores[2].negative_penalty, 1.0)
+        self.assertEqual(result.channel_states[0].channel, "G")
+        self.assertEqual(result.run_type, RunType.MANUAL)
 
     def test_missing_channel_states_raise_clear_error(self) -> None:
         with self.assertRaisesRegex(ValueError, "missing channel states"):

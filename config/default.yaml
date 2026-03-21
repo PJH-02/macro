@@ -36,7 +36,7 @@ stage1:
 stage2:
   score_weights:
     dart: 1.0
-    industry: 1.0
+    industry: 0.35
     financial: 0.0
   decay_half_lives:
     supply_contract: 20
@@ -53,3 +53,5 @@ runtime:
   stage1_only_on_stage2_failure: true
   stale_dart_after_retries: true
   reuse_last_known_channel_states: true
+  unknown_dart_ratio_warning_threshold: 0.2
+  max_runtime_minutes_warning: 5

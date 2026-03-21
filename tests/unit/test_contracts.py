@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from macro_screener.config import load_config
+from macro_screener.contracts import Snapshot as CompatibilitySnapshot
 from macro_screener.db import SnapshotAlreadyPublishedError, SnapshotRegistry
 from macro_screener.models import (
     CalendarContext,
@@ -39,7 +40,7 @@ def test_contracts_round_trip() -> None:
                 overlay_adjustment=0.5,
                 final_score=2.5,
                 rank=1,
-                negative_penalty=-0.2,
+                negative_penalty=0.2,
                 positive_contribution=1.2,
             )
         ],
@@ -98,6 +99,7 @@ def test_contracts_round_trip() -> None:
 
     assert restored_context.stage1_result.channel_states[0].channel == "G"
     assert restored_snapshot.stock_scores[0].stock_code == "005930"
+    assert CompatibilitySnapshot is Snapshot
 
 
 def test_snapshot_registry_enforces_immutable_scheduled_window(tmp_path: Path) -> None:
@@ -123,3 +125,28 @@ def test_snapshot_registry_enforces_immutable_scheduled_window(tmp_path: Path) -
             published_at=datetime(2026, 3, 21, 8, 32),
             snapshot_path="data/snapshots/run-2.parquet",
         )
+
+
+def test_snapshot_registry_tracks_watermarks_and_last_known_channel_states(tmp_path: Path) -> None:
+    config_path = tmp_path / "config"
+    config_path.mkdir(parents=True)
+    (config_path / "default.yaml").write_text("{}", encoding="utf-8")
+    config = load_config(config_path / "default.yaml")
+    registry = SnapshotRegistry.for_config(config=config, base_path=tmp_path)
+    registry.initialize()
+
+    registry.upsert_watermark(source_name="dart", resource_key="disclosures", watermark_value="w1")
+    registry.save_channel_states(
+        run_id="run-1",
+        channel_states=[
+            ChannelState(channel="G", state=1, effective_at=datetime(2026, 3, 21, 8, 0)),
+            ChannelState(channel="IC", state=0, effective_at=datetime(2026, 3, 21, 8, 0)),
+            ChannelState(channel="FC", state=0, effective_at=datetime(2026, 3, 21, 8, 0)),
+            ChannelState(channel="ED", state=1, effective_at=datetime(2026, 3, 21, 8, 0)),
+            ChannelState(channel="FX", state=0, effective_at=datetime(2026, 3, 21, 8, 0)),
+        ],
+        source="manual",
+    )
+
+    assert registry.get_watermark(source_name="dart", resource_key="disclosures") == "w1"
+    assert registry.load_last_channel_states() is not None

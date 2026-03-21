@@ -58,6 +58,7 @@ class Stage2ScoringTests(unittest.TestCase):
             stock_scores[1].normalized_dart_score,
         )
         self.assertAlmostEqual(stock_scores[1].normalized_financial_score, 0.0)
+        self.assertIn("supply_contract", stock_scores[0].block_scores)
         self.assertIn("unknown_dart_classification_ratio", warnings[0])
 
     def test_zero_variance_normalization_returns_zero_components(self) -> None:

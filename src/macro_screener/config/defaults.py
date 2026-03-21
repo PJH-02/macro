@@ -32,7 +32,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
         },
     },
     "stage2": {
-        "score_weights": {"dart": 1.0, "industry": 1.0, "financial": 0.0},
+        "score_weights": {"dart": 1.0, "industry": 0.35, "financial": 0.0},
         "decay_half_lives": {
             "supply_contract": 20,
             "treasury_stock": 10,
@@ -49,5 +49,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "stage1_only_on_stage2_failure": True,
         "stale_dart_after_retries": True,
         "reuse_last_known_channel_states": True,
+        "unknown_dart_ratio_warning_threshold": 0.2,
+        "max_runtime_minutes_warning": 5,
     },
 }

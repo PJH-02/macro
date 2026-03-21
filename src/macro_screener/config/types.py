@@ -99,7 +99,7 @@ class Stage1Config(SerializableMixin):
 @dataclass(frozen=True, slots=True)
 class Stage2Config(SerializableMixin):
     score_weights: dict[str, float] = field(
-        default_factory=lambda: {"dart": 1.0, "industry": 1.0, "financial": 0.0}
+        default_factory=lambda: {"dart": 1.0, "industry": 0.35, "financial": 0.0}
     )
     decay_half_lives: dict[str, int] = field(
         default_factory=lambda: {
@@ -130,7 +130,7 @@ class Stage2Config(SerializableMixin):
             str(key): float(value)
             for key, value in payload.get(
                 "score_weights",
-                {"dart": 1.0, "industry": 1.0, "financial": 0.0},
+                {"dart": 1.0, "industry": 0.35, "financial": 0.0},
             ).items()
         }
         decay_half_lives = {
@@ -158,6 +158,8 @@ class RuntimePolicyConfig(SerializableMixin):
     stage1_only_on_stage2_failure: bool = True
     stale_dart_after_retries: bool = True
     reuse_last_known_channel_states: bool = True
+    unknown_dart_ratio_warning_threshold: float = 0.2
+    max_runtime_minutes_warning: int = 5
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "RuntimePolicyConfig":
@@ -170,6 +172,10 @@ class RuntimePolicyConfig(SerializableMixin):
             reuse_last_known_channel_states=bool(
                 payload.get("reuse_last_known_channel_states", True)
             ),
+            unknown_dart_ratio_warning_threshold=float(
+                payload.get("unknown_dart_ratio_warning_threshold", 0.2)
+            ),
+            max_runtime_minutes_warning=int(payload.get("max_runtime_minutes_warning", 5)),
         )
 
 
