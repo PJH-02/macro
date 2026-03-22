@@ -49,13 +49,37 @@ def test_production_live_mode_rejects_file_backed_krx_inputs(tmp_path: Path) -> 
         channel_states=dict(DEFAULT_CHANNEL_STATES),
         source_name="ecos_kosis_fred_live",
     )
+    unavailable_live = KRXLoadResult(
+        rows=[],
+        source="unavailable",
+        warnings=["krx_live_source_unconfigured"],
+    )
+    taxonomy_only = KRXLoadResult(
+        rows=[
+            {
+                "stock_code": "005930",
+                "stock_name": "Samsung Electronics",
+                "industry_code": "제조__전자__반도체",
+            }
+        ],
+        source="file",
+        warnings=[],
+    )
 
     with patch("macro_screener.pipeline.runner._resolve_macro_states", return_value=live_macro):
-        with pytest.raises(
-            RuntimeError,
-            match="krx_live_source_required_in_production_live_mode:taxonomy_only",
+        with patch(
+            "macro_screener.pipeline.runner.KRXClient.load_live_stocks_result",
+            return_value=unavailable_live,
         ):
-            run_manual(tmp_path, run_id="prod-krx-guard", config_path=config_path)
+            with patch(
+                "macro_screener.pipeline.runner.KRXClient.load_stocks_result",
+                return_value=taxonomy_only,
+            ):
+                with pytest.raises(
+                    RuntimeError,
+                    match="krx_live_source_required_in_production_live_mode:taxonomy_only",
+                ):
+                    run_manual(tmp_path, run_id="prod-krx-guard", config_path=config_path)
 
 
 def test_production_live_mode_rejects_demo_backed_dart_inputs(tmp_path: Path) -> None:

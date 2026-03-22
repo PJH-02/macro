@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
-from collections.abc import Callable, Mapping
+import tempfile
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -123,17 +125,25 @@ class KRXClient:
         fetcher: Callable[[dict[str, Any]], Mapping[str, Any]] | None = None,
     ) -> KRXLoadResult:
         auth_key = os.getenv(self.api_key_env, "").strip()
+        if fetcher is None:
+            try:
+                return self._load_live_stocks_via_master_download()
+            except Exception as exc:
+                warning_prefix = (
+                    "krx_live_source_unconfigured"
+                    if not auth_key
+                    else "krx_live_fetcher_unconfigured"
+                )
+                return KRXLoadResult(
+                    rows=[],
+                    source="unavailable",
+                    warnings=[warning_prefix, f"krx_master_download_failed: {exc}"],
+                )
         if not auth_key:
             return KRXLoadResult(
                 rows=[],
                 source="unavailable",
                 warnings=["krx_live_source_unconfigured"],
-            )
-        if fetcher is None:
-            return KRXLoadResult(
-                rows=[],
-                source="unavailable",
-                warnings=["krx_live_fetcher_unconfigured"],
             )
         try:
             request_payload = self.build_live_stock_master_request(
@@ -154,6 +164,9 @@ class KRXClient:
                 warnings=["krx_live_records_empty"],
             )
 
+        return self.normalize_live_stock_records(live_rows)
+
+    def normalize_live_stock_records(self, live_rows: Sequence[Mapping[str, Any]]) -> KRXLoadResult:
         frame = self.load_stock_classification()
         taxonomy_rows = self._classification_rows(frame, include_non_common=True)
         if not taxonomy_rows:
@@ -203,6 +216,17 @@ class KRXClient:
             rows=[],
             source="unavailable",
             warnings=[*warnings, "krx_live_rows_unusable_after_taxonomy_join"],
+        )
+
+    def _load_live_stocks_via_master_download(self) -> KRXLoadResult:
+        live_result = self.normalize_live_stock_records(self._load_master_download_records())
+        warnings = [*live_result.warnings, "krx_live_source_master_download"]
+        if live_result.rows:
+            return KRXLoadResult(rows=live_result.rows, source="live", warnings=warnings)
+        return KRXLoadResult(
+            rows=[],
+            source="unavailable",
+            warnings=warnings or ["krx_master_download_empty"],
         )
 
     def load_stocks(self) -> list[dict[str, Any]]:
@@ -312,6 +336,36 @@ class KRXClient:
     @staticmethod
     def _classification_unavailable_warning(frame: pd.DataFrame) -> str:
         return "stock_classification_missing" if frame.empty else "stock_classification_empty"
+
+    @staticmethod
+    def _load_master_download_records() -> list[dict[str, str]]:
+        module_path = Path(__file__).resolve().parents[2] / "security" / "kis_security_defended.py"
+        spec = importlib.util.spec_from_file_location("kis_security_defended_runtime", module_path)
+        if spec is None or spec.loader is None:
+            raise RuntimeError(f"Unable to load KIS security module: {module_path}")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workdir = Path(tmpdir)
+            kospi = module.load_kospi_master(workdir)
+            kosdaq = module.load_kosdaq_master(workdir)
+            combined = module.pd.concat([kospi, kosdaq], ignore_index=True)
+            common = combined[
+                combined.apply(lambda row: module.classify_security(row)[0] == "보통주", axis=1)
+            ].copy()
+            records: list[dict[str, str]] = []
+            for _, row in common.iterrows():
+                records.append(
+                    {
+                        "stock_code": str(row.get("종목코드") or "").zfill(6),
+                        "stock_name": str(row.get("종목명") or "").strip(),
+                        "market": str(row.get("시장") or "").strip().upper(),
+                        "security_type": "COMMON",
+                        "listing_status": "LISTED",
+                    }
+                )
+            return records
 
     @staticmethod
     def _normalize_live_stock_master_response(
