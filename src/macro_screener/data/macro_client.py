@@ -549,6 +549,83 @@ def classify_macro_series_value(series_id: str, value: float) -> int:
     return 0
 
 
+def classify_signal_from_provider_payload(
+    series_id: str,
+    payload: Mapping[str, Any],
+    *,
+    series_index: int = 0,
+    confidence: float = 1.0,
+    warning_flags: Sequence[str] = (),
+    fallback_used: bool = False,
+) -> MacroSeriesSignal:
+    spec = FIXED_SERIES_CLASSIFIER_SPECS.get(series_id)
+    if spec is None:
+        raise KeyError(f"unknown macro series classifier spec: {series_id}")
+    state = classify_macro_series_value(
+        series_id,
+        _extract_series_numeric_value(payload, series_index=series_index),
+    )
+    provider = str(payload.get("provider") or "").strip()
+    if provider == "ecos":
+        return signal_from_ecos_response(
+            channel=spec.channel,
+            state=state,
+            payload=payload,
+            series_index=series_index,
+            confidence=confidence,
+            warning_flags=warning_flags,
+            fallback_used=fallback_used,
+        )
+    if provider == "kosis":
+        return signal_from_kosis_response(
+            channel=spec.channel,
+            state=state,
+            payload=payload,
+            series_index=series_index,
+            confidence=confidence,
+            warning_flags=warning_flags,
+            fallback_used=fallback_used,
+        )
+    if provider == "us_macro":
+        return signal_from_fred_response(
+            channel=spec.channel,
+            state=state,
+            payload=payload,
+            series_index=series_index,
+            confidence=confidence,
+            warning_flags=warning_flags,
+            fallback_used=fallback_used,
+        )
+    raise ValueError(f"unsupported macro provider payload: {provider}")
+
+
+def build_live_macro_data_source_from_provider_payloads(
+    series_payloads: Mapping[str, Mapping[str, Any]],
+    *,
+    degraded_mode: bool = False,
+    source_name: str = "live_macro",
+    source_version: str | None = None,
+    confidence_by_series: Mapping[str, float] | None = None,
+    warning_flags_by_series: Mapping[str, Sequence[str]] | None = None,
+) -> LiveMacroDataSource:
+    series_signals: dict[str, MacroSeriesSignal] = {}
+    confidence_map = confidence_by_series or {}
+    warning_map = warning_flags_by_series or {}
+    for series_id, payload in series_payloads.items():
+        series_signals[series_id] = classify_signal_from_provider_payload(
+            series_id,
+            payload,
+            confidence=float(confidence_map.get(series_id, 1.0)),
+            warning_flags=warning_map.get(series_id, ()),
+        )
+    return LiveMacroDataSource.from_fixed_series_signals(
+        series_signals=series_signals,
+        degraded_mode=degraded_mode,
+        source_name=source_name,
+        source_version=source_version,
+    )
+
+
 def build_fixed_channel_signal_map(
     series_signals: Mapping[str, MacroSeriesSignal],
     *,
@@ -584,6 +661,26 @@ def _parse_series_timestamp(value: str) -> datetime:
 
 def _dedupe_flags(flags: Sequence[str] | Any) -> list[str]:
     return list(dict.fromkeys(str(flag) for flag in flags if str(flag).strip()))
+
+
+def _extract_series_numeric_value(
+    payload: Mapping[str, Any],
+    *,
+    series_index: int,
+) -> float:
+    provider = str(payload.get("provider") or "").strip()
+    record = _extract_series_record(
+        payload,
+        series_index=series_index,
+        expected_provider=provider,
+    )
+    raw_value = record.get("value")
+    if raw_value is None:
+        raise ValueError(f"macro provider payload missing numeric value for provider {provider}")
+    try:
+        return float(raw_value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"macro provider value is not numeric: {raw_value}") from exc
 
 
 def _require_series_signal(

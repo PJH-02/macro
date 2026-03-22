@@ -13,7 +13,9 @@ from macro_screener.data.macro_client import (
     build_fixed_channel_signal_map,
     build_fred_request_contract,
     build_kosis_request_contract,
+    build_live_macro_data_source_from_provider_payloads,
     classify_macro_series_value,
+    classify_signal_from_provider_payload,
     combine_channel_signal_states,
     signal_from_ecos_response,
     signal_from_fred_response,
@@ -195,6 +197,52 @@ def test_classify_macro_series_value_rejects_unknown_series() -> None:
         raise AssertionError("expected classify_macro_series_value to reject unknown series")
 
 
+def test_classify_signal_from_provider_payload_uses_fixed_thresholds() -> None:
+    ecos_payload = {
+        "provider": "ecos",
+        "service": "StatisticSearch",
+        "series": [
+            {
+                "table_code": "901Y009",
+                "item_code": "0",
+                "frequency": "M",
+                "observation_date": "2026-02",
+                "release_date": "2026-03-15",
+                "retrieval_timestamp": "2026-03-22T00:02:00Z",
+                "transformation_method": "yoy",
+                "value": "2.8",
+            }
+        ],
+    }
+    fred_payload = {
+        "provider": "us_macro",
+        "adapter": "fred",
+        "official_source": "Federal Reserve",
+        "series": [
+            {
+                "series_id": "PCE_GOODS",
+                "observation_date": "2026-02-01",
+                "release_date": "2026-03-14",
+                "retrieval_timestamp": "2026-03-22T00:04:00Z",
+                "transformation_method": "yoy",
+                "value": "-2.0",
+            }
+        ],
+    }
+
+    korea_signal = classify_signal_from_provider_payload("kr_cpi_yoy_3mma", ecos_payload)
+    us_signal = classify_signal_from_provider_payload(
+        "us_real_pce_goods_yoy_3mma",
+        fred_payload,
+    )
+
+    assert korea_signal.channel == "IC"
+    assert korea_signal.state == 1
+    assert us_signal.channel == "ED"
+    assert us_signal.state == -1
+    assert us_signal.official_source == "Federal Reserve"
+
+
 def test_build_fixed_channel_signal_map_uses_primary_series_when_present() -> None:
     series_signals = {
         "kr_ipi_yoy_3mma": _signal("G", 1, series_id="kr_ipi_yoy_3mma"),
@@ -273,5 +321,174 @@ def test_live_macro_data_source_from_fixed_series_signals_builds_channel_map() -
     assert result.source_name == "fixed-roster-live"
     assert result.channel_states["G"] == 1
     assert result.channel_states["ED"] == 1
+    assert result.fallback_mode == "degraded_live"
+    assert "us_real_imports_goods_yoy_3mma_fallback_signal_used" in result.warnings
+
+
+def test_build_live_macro_data_source_from_provider_payloads_supports_degraded_ed_fallback(
+) -> None:
+    series_payloads = {
+        "kr_ipi_yoy_3mma": {
+            "provider": "ecos",
+            "service": "StatisticSearch",
+            "series": [
+                {
+                    "table_code": "901Y009",
+                    "item_code": "0",
+                    "observation_date": "2026-02",
+                    "release_date": "2026-03-15",
+                    "retrieval_timestamp": "2026-03-22T00:02:00Z",
+                    "transformation_method": "yoy",
+                    "value": "1.2",
+                }
+            ],
+        },
+        "us_ipi_yoy_3mma": {
+            "provider": "us_macro",
+            "adapter": "fred",
+            "official_source": "Federal Reserve",
+            "series": [
+                {
+                    "series_id": "INDPRO",
+                    "observation_date": "2026-02-01",
+                    "release_date": "2026-03-14",
+                    "retrieval_timestamp": "2026-03-22T00:04:00Z",
+                    "transformation_method": "yoy",
+                    "value": "1.3",
+                }
+            ],
+        },
+        "kr_cpi_yoy_3mma": {
+            "provider": "ecos",
+            "service": "StatisticSearch",
+            "series": [
+                {
+                    "table_code": "901Y009",
+                    "item_code": "0",
+                    "observation_date": "2026-02",
+                    "release_date": "2026-03-15",
+                    "retrieval_timestamp": "2026-03-22T00:02:00Z",
+                    "transformation_method": "yoy",
+                    "value": "2.9",
+                }
+            ],
+        },
+        "us_cpi_yoy_3mma": {
+            "provider": "us_macro",
+            "adapter": "fred",
+            "official_source": "BLS",
+            "series": [
+                {
+                    "series_id": "CPIAUCSL",
+                    "observation_date": "2026-02-01",
+                    "release_date": "2026-03-14",
+                    "retrieval_timestamp": "2026-03-22T00:04:00Z",
+                    "transformation_method": "yoy",
+                    "value": "2.0",
+                }
+            ],
+        },
+        "kr_credit_spread_z36": {
+            "provider": "ecos",
+            "service": "StatisticSearch",
+            "series": [
+                {
+                    "table_code": "901Y009",
+                    "item_code": "0",
+                    "observation_date": "2026-02",
+                    "release_date": "2026-03-15",
+                    "retrieval_timestamp": "2026-03-22T00:02:00Z",
+                    "transformation_method": "zscore",
+                    "value": "-0.6",
+                }
+            ],
+        },
+        "us_credit_spread_z36": {
+            "provider": "us_macro",
+            "adapter": "fred",
+            "official_source": "Federal Reserve",
+            "series": [
+                {
+                    "series_id": "BAA10Y",
+                    "observation_date": "2026-02-01",
+                    "release_date": "2026-03-14",
+                    "retrieval_timestamp": "2026-03-22T00:04:00Z",
+                    "transformation_method": "zscore",
+                    "value": "0.1",
+                }
+            ],
+        },
+        "kr_exports_us_yoy_3mma": {
+            "provider": "kosis",
+            "service": "statistical_data",
+            "series": [
+                {
+                    "table_id": "DT_1J22005",
+                    "item_id": "T1",
+                    "observation_date": "2026-02",
+                    "release_date": "2026-03-18",
+                    "retrieval_timestamp": "2026-03-22T00:03:00Z",
+                    "transformation_method": "yoy",
+                    "value": "4.0",
+                }
+            ],
+        },
+        "us_real_pce_goods_yoy_3mma": {
+            "provider": "us_macro",
+            "adapter": "fred",
+            "official_source": "BEA",
+            "series": [
+                {
+                    "series_id": "PCE_GOODS",
+                    "observation_date": "2026-02-01",
+                    "release_date": "2026-03-14",
+                    "retrieval_timestamp": "2026-03-22T00:04:00Z",
+                    "transformation_method": "yoy",
+                    "value": "1.8",
+                }
+            ],
+        },
+        "usdkrw_3m_log_return": {
+            "provider": "ecos",
+            "service": "StatisticSearch",
+            "series": [
+                {
+                    "table_code": "901Y009",
+                    "item_code": "0",
+                    "observation_date": "2026-02",
+                    "release_date": "2026-03-15",
+                    "retrieval_timestamp": "2026-03-22T00:02:00Z",
+                    "transformation_method": "log_return",
+                    "value": "2.6",
+                }
+            ],
+        },
+        "broad_usd_3m_log_return": {
+            "provider": "us_macro",
+            "adapter": "fred",
+            "official_source": "Federal Reserve",
+            "series": [
+                {
+                    "series_id": "TWEXB",
+                    "observation_date": "2026-02-01",
+                    "release_date": "2026-03-14",
+                    "retrieval_timestamp": "2026-03-22T00:04:00Z",
+                    "transformation_method": "log_return",
+                    "value": "2.1",
+                }
+            ],
+        },
+    }
+
+    result = build_live_macro_data_source_from_provider_payloads(
+        series_payloads,
+        degraded_mode=True,
+        source_name="provider-payload-live",
+        source_version="phase0-freeze-8230c76",
+    ).fetch_channel_states()
+
+    assert result.source_name == "provider-payload-live"
+    assert result.source_version == "phase0-freeze-8230c76"
+    assert result.channel_states == {"G": 1, "IC": 1, "FC": 1, "ED": 1, "FX": 1}
     assert result.fallback_mode == "degraded_live"
     assert "us_real_imports_goods_yoy_3mma_fallback_signal_used" in result.warnings
