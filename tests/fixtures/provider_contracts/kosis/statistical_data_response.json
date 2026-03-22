@@ -1,0 +1,16 @@
+{
+  "provider": "kosis",
+  "service": "statistical_data",
+  "series": [
+    {
+      "table_id": "DT_1J22005",
+      "item_id": "T1",
+      "frequency": "M",
+      "unit": "USD mn",
+      "observation_date": "2026-02",
+      "release_date": "2026-03-18",
+      "retrieval_timestamp": "2026-03-22T00:03:00Z",
+      "transformation_method": "yoy"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "provider_families": [
+    {
+      "provider": "krx",
+      "request_fixture": "krx/stock_master_request.json",
+      "response_fixture": "krx/stock_master_response.json",
+      "required_request_keys": ["provider", "service_family", "transport", "params"],
+      "required_response_keys": ["provider", "service_family", "records", "retrieved_at"]
+    },
+    {
+      "provider": "dart",
+      "request_fixture": "dart/disclosure_list_request.json",
+      "response_fixture": "dart/disclosure_list_response.json",
+      "required_request_keys": ["provider", "endpoint", "params"],
+      "required_response_keys": ["provider", "endpoint", "cursor", "records", "retrieved_at"]
+    },
+    {
+      "provider": "ecos",
+      "request_fixture": "ecos/statistic_search_request.json",
+      "response_fixture": "ecos/statistic_search_response.json",
+      "required_request_keys": ["provider", "service", "table_code", "item_codes", "frequency"],
+      "required_response_keys": ["provider", "service", "series"]
+    },
+    {
+      "provider": "kosis",
+      "request_fixture": "kosis/statistical_data_request.json",
+      "response_fixture": "kosis/statistical_data_response.json",
+      "required_request_keys": ["provider", "service", "table_id", "item_id", "frequency"],
+      "required_response_keys": ["provider", "service", "series"]
+    },
+    {
+      "provider": "us_macro",
+      "request_fixture": "us_macro/fred_series_request.json",
+      "response_fixture": "us_macro/fred_series_response.json",
+      "required_request_keys": ["provider", "adapter", "series_id", "official_source", "vintage_mode"],
+      "required_response_keys": ["provider", "adapter", "official_source", "series"]
+    }
+  ]
+}
