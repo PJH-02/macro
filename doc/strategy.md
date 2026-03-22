@@ -18,7 +18,7 @@ The final human-facing documentation set is:
 1. `doc/strategy.md` — boundary and architecture anchor
 2. `doc/prd.md` — authoritative product and data-contract requirements
 3. `doc/plan.md` — authoritative implementation plan
-4. `doc/open-questions.md` — only the true remaining kickoff questions
+4. `doc/open-questions.md` — ratification ledger and residual implementation-prerequisite tracker
 
 Historical corrective inputs and draft planning notes are not part of the final authoritative doc set once their content is merged here and into `prd.md` / `plan.md`.
 
@@ -80,7 +80,7 @@ Stage 1 converts Korea-side and US-side macro inputs into channel states, then c
 
 ### Fixed MVP rules
 - each channel state is in `{-1, 0, +1}`
-- channel interpretation and sign semantics are fixed
+- channel interpretation and sign semantics are fixed in **state-language**, not change-language
 - `0` means **neutral only**
 - missing, stale, failed, or fallback inputs are represented separately through metadata and confidence, not by coercing to `0`
 - Korea-side and US-side signals inside a channel combine by a documented **simple arithmetic mean**, then map back to the final channel state through a channel-specific neutral band
@@ -93,30 +93,42 @@ Stage 1 converts Korea-side and US-side macro inputs into channel states, then c
   2. higher positive contribution
   3. industry code ascending
 
+### Frozen state-language semantics
+- `G`: above-trend / neutral / below-trend activity state
+- `IC`: elevated / neutral / subdued cost-pressure state
+- `FC`: easy / neutral / tight financial-conditions state
+- `ED`: supportive / neutral / weak external-demand state
+- `FX`: KRW-weak / neutral / KRW-strong currency state
+
 ### Stage 1 data authority
 For production MVP planning, Stage 1 relies on:
 - Korea macro/statistical sources: `ECOS`, `KOSIS`
 - US external macro sources: **FRED / ALFRED or an equivalent official-source adapter layer**
+- primary US `ED` series: **US real imports of goods YoY**
+- live degraded fallback US `ED` series: **US real personal consumption expenditures on goods YoY** with lower confidence and explicit fallback metadata only
+- official historical validation/backtest must not substitute the fallback series as the canonical US `ED` primary input
+- ALFRED/vintage handling is required for revisable US macro release series used in official pre-go-live historical validation
 - local taxonomy authority: `stock_classification.csv`
-- derived taxonomy authority when needed: `industry_master.csv` or equivalent, generated from the local classification CSV
+- derived taxonomy authority: `data/reference/industry_master.csv`, generated from the local classification CSV and owned by the stock-classification maintainer
 - KRX as market / universe / overlay infrastructure, **not** as the sole macro provider for any channel
 - manual override / stub mode only for local verification and controlled degraded fallback
 
 ### What is frozen now
 - the 5 channels and their economic meaning
-- the sign semantics for `+1 / 0 / -1`
+- the state-language sign semantics for `+1 / 0 / -1`
 - Korea + US-only external macro framing
-- simple channel-combination rule
+- the fixed per-series transform/classifier defaults recorded in `doc/prd.md`
+- the final `tau_c` table by channel
+- the primary US `ED` series and degraded-mode-only fallback rule
+- the ALFRED-required pre-go-live historical validation policy
 - local CSV authority for common-stock filtering and industry taxonomy
+- the derived taxonomy artifact contract for `data/reference/industry_master.csv`
 - full sector-rank-table Stage 1 scoring shape
 - equal default channel weights unless explicitly changed later
 
-### What remains intentionally open
-- exact raw-series transform for each fixed series
-- exact neutral-band threshold `tau_c` for each channel
-- final choice of the US `ED` proxy when more than one acceptable realized series exists
-- whether ALFRED vintages are required before live collection starts
-- final filename/schema/ownership for the derived industry taxonomy master
+### Remaining implementation prerequisite
+- one **provisional versioned Stage 1 sector-rank-table / channel-weight artifact** must still be checked into executable config before full production implementation begins
+- this is an implementation prerequisite, not a remaining product-policy question
 
 ## 5.2 Stage 2: DART-based stock scoring
 
@@ -253,19 +265,14 @@ Operator response and verification specifics live in `doc/plan.md`.
 
 ## 10. What is intentionally deferred
 
-These do not block doc consolidation or the already-started Phase 1 provider-contract fixture work, but they **do** block full production implementation until they are frozen:
-- exact raw transform for each fixed Korea/US series
-- exact neutral-band `tau_c` values by channel
-- final US `ED` proxy choice when multiple acceptable realized series remain
-- whether ALFRED vintages are required before live collection starts
-- final filename/schema/ownership for the derived industry taxonomy file
-- final versioned Stage 1 sector-rank-table contents and channel weights in executable config
-
-These can remain deferred without blocking the production-readiness decision:
+These do not block document ratification, and they do not block implementation once the provisional Stage 1 artifact exists:
 - exact SQLite physical DDL and non-essential indexes
 - migration tool vs manual versioned SQL
 - non-file-based downstream service/API contract
 - fine-grained alert/SLO tuning beyond the MVP alert matrix
+- economically optimized revisions to the provisional Stage 1 sector-rank-table contents and channel weights after MVP bootstrap
+
+The only remaining narrow gate before full production implementation is the presence of one provisional versioned Stage 1 sector-rank-table / channel-weight artifact in executable config.
 
 ## 11. Reading order
 

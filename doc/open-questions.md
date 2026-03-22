@@ -1,10 +1,21 @@
 # Open Questions for Final MVP Implementation Kickoff
 
-> Purpose: preserve only the real remaining implementation questions after the final documentation consolidation.
+> Purpose: preserve the ratification history for recently resolved decisions and track the single remaining implementation prerequisite after document ratification.
 
-## 1. Questions already resolved in the final doc set
+## 1. Current status
 
-The following are **no longer open** and should not be re-opened unless a later explicit product decision changes them:
+There are currently **no remaining unresolved product-policy questions** blocking document ratification.
+
+Authority for resolved policy now lives in:
+1. `doc/strategy.md`
+2. `doc/prd.md`
+3. `doc/plan.md`
+
+This file is now a **historical ledger / residual tracker only**. It is not the authority surface for already-ratified policy.
+
+## 2. Ratified decision ledger (historical only)
+
+The following are ratified and should not be re-opened unless a later explicit product decision changes them:
 - MVP external macro scope = **Korea + US-only external macro**
 - KRX security-type ambiguity is operationally resolved by the authoritative local classification CSV
 - the MVP provider roster no longer includes mandatory BIS/OECD/IMF runtime adapters
@@ -16,62 +27,86 @@ The following are **no longer open** and should not be re-opened unless a later 
 - normalization uses cross-sectional z-scores with lambda applied after normalization
 - DART half-life defaults and the fast-overlay `5%` baseline are already fixed for the final-stage baseline
 - backtest may process independent dates in parallel
+- channel semantics are frozen in **state-language**, not change-language
+- the primary US `ED` series is **US real imports of goods YoY**
+- fallback from the primary US `ED` series to US real personal consumption expenditures on goods YoY is allowed **only for live degraded mode**, with explicit fallback metadata and lower confidence; official historical validation/backtest must not substitute the fallback as the canonical primary series
+- MVP execution may proceed with one **provisional versioned Stage 1 sector-rank-table / channel-weight artifact**, explicitly marked as temporary and replaceable after later team ratification
 
-## 2. Remaining open questions only
+### R1. Frozen per-series transform table with state-language semantics
 
-### Q1. What is the exact raw transform for each fixed series?
-Examples:
-- YoY
-- QoQ annualized
-- moving-average slope
-- spread change
-- level relative to threshold
+Interpretation rule for final channel states:
+- `G`: above-trend / neutral / below-trend activity state
+- `IC`: elevated / neutral / subdued cost-pressure state
+- `FC`: easy / neutral / tight financial-conditions state
+- `ED`: supportive / neutral / weak external-demand state
+- `FX`: KRW-weak / neutral / KRW-strong currency state
 
-This must be frozen per series for the final implementation config.
+These transforms classify the **current macro state**, not acceleration/deceleration semantics.
 
-### Q2. What is the neutral band `tau_c` for each channel?
-Need exact values for mapping the combined simple-average signal back into `{-1, 0, +1}`.
+| series_id | transform | parameters | state-classifier threshold basis | notes |
+|---|---|---|---|---|
+| `kr_ipi_yoy_3mma` | 3-month moving average of industrial production YoY | `ma_window=3m` | `+1` if `> +1.0%p`, `0` if `[-1.0,+1.0]`, `-1` if `< -1.0%p` | classifies Korea activity as above-trend / neutral / below-trend while smoothing monthly production noise |
+| `us_ipi_yoy_3mma` | 3-month moving average of industrial production YoY | `ma_window=3m` | `+1` if `> +1.0%p`, `0` if `[-1.0,+1.0]`, `-1` if `< -1.0%p` | captures realized US activity state spillover to Korean cyclicals/exporters |
+| `kr_cpi_yoy_3mma` | 3-month moving average of CPI YoY | `inflation_target=2.0%` | `+1` if `> 2.75%`, `0` if `[1.25%,2.75%]`, `-1` if `< 1.25%` | uses level-vs-target because elevated vs subdued cost pressure matters more than month-to-month noise |
+| `us_cpi_yoy_3mma` | 3-month moving average of CPI YoY | `inflation_target=2.0%` | `+1` if `> 2.75%`, `0` if `[1.25%,2.75%]`, `-1` if `< 1.25%` | reflects imported inflation / Fed-sensitive cost-pressure state |
+| `kr_credit_spread_z36` | Korea IG corporate spread z-score vs 36-month history | `lookback=36m`, `smooth=3m` | `+1` if `< -0.5σ`, `0` if `[-0.5σ,+0.5σ]`, `-1` if `> +0.5σ` | narrower spread = easier financial-conditions state |
+| `us_credit_spread_z36` | US IG corporate spread z-score vs 36-month history | `lookback=36m`, `smooth=3m` | `+1` if `< -0.5σ`, `0` if `[-0.5σ,+0.5σ]`, `-1` if `> +0.5σ` | captures global risk-appetite / funding-condition state spillover |
+| `kr_exports_us_yoy_3mma` | 3-month moving average of Korea exports to US YoY | `ma_window=3m` | `+1` if `> +2.0%p`, `0` if `[-2.0,+2.0]`, `-1` if `< -2.0%p` | dampens shipping volatility while classifying Korea-to-US demand as supportive / neutral / weak |
+| `us_real_imports_goods_yoy_3mma` | 3-month moving average of US real imports of goods YoY | `ma_window=3m` | `+1` if `> +1.5%p`, `0` if `[-1.5,+1.5]`, `-1` if `< -1.5%p` | primary realized US goods-demand state proxy for Korea export sensitivity |
+| `usdkrw_3m_log_return` | 3-month log return of USD/KRW monthly average | `lookback=3m` | `+1` if `> +2.5%`, `0` if `[-2.5%,+2.5%]`, `-1` if `< -2.5%` | positive = KRW-weak state / exporter-favorable |
+| `broad_usd_3m_log_return` | 3-month log return of broad trade-weighted USD index | `lookback=3m` | `+1` if `> +2.0%`, `0` if `[-2.0%,+2.0%]`, `-1` if `< -2.0%` | confirms whether the KRW move sits inside a broader dollar-state regime |
 
-### Q3. Which US `ED` proxy is final?
-Choose one:
-- US real imports of goods YoY
-- US real goods consumption YoY
+### R2. Frozen primary US `ED` series
 
-### Q4. Is ALFRED required for historical backfill before live collection starts?
-If yes, document vintage handling explicitly.
-If no, document the historical limitation and rely on persisted release snapshots from go-live onward.
+- `primary_series: US real imports of goods YoY`
+- `fallback_allowed: yes`
+- `fallback_scope: live degraded mode only`
+- `fallback_rule: use US real personal consumption expenditures on goods YoY only when the primary imports series is unavailable or stale for the classification window; set explicit fallback metadata and lower confidence for that run`
+- `official_history_rule: official historical validation/backtest must not substitute the fallback as the canonical primary series`
+- **Economic rationale:** imports of goods is the cleaner realized-demand bridge to Korea’s export cycle than domestic US goods consumption.
 
-### Q5. What is the final industry taxonomy file name, schema, refresh process, and ownership?
-The final docs must freeze:
-- file path
-- required columns
-- refresh process
-- ownership
+### R3. Provisional Stage 1 sector-rank-table / channel-weight artifact policy
 
-## 3. Production-readiness blocker assessment (2026-03-22)
+- `policy: allow one provisional versioned Stage 1 artifact for MVP bootstrap`
+- `scope: per-channel industry rank tables plus channel weights`
+- `bootstrap_rule: the initial artifact may be heuristic/manual rather than economically optimized`
+- `default_weight_rule: equal channel weights remain acceptable unless a later explicit version changes them`
+- `labeling_rule: mark the artifact as provisional / non-authoritative in config-version notes`
+- `revision_rule: later team-reviewed changes must be version-bumped and documented, not silently overwritten`
 
-**Decision:** the docs are **not** production-ready for end-to-end implementation. Stop full production execution after Phase 1 grounding and resolve Q1-Q5, plus the remaining executable Stage 1 freeze gaps, first.
+### R4. Final `tau_c` table
 
-| Blocker | Why it blocks entire production | Grounding |
-|---|---|---|
-| Q1. Per-series raw transforms are still undefined. | Stage 1 cannot classify real Korea/US provider data deterministically, and replay cannot prove the same transform was applied historically. Any implementation would have to invent product logic inside config/runtime. | `doc/prd.md` requires persisted `transformation_method` metadata for Korea, KOSIS, and US series; `doc/plan.md` Phases 2b-4 require config defaults plus release-aware persistence. |
-| Q2. `tau_c` is still undefined for every channel. | The final simple-average combination rule cannot map provider inputs back into `{-1, 0, +1}` without exact thresholds, so `ChannelState.state` cannot be derived from live macro data. | `doc/prd.md` defines the `tau_c`-based mapping; `src/macro_screener/data/macro_client.py` currently only returns pre-baked/manual states, which shows the runtime has no final classifier yet. |
-| Q3. The final US `ED` proxy is still unresolved. | Phase 3 cannot sign off the fixed US series roster or final validation baseline while the product still permits two different canonical primary-series choices for the external-demand channel. | `doc/prd.md` lists a preferred US real imports choice plus a fallback US real goods consumption choice; `doc/open-questions.md` still asks for one final frozen primary series. |
-| Q4. The ALFRED/vintage decision is still unresolved. | Historical replay cannot be signed off as point-in-time safe until the project decides whether pre-go-live backfill depends on ALFRED vintages or only on persisted release snapshots from go-live onward. | `doc/prd.md` and `doc/plan.md` both require vintage-aware or release-aware metadata; the provider fixtures include US `vintage_mode`, but the current runtime has no finalized vintage/backfill path. |
-| Q5. The derived industry taxonomy artifact is still unresolved. | Stage 1 rank tables, KRX joins, and operator ownership cannot be productionized without one frozen file path/schema/refresh owner for the authoritative derived taxonomy. | `doc/prd.md` makes `stock_classification.csv` authoritative and allows a derived `industry_master.csv`; `doc/plan.md` depends on that artifact for Stage 1 rank tables and Phase 3 KRX joins. |
+| channel | tau_c | rationale | validation note |
+|---|---:|---|---|
+| `G` | `0.25` | one-sided Korea or US activity already being clearly above-trend / below-trend is economically meaningful for Korean sector rotation | `(+1,0)` should classify as an above-trend growth state; `(+1,-1)` remains neutral |
+| `IC` | `0.25` | one-sided elevated or subdued inflation pressure can still move rates / margin expectations quickly | allows a single clear cost-pressure state to register without requiring both geographies |
+| `FC` | `0.25` | either Korea or US spread easy/tight state spills into Korean risk appetite | preserves sensitivity to US-led credit-condition shocks |
+| `ED` | `0.25` | either export realization or US goods demand can establish the external-demand state | keeps the channel responsive to partial but still meaningful confirmation |
+| `FX` | `0.50` | FX is noisier; require stronger joint confirmation before assigning a KRW-weak / KRW-strong final state | `(+1,0)` stays neutral; only broad confirmation should flip the final FX state |
 
-### Additional gating gap beyond Q1-Q5
+### R5. Pre-go-live historical backfill policy
 
-- **Stage 1 rank-table / weight freeze is still incomplete.** The direction is settled — full ordered sector-rank tables plus versioned channel weights — but the concrete executable artifact is still not frozen. `doc/prd.md` requires versioned rank tables and weights (`F1.5`, `F1.12`) yet the config example still contains placeholder ellipses, and `doc/plan.md` still treats default tables/weights as future Phase 2b work.
+- `alfred_required_pre_go_live: yes`
+- `policy_scope: all revisable US macro release series used for official historical validation`
+- `exception_rule: non-revisable market-price-like series may use as-of historical market data without ALFRED`
+- `if_vintage_unavailable: the series is not PIT-valid for official pre-go-live backtests and must be excluded or explicitly flagged as non-authoritative`
+- **Economic rationale:** this keeps the historical macro regime record aligned with information that would actually have been visible at the time.
 
-### Additional grounding from the current implementation
+### R6. Derived industry taxonomy artifact contract
 
-- `src/macro_screener/models/contracts.py` still defines `ChannelState` with only `effective_at`, `source`, and optional `confidence`, which is short of the PRD-required metadata contract.
-- `src/macro_screener/stage1/base_score.py` and `src/macro_screener/stage1/ranking.py` still implement symmetric exposure × state scoring instead of the PRD's rank-derived sector-prior model.
-- `src/macro_screener/data/macro_client.py` still centers on manual or last-known channel states rather than provider-specific Korea/US series ingestion with release metadata.
-- `src/macro_screener/data/dart_client.py` still persists simple cutoff/page-style watermarks instead of the monotone disclosure cursoring and amendment-safe metadata required by the plan.
-- `tests/fixtures/provider_contracts/` is useful Phase 1 grounding, but it only proves example provider contracts exist; it does not freeze the unresolved scoring, vintage, taxonomy, or concrete rank-table/weight decisions above.
+- `file_path: data/reference/industry_master.csv`
+- `required_columns: industry_code, industry_name, sector_l1, sector_l2, sector_l3, stock_count, representative_stock_code, source_classification_version, generated_at`
+- `refresh_process: regenerate whenever stock_classification.csv changes; commit the regenerated file together with the classification change; also run a monthly consistency refresh before any Stage 1 rank-table revision`
+- `owner: stock_classification.csv maintainer (research/data owner)`
+- `industry_code_rule: stable slug derived from sector_l1 > sector_l2 > sector_l3, never row-order-based`
+
+## 3. Remaining implementation prerequisite
+
+The only remaining narrow implementation prerequisite is:
+- one **provisional versioned Stage 1 sector-rank-table / channel-weight artifact** must be checked into executable config before full production implementation begins
+
+This is an implementation prerequisite, not a remaining product-policy question.
 
 ## 4. Exit condition for this file
 
-This file should shrink to zero open questions, and the Stage 1 rank-table / weight artifact should be frozen, before full production implementation begins.
+Keep this file as a historical ledger / residual tracker after ratification. It may shrink further once the provisional Stage 1 artifact is explicitly identified in executable config and referenced from the authoritative docs.

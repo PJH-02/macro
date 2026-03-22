@@ -29,7 +29,7 @@ Downstream systems decide:
 - `doc/strategy.md` defines the product boundary and strategic posture.
 - `doc/prd.md` defines the authoritative final product and data-contract requirements.
 - `doc/plan.md` defines the authoritative implementation path.
-- `doc/open-questions.md` contains only the remaining unresolved kickoff questions.
+- `doc/open-questions.md` is the ratification ledger and residual tracker; it is not the authority surface for already-ratified policy.
 
 ## 2. Scope and scenarios
 
@@ -104,7 +104,7 @@ The product goal is to rank Korean industries and Korean stocks using the extern
 
 Recommended practical rule:
 - use **FRED** for latest/current series retrieval
-- use **ALFRED** or persisted release snapshots when vintage-aware PIT behavior is required
+- use **ALFRED** for revisable US macro release series in official historical validation; persisted release snapshots remain an internal persistence layer after go-live rather than an alternative policy choice
 - keep source attribution to the underlying official source (BEA, BLS, Federal Reserve, Treasury, Census, etc.) in metadata
 
 #### Non-MVP / future-extension providers
@@ -147,11 +147,11 @@ The channel-state sign convention is frozen as follows.
 
 | Channel | `+1` | `0` | `-1` |
 |---|---|---|---|
-| `G` | growth / activity accelerating | neutral | growth / activity decelerating |
-| `IC` | inflation / cost pressure rising | neutral | disinflation / cost pressure easing |
-| `FC` | financial conditions easing | neutral | financial conditions tightening |
-| `ED` | external demand strengthening | neutral | external demand weakening |
-| `FX` | KRW weakness / exporter-favorable | neutral | KRW strength / importer-favorable |
+| `G` | above-trend activity | neutral | below-trend activity |
+| `IC` | elevated cost pressure | neutral | subdued cost pressure |
+| `FC` | easy financial conditions | neutral | tight financial conditions |
+| `ED` | supportive external demand | neutral | weak external demand |
+| `FX` | KRW weakness / exporter-favorable currency state | neutral | KRW strength / importer-favorable currency state |
 
 ### 4.3 Neutral vs missing
 - `0` means **neutral only**.
@@ -197,6 +197,16 @@ Where:
 - `tau_c` is the channel-specific neutral-band threshold
 - PIT handling still requires explicit release timestamp, observation period, effective timestamp, next-trading-day application rule when required, and revision handling
 
+Final MVP thresholds:
+
+| Channel | `tau_c` |
+|---|---:|
+| `G` | `0.25` |
+| `IC` | `0.25` |
+| `FC` | `0.25` |
+| `ED` | `0.25` |
+| `FX` | `0.50` |
+
 ## 5. Industry taxonomy and local reference-file rules
 
 ### 5.1 `stock_classification.csv`
@@ -212,17 +222,28 @@ If live KRX data lacks stable production-grade security-type metadata, the runti
 3. use the CSV to filter to the common-stock MVP universe and attach industry classification
 
 ### 5.2 Derived `industry_master.csv` (or equivalent)
-A derived taxonomy file may be generated from `stock_classification.csv` and becomes authoritative for:
+The final derived taxonomy artifact is frozen as:
+- `file_path = data/reference/industry_master.csv`
+- owner = `stock_classification.csv` maintainer (research/data owner)
+
+This artifact becomes authoritative for:
 - unique `industry_code`
 - `industry_name`
-- the industry universe used in Stage 1 ranking
-- optional sector-ordering metadata
+- `sector_l1`
+- `sector_l2`
+- `sector_l3`
+- `stock_count`
+- `representative_stock_code`
+- `source_classification_version`
+- `generated_at`
 
-If an industry master file does not yet exist, the implementation plan must include a preprocessing step that:
-1. reads `stock_classification.csv`
-2. filters to the common-stock MVP universe
-3. extracts the unique industry taxonomy
-4. writes a maintained derived master file
+Contract rules:
+1. generate it from `stock_classification.csv`
+2. filter to the common-stock MVP universe before deriving the industry taxonomy
+3. regenerate it whenever `stock_classification.csv` changes
+4. commit the regenerated artifact together with the classification change
+5. run a monthly consistency refresh before any Stage 1 rank-table revision
+6. derive `industry_code` as a stable slug from `sector_l1 > sector_l2 > sector_l3`, never from row order
 
 ## 6. External data contracts and fixed series roster
 
@@ -334,9 +355,13 @@ For every KOSIS series used, persist:
 
 The MVP US external macro adapter must support:
 - latest/current retrieval through FRED or equivalent official-source routing
-- vintage-aware retrieval through ALFRED or persisted release snapshots when required
+- vintage-aware retrieval through **ALFRED** for revisable US macro release series used in official pre-go-live historical validation
 - source attribution to underlying official publishers in metadata
 - exclusion of projected series periods from runtime classification
+
+Policy rules:
+- non-revisable market-price-like series may use as-of historical market data without ALFRED
+- if required vintage history is unavailable, that series is **non-authoritative** for official pre-go-live historical validation/backtest and must be excluded or explicitly flagged as such
 
 For every US series used, persist:
 - dataset / series identifier
@@ -408,8 +433,10 @@ For every US series used, persist:
 
 #### US core series
 - **US real goods demand proxy**
-  - preferred choice: **US real imports of goods YoY**
-  - acceptable fallback: **US real personal consumption expenditures on goods YoY**
+  - primary series: **US real imports of goods YoY**
+  - live degraded fallback only: **US real personal consumption expenditures on goods YoY**
+  - fallback requires lower confidence and explicit fallback metadata
+  - fallback is never canonical for official historical validation/backtest
   - preferred source: FRED/ALFRED with official-source attribution
 
 ### `FX` — Foreign Exchange
@@ -429,6 +456,23 @@ For every US series used, persist:
 
 #### Optional monitoring-only secondary series
 - KRW REER / NEER
+
+## 6.6 Frozen per-series transform and classifier defaults
+
+These transforms classify the **current macro state**, not acceleration/deceleration.
+
+| series_id | transform | parameters | state-classifier threshold basis | notes |
+|---|---|---|---|---|
+| `kr_ipi_yoy_3mma` | 3-month moving average of industrial production YoY | `ma_window=3m` | `+1` if `> +1.0%p`, `0` if `[-1.0,+1.0]`, `-1` if `< -1.0%p` | classifies Korea activity as above-trend / neutral / below-trend while smoothing monthly production noise |
+| `us_ipi_yoy_3mma` | 3-month moving average of industrial production YoY | `ma_window=3m` | `+1` if `> +1.0%p`, `0` if `[-1.0,+1.0]`, `-1` if `< -1.0%p` | captures realized US activity state spillover to Korean cyclicals/exporters |
+| `kr_cpi_yoy_3mma` | 3-month moving average of CPI YoY | `inflation_target=2.0%` | `+1` if `> 2.75%`, `0` if `[1.25%,2.75%]`, `-1` if `< 1.25%` | uses level-vs-target because elevated vs subdued cost pressure matters more than month-to-month noise |
+| `us_cpi_yoy_3mma` | 3-month moving average of CPI YoY | `inflation_target=2.0%` | `+1` if `> 2.75%`, `0` if `[1.25%,2.75%]`, `-1` if `< 1.25%` | reflects imported inflation / Fed-sensitive cost-pressure state |
+| `kr_credit_spread_z36` | Korea IG corporate spread z-score vs 36-month history | `lookback=36m`, `smooth=3m` | `+1` if `< -0.5σ`, `0` if `[-0.5σ,+0.5σ]`, `-1` if `> +0.5σ` | narrower spread = easier financial-conditions state |
+| `us_credit_spread_z36` | US IG corporate spread z-score vs 36-month history | `lookback=36m`, `smooth=3m` | `+1` if `< -0.5σ`, `0` if `[-0.5σ,+0.5σ]`, `-1` if `> +0.5σ` | captures global risk-appetite / funding-condition state spillover |
+| `kr_exports_us_yoy_3mma` | 3-month moving average of Korea exports to US YoY | `ma_window=3m` | `+1` if `> +2.0%p`, `0` if `[-2.0,+2.0]`, `-1` if `< -2.0%p` | dampens shipping volatility while classifying Korea-to-US demand as supportive / neutral / weak |
+| `us_real_imports_goods_yoy_3mma` | 3-month moving average of US real imports of goods YoY | `ma_window=3m` | `+1` if `> +1.5%p`, `0` if `[-1.5,+1.5]`, `-1` if `< -1.5%p` | primary realized US goods-demand state proxy for Korea export sensitivity |
+| `usdkrw_3m_log_return` | 3-month log return of USD/KRW monthly average | `lookback=3m` | `+1` if `> +2.5%`, `0` if `[-2.5%,+2.5%]`, `-1` if `< -2.5%` | positive = KRW-weak state / exporter-favorable |
+| `broad_usd_3m_log_return` | 3-month log return of broad trade-weighted USD index | `lookback=3m` | `+1` if `> +2.0%`, `0` if `[-2.0%,+2.0%]`, `-1` if `< -2.0%` | confirms whether the KRW move sits inside a broader dollar-state regime |
 
 ## 7. Stage 1 — macro-based industry scoring requirements
 

@@ -20,9 +20,9 @@ Authority order for execution:
 1. preserve the MVP boundary from `doc/strategy.md`
 2. implement against the detailed product/data-contract requirements in `doc/prd.md`
 3. sequence and verify work according to `doc/plan.md`
-4. treat `doc/open-questions.md` as the only surviving unresolved-question list
+4. treat `doc/open-questions.md` as a historical ratification ledger / residual tracker, not as the authority surface for resolved policy
 
-**Execution gate (2026-03-22):** only Phase 1 grounding work may continue for now. Phases 2a-6 stay blocked until `doc/open-questions.md` reaches zero material implementation blockers and one concrete versioned Stage 1 sector-rank-table / channel-weight artifact is frozen.
+**Execution gate (2026-03-22):** documentation ratification may proceed immediately, and implementation planning may proceed from the ratified docs. The only remaining implementation prerequisite is one concrete versioned Stage 1 sector-rank-table / channel-weight artifact in executable config so Phase 2b+ does not rely on placeholders.
 
 ## 2. Grounded current-state evidence
 
@@ -42,7 +42,7 @@ The repo already has a real package/runtime skeleton. The remaining final-stage 
 - macro ingestion still centers on manual or last-known channel-state behavior (`src/macro_screener/data/macro_client.py`)
 - KRX ingestion still relies on local/demo loaders and keyword heuristics rather than the final KRX + local-CSV authority model (`src/macro_screener/data/krx_client.py`)
 - DART ingestion still centers on `list.json` plus weak watermark fallback rather than a structured monotone disclosure cursor with full metadata (`src/macro_screener/data/dart_client.py`)
-- current docs still need final-stage consolidation around Korea + US-only external macro, full sector-rank tables, local CSV authority, and cleanup of redundant markdown
+- the documentation stance is now ratified; the remaining gap is implementation follow-through on the ratified state-language semantics, fallback policy, historical-validation policy, taxonomy contract, and Stage 1 artifact prerequisite
 
 ### 2.3 Final framing correction from the last clarification pass
 The final-stage implementation posture is:
@@ -72,6 +72,11 @@ These points are no longer open and should not be re-litigated during implementa
 - the Korea holiday calendar remains a hardcoded MVP list behind the project calendar helper
 - backtest may process independent replay dates in parallel
 - DART API keys come from environment/secret sources; local development already resolves this through `.env`
+- Stage 1 channel semantics are frozen in state-language, not acceleration/deceleration language
+- primary US `ED` series = **US real imports of goods YoY**; fallback to US real personal consumption expenditures on goods YoY is allowed only in live degraded mode with lower confidence and explicit fallback metadata
+- official pre-go-live historical validation for revisable US macro release series requires ALFRED/vintage handling; if vintage history is unavailable, the series is non-authoritative for that use
+- the final derived taxonomy artifact contract is `data/reference/industry_master.csv` with fixed columns, refresh process, owner, and stable slug-based `industry_code`
+- one provisional versioned Stage 1 sector-rank-table / channel-weight artifact is allowed for MVP bootstrap, but it must be explicitly identified in executable config before full implementation proceeds
 
 ## 4. RALPLAN-DR summary
 
@@ -128,33 +133,33 @@ The following runtime/document defaults are treated as fixed for final-stage pla
 
 ## 7. Phase plan
 
-### Phase 1 — Final contract and taxonomy freeze
-**Goal:** freeze the provider/runtime contract, Korea+US series roster, taxonomy authority, and historical doc consolidation rules before further implementation diverges.
+### Phase 1 — Ratified contract materialization and provisional artifact freeze
+**Goal:** materialize the ratified provider/runtime contract, taxonomy authority, and one provisional Stage 1 artifact before further implementation diverges.
+
+**Ratification-era note:** the only remaining documentation-era prerequisite is identifying/checking in the provisional Stage 1 artifact. The rest of Phase 1 is normal implementation follow-through against already-ratified policy.
 
 **Primary work:**
-- freeze the final MVP provider roster: KRX, DART, ECOS, KOSIS, local classification CSV, US macro adapter layer via FRED/ALFRED or equivalent official-source routing
-- freeze the exact Korea/US core series roster by channel
-- freeze the source-priority rule (official actual > topic dataset actual > WEO reference/backfill)
-- freeze local CSV authority and the derived industry-master generation rule
-- freeze the Stage 1 sector-rank-table schema and rank-to-score transform as the canonical scoring representation
-- consolidate the surviving human-facing docs and identify which markdown files become redundant
+- carry the ratified Korea + US-only provider roster, source-priority rule, and per-series transform semantics into executable config/metadata surfaces
+- materialize the final taxonomy preprocessing rule and `data/reference/industry_master.csv` contract in implementation-facing assets
+- define and check in one provisional versioned Stage 1 sector-rank-table / channel-weight artifact for MVP bootstrap
+- keep the artifact explicitly labeled as provisional / non-authoritative until later reviewed revisions replace it
 
 **Likely implementation surfaces:**
-- `doc/strategy.md`
-- `doc/prd.md`
-- `doc/plan.md`
-- `doc/open-questions.md` (new)
-- `README.md` if doc references or high-level wording need cleanup
+- `src/macro_screener/config/types.py`
+- `src/macro_screener/config/defaults.py`
+- `config/default.yaml`
+- `tests/fixtures/provider_contracts/`
+- `data/reference/industry_master.csv` or the preprocessing step that generates it
 
 **Acceptance criteria:**
-- no final doc treats BIS/OECD/IMF as mandatory MVP runtime adapters
-- Korea + US-only external-macro scope is explicit everywhere
-- the local CSV authority rule and derived industry-master rule are explicit
-- the final doc set is clear and historical corrective docs are marked for removal
+- the ratified provider roster, series semantics, fallback policy, and taxonomy contract are mirrored in executable config/reference surfaces
+- one provisional versioned Stage 1 artifact is explicitly identified for execution use; no other policy question remains gated at the documentation layer
+- no implementation-facing config still depends on placeholder policy choices that the docs already ratified
 
 **Verification:**
-- doc review confirms the provider roster, series roster, local authority rules, and source-priority rules are consistent across strategy/prd/plan
+- doc review confirms strategy/prd/plan are mutually consistent after ratification
 - at least one validated request/response fixture or sample contract example exists per provider family before Phase 3 scales up
+- the provisional artifact is named/versioned rather than implied
 
 ### Phase 2a — ChannelState schema expansion and combination-contract widening
 **Goal:** align the runtime contract with the final PRD before changing the Stage 1 scoring formula.
@@ -250,7 +255,7 @@ The following runtime/document defaults are treated as fixed for final-stage pla
 **Primary work:**
 - replace weak DART watermark behavior with structured monotone cursor metadata
 - persist observation date, release date, retrieval timestamp, and transformation metadata for Korea and US series
-- decide between ALFRED vintages and persisted release snapshots for pre-go-live historical backfill
+- require ALFRED/vintage handling for revisable US macro release series used in official pre-go-live historical validation; if vintage history is unavailable, mark the series non-authoritative for that use
 - ensure historical replay never consumes future DART amendments or future macro releases
 - keep `run_id` attempt-unique and separate from scheduled business-window identity
 
