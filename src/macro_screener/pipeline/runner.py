@@ -33,6 +33,7 @@ DEFAULT_DEMO_AS_OF = "2026-03-21T08:30:00+09:00"
 DEFAULT_DEMO_INPUT_CUTOFF = "2026-03-20T18:00:00+09:00"
 DEFAULT_CONFIG_VERSION = "mvp-1"
 KST = ZoneInfo("Asia/Seoul")
+PRODUCTION_ENVIRONMENTS = {"prod", "production"}
 
 
 def build_manual_context(
@@ -148,6 +149,69 @@ def _resolve_macro_states(
         if config.runtime.reuse_last_known_channel_states:
             return PersistedMacroDataSource(store).fetch_channel_states()
         raise
+
+
+def _is_production_live_mode(
+    *,
+    config: AppConfig,
+    mode: RunMode,
+    use_demo_inputs: bool,
+) -> bool:
+    if use_demo_inputs or mode == RunMode.BACKTEST:
+        return False
+    return (
+        config.environment.lower() in PRODUCTION_ENVIRONMENTS
+        and config.runtime.normal_mode == "live"
+    )
+
+
+def _enforce_macro_source_policy(
+    *,
+    config: AppConfig,
+    mode: RunMode,
+    macro_result: Any,
+    channel_states: dict[str, int] | None,
+    use_demo_inputs: bool,
+) -> None:
+    if not _is_production_live_mode(config=config, mode=mode, use_demo_inputs=use_demo_inputs):
+        return
+    manual_like_sources = {"manual", "manual_config", "manual_override", "demo_manual"}
+    if (
+        channel_states is not None or macro_result.source_name in manual_like_sources
+    ) and not config.runtime.allow_manual_macro_states_in_live_mode:
+        raise RuntimeError(
+            f"manual_macro_source_forbidden_in_production_live_mode:{macro_result.source_name}"
+        )
+    if macro_result.fallback_mode == "last_known_channel_states":
+        raise RuntimeError("last_known_macro_fallback_requires_degraded_mode")
+
+
+def _enforce_krx_source_policy(
+    *,
+    config: AppConfig,
+    mode: RunMode,
+    stock_source: str,
+    use_demo_inputs: bool,
+) -> None:
+    if not _is_production_live_mode(config=config, mode=mode, use_demo_inputs=use_demo_inputs):
+        return
+    if stock_source != "live":
+        raise RuntimeError(f"krx_live_source_required_in_production_live_mode:{stock_source}")
+
+
+def _enforce_dart_source_policy(
+    *,
+    config: AppConfig,
+    mode: RunMode,
+    disclosure_source: str,
+    use_demo_inputs: bool,
+) -> None:
+    if not _is_production_live_mode(config=config, mode=mode, use_demo_inputs=use_demo_inputs):
+        return
+    if disclosure_source in {"demo", "file"}:
+        raise RuntimeError(
+            f"dart_live_source_required_in_production_live_mode:{disclosure_source}"
+        )
 
 
 def _load_stage1_rows_and_rank_tables(
@@ -325,6 +389,13 @@ def run_pipeline_context(
         channel_states=channel_states,
         use_demo_inputs=use_demo_inputs,
     )
+    _enforce_macro_source_policy(
+        config=config,
+        mode=mode,
+        macro_result=macro_result,
+        channel_states=channel_states,
+        use_demo_inputs=use_demo_inputs,
+    )
     warnings = list(macro_result.warnings)
     krx_client = KRXClient(
         stock_classification_path=_repo_relative(config.universe.stock_classification_path),
@@ -334,6 +405,12 @@ def run_pipeline_context(
         config=config
     )
     stock_result = krx_client.load_stocks_result()
+    _enforce_krx_source_policy(
+        config=config,
+        mode=mode,
+        stock_source=stock_result.source,
+        use_demo_inputs=use_demo_inputs,
+    )
     if not use_demo_inputs:
         warnings.extend(stock_result.warnings)
     stage1_result = _compute_stage1_result_compat(
@@ -362,6 +439,12 @@ def run_pipeline_context(
         config=config,
         store=store,
         input_cutoff=str(context["input_cutoff"]),
+        use_demo_inputs=use_demo_inputs,
+    )
+    _enforce_dart_source_policy(
+        config=config,
+        mode=mode,
+        disclosure_source=disclosure_result.source,
         use_demo_inputs=use_demo_inputs,
     )
     warnings.extend(disclosure_result.warnings)

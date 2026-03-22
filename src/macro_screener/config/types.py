@@ -202,6 +202,10 @@ class RuntimePolicyConfig(SerializableMixin):
     unknown_dart_ratio_warning_threshold: float = 0.2
     max_runtime_minutes_warning: int = 5
 
+    def __post_init__(self) -> None:
+        if self.normal_mode not in {"live", "degraded"}:
+            raise ValueError("Runtime normal_mode must be 'live' or 'degraded'.")
+
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "RuntimePolicyConfig":
         return cls(
