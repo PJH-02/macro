@@ -9,6 +9,7 @@ from pathlib import Path
 from _pytest.monkeypatch import MonkeyPatch
 
 from macro_screener.config import load_config
+from macro_screener.config.loader import load_env_file
 
 
 def test_default_config_loads(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
@@ -90,3 +91,27 @@ paths:
         assert payload["config_version"] == "cli-custom"
         assert payload["schedule"]["pre_open_time"] == "08:45"
         assert payload["paths"]["latest_snapshot_pointer"] == "custom/latest.json"
+
+
+def test_load_env_file_parses_spaced_assignments(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    env_path = tmp_path / ".env"
+    env_path.write_text(
+        """
+DART_API_KEY = test-dart
+export ECOS_API_KEY = "test-ecos"
+FRED_API_KEY='test-fred'
+KOSIS_API_KEY = test-kosis
+        """.strip(),
+        encoding="utf-8",
+    )
+    for key in ("DART_API_KEY", "ECOS_API_KEY", "FRED_API_KEY", "KOSIS_API_KEY"):
+        monkeypatch.delenv(key, raising=False)
+
+    load_env_file(env_path)
+
+    assert os.environ["DART_API_KEY"] == "test-dart"
+    assert os.environ["ECOS_API_KEY"] == "test-ecos"
+    assert os.environ["FRED_API_KEY"] == "test-fred"
+    assert os.environ["KOSIS_API_KEY"] == "test-kosis"
