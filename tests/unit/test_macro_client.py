@@ -1,0 +1,153 @@
+from __future__ import annotations
+
+import json
+from datetime import datetime
+from pathlib import Path
+
+from macro_screener.data.macro_client import (
+    LiveMacroDataSource,
+    MacroSeriesSignal,
+    build_ecos_request_contract,
+    build_fred_request_contract,
+    build_kosis_request_contract,
+    combine_channel_signal_states,
+    signal_from_ecos_response,
+    signal_from_fred_response,
+    signal_from_kosis_response,
+)
+
+FIXTURE_ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "provider_contracts"
+
+
+def _load_json(path: Path) -> dict[str, object]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _signal(
+    channel: str,
+    state: int,
+    *,
+    confidence: float = 1.0,
+    fallback_used: bool = False,
+    warning_flags: tuple[str, ...] = (),
+    as_of_timestamp: str = "2026-02-01T00:00:00",
+    input_cutoff: str = "2026-03-20T00:00:00",
+) -> MacroSeriesSignal:
+    return MacroSeriesSignal(
+        channel=channel,
+        series_id=f"{channel}-signal",
+        provider="fixture",
+        state=state,
+        as_of_timestamp=datetime.fromisoformat(as_of_timestamp),
+        input_cutoff=datetime.fromisoformat(input_cutoff),
+        transformation_method="fixture",
+        retrieval_timestamp=datetime.fromisoformat("2026-03-22T00:00:00"),
+        confidence=confidence,
+        warning_flags=warning_flags,
+        fallback_used=fallback_used,
+    )
+
+
+def test_macro_request_contract_builders_match_fixtures() -> None:
+    assert build_ecos_request_contract(
+        table_code="901Y009",
+        item_codes=["0"],
+        frequency="M",
+    ) == _load_json(FIXTURE_ROOT / "ecos" / "statistic_search_request.json")
+    assert build_kosis_request_contract(
+        table_id="DT_1J22005",
+        item_id="T1",
+        frequency="M",
+    ) == _load_json(FIXTURE_ROOT / "kosis" / "statistical_data_request.json")
+    assert build_fred_request_contract(
+        series_id="INDPRO",
+        official_source="Federal Reserve",
+    ) == _load_json(FIXTURE_ROOT / "us_macro" / "fred_series_request.json")
+
+
+def test_macro_signal_builders_preserve_provider_metadata() -> None:
+    ecos_signal = signal_from_ecos_response(
+        channel="G",
+        state=1,
+        payload=_load_json(FIXTURE_ROOT / "ecos" / "statistic_search_response.json"),
+    )
+    kosis_signal = signal_from_kosis_response(
+        channel="ED",
+        state=1,
+        payload=_load_json(FIXTURE_ROOT / "kosis" / "statistical_data_response.json"),
+    )
+    fred_signal = signal_from_fred_response(
+        channel="G",
+        state=1,
+        payload=_load_json(FIXTURE_ROOT / "us_macro" / "fred_series_response.json"),
+    )
+
+    assert ecos_signal.series_id == "901Y009:0"
+    assert ecos_signal.provider == "ecos"
+    assert ecos_signal.as_of_timestamp == datetime.fromisoformat("2026-02-01T00:00:00")
+    assert ecos_signal.input_cutoff == datetime.fromisoformat("2026-03-15T00:00:00")
+
+    assert kosis_signal.series_id == "DT_1J22005:T1"
+    assert kosis_signal.provider == "kosis"
+    assert kosis_signal.input_cutoff == datetime.fromisoformat("2026-03-18T00:00:00")
+
+    assert fred_signal.series_id == "INDPRO"
+    assert fred_signal.provider == "fred"
+    assert fred_signal.official_source == "Federal Reserve"
+    assert fred_signal.input_cutoff == datetime.fromisoformat("2026-03-14T00:00:00")
+
+
+def test_combine_channel_signal_states_uses_simple_mean() -> None:
+    positive_state, positive_score = combine_channel_signal_states(
+        [_signal("IC", 1), _signal("IC", 0)],
+        neutral_band=0.25,
+    )
+    neutral_state, neutral_score = combine_channel_signal_states(
+        [_signal("FC", 1), _signal("FC", -1)],
+        neutral_band=0.25,
+    )
+
+    assert positive_score == 0.5
+    assert positive_state == 1
+    assert neutral_score == 0.0
+    assert neutral_state == 0
+
+
+def test_live_macro_data_source_builds_channel_states_and_fallback_metadata() -> None:
+    data_source = LiveMacroDataSource(
+        channel_signals={
+            "G": [_signal("G", 1), _signal("G", 1, confidence=0.9)],
+            "IC": [_signal("IC", 1), _signal("IC", 0, confidence=0.8)],
+            "FC": [_signal("FC", -1), _signal("FC", 1)],
+            "ED": [
+                _signal("ED", 1),
+                _signal(
+                    "ED",
+                    0,
+                    confidence=0.6,
+                    fallback_used=True,
+                    warning_flags=("us_real_imports_goods_fallback_to_pce_goods",),
+                    input_cutoff="2026-03-21T00:00:00",
+                ),
+            ],
+            "FX": [_signal("FX", -1), _signal("FX", -1, confidence=0.95)],
+        },
+        source_name="ecos_kosis_fred_live",
+        source_version="phase0-freeze-8230c76",
+    )
+
+    result = data_source.fetch_channel_states()
+
+    assert result.source_name == "ecos_kosis_fred_live"
+    assert result.source_version == "phase0-freeze-8230c76"
+    assert result.channel_states == {"G": 1, "IC": 1, "FC": 0, "ED": 1, "FX": -1}
+    assert result.confidence_by_channel["ED"] == 0.6
+    assert result.fallback_mode == "degraded_live"
+    assert result.warning_flags_by_channel["ED"] == [
+        "us_real_imports_goods_fallback_to_pce_goods",
+        "live_macro_fallback_signal_used",
+    ]
+    assert "us_real_imports_goods_fallback_to_pce_goods" in result.warnings
+    assert result.input_cutoff == datetime.fromisoformat("2026-03-21T00:00:00")
