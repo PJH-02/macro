@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import os
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
@@ -35,10 +37,7 @@ DEFAULT_STOCKS: list[dict[str, Any]] = [
 ]
 
 NON_COMMON_STOCK_KEYWORDS = ("ETF", "ETN", "REIT", "리츠", "SPAC", "스팩")
-DEFAULT_LIVE_SERVICE_FAMILY = "유가증권 종목기본정보"
-DEFAULT_ALLOWED_MARKETS: tuple[str, ...] = ("KOSPI", "KOSDAQ")
-DEFAULT_LISTED_STATUSES: tuple[str, ...] = ("LISTED", "상장")
-DEFAULT_COMMON_SECURITY_TYPES: tuple[str, ...] = ("COMMON", "COMMON_STOCK", "보통주")
+LIVE_STOCK_MASTER_SERVICE_FAMILY = "유가증권 종목기본정보"
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,6 +52,7 @@ class KRXClient:
     stock_classification_path: Path | None = None
     exposure_matrix_path: Path = Path("data/industry_exposures.json")
     ohlcv_path: Path = Path("data/ohlcv.csv")
+    api_key_env: str = "KRX_API_KEY"
     use_demo_fallback: bool = True
     allowed_markets: tuple[str, ...] = DEFAULT_ALLOWED_MARKETS
 
@@ -163,6 +163,114 @@ class KRXClient:
             return pd.DataFrame(columns=["종목코드", "종목명", "대분류", "중분류", "소분류"])
         return pd.read_csv(self.stock_classification_path, dtype=str).fillna("")
 
+    def build_live_stock_master_request(
+        self,
+        *,
+        trading_date: str,
+        auth_key: str | None = None,
+    ) -> dict[str, Any]:
+        resolved_auth_key = (auth_key or os.getenv(self.api_key_env, "")).strip()
+        if not resolved_auth_key:
+            raise ValueError(f"Missing KRX auth key env: {self.api_key_env}")
+        return {
+            "provider": "krx",
+            "service_family": LIVE_STOCK_MASTER_SERVICE_FAMILY,
+            "transport": {
+                "headers": {"AUTH_KEY": resolved_auth_key},
+                "response_format": "json",
+            },
+            "params": {"basDd": trading_date},
+        }
+
+    def load_live_stocks_result(
+        self,
+        *,
+        trading_date: str,
+        fetcher: Callable[[dict[str, Any]], Mapping[str, Any]] | None = None,
+    ) -> KRXLoadResult:
+        auth_key = os.getenv(self.api_key_env, "").strip()
+        if not auth_key:
+            return KRXLoadResult(
+                rows=[],
+                source="unavailable",
+                warnings=["krx_live_source_unconfigured"],
+            )
+        if fetcher is None:
+            return KRXLoadResult(
+                rows=[],
+                source="unavailable",
+                warnings=["krx_live_fetcher_unconfigured"],
+            )
+        try:
+            request_payload = self.build_live_stock_master_request(
+                trading_date=trading_date,
+                auth_key=auth_key,
+            )
+            live_rows = self._normalize_live_stock_master_response(fetcher(request_payload))
+        except Exception as exc:
+            return KRXLoadResult(
+                rows=[],
+                source="unavailable",
+                warnings=[f"krx_live_fetch_failed: {exc}"],
+            )
+        if not live_rows:
+            return KRXLoadResult(
+                rows=[],
+                source="unavailable",
+                warnings=["krx_live_records_empty"],
+            )
+
+        frame = self.load_stock_classification()
+        taxonomy_rows = self._classification_rows(frame)
+        if not taxonomy_rows:
+            warning = self._classification_unavailable_warning(frame)
+            return KRXLoadResult(rows=[], source="unavailable", warnings=[warning])
+
+        taxonomy_by_code = {row["stock_code"]: row for row in taxonomy_rows}
+        warnings: list[str] = []
+        rows: list[dict[str, Any]] = []
+        seen_codes: set[str] = set()
+        missing_taxonomy = 0
+
+        for live_row in live_rows:
+            stock_code = str(live_row["stock_code"]).zfill(6)
+            taxonomy_row = taxonomy_by_code.get(stock_code)
+            if taxonomy_row is None:
+                missing_taxonomy += 1
+                continue
+            stock_name = str(live_row.get("stock_name") or taxonomy_row["stock_name"]).strip()
+            security_type = str(
+                live_row.get("security_type") or taxonomy_row.get("security_type", "")
+            ).strip()
+            listing_status = str(live_row.get("listing_status") or "LISTED").strip().upper()
+            if listing_status and listing_status not in {"LISTED", "상장"}:
+                continue
+            if not stock_name or self._is_non_common_equity(
+                stock_name=stock_name,
+                security_type=security_type,
+            ):
+                continue
+            if stock_code in seen_codes:
+                continue
+            seen_codes.add(stock_code)
+            rows.append(
+                {
+                    "stock_code": stock_code,
+                    "stock_name": stock_name,
+                    "industry_code": str(taxonomy_row["industry_code"]),
+                }
+            )
+
+        if missing_taxonomy:
+            warnings.append(f"krx_live_rows_missing_taxonomy_mapping={missing_taxonomy}")
+        if rows:
+            return KRXLoadResult(rows=rows, source="live", warnings=warnings)
+        return KRXLoadResult(
+            rows=[],
+            source="unavailable",
+            warnings=[*warnings, "krx_live_rows_unusable_after_taxonomy_join"],
+        )
+
     def load_stocks(self) -> list[dict[str, Any]]:
         return self.load_stocks_result().rows
 
@@ -180,31 +288,15 @@ class KRXClient:
                 source="unavailable",
                 warnings=["stock_classification_missing"],
             )
-        rows: list[dict[str, Any]] = []
-        for _, row in frame.iterrows():
-            stock_code = self._first_value(row, "stock_code", "종목코드", "code")
-            stock_name = self._first_value(row, "stock_name", "종목명", "name")
-            sector_l1 = self._first_value(row, "sector_l1", "대분류")
-            sector_l2 = self._first_value(row, "sector_l2", "중분류")
-            sector_l3 = self._first_value(row, "sector_l3", "소분류")
-            if sector_l1 and sector_l2 and sector_l3:
-                industry_code = industry_code_slug((sector_l1, sector_l2, sector_l3))
-            else:
-                industry_code = self._first_value(
-                    row, "industry_code", "industry", "소분류", "중분류", "대분류"
-                )
-            security_type = self._first_value(row, "security_type", "증권구분", "종목구분")
-            if not stock_code or not stock_name or not industry_code:
-                continue
-            if self._is_non_common_equity(stock_name=stock_name, security_type=security_type):
-                continue
-            rows.append(
-                {
-                    "stock_code": stock_code.zfill(6),
-                    "stock_name": stock_name,
-                    "industry_code": industry_code,
-                }
-            )
+        classification_rows = self._classification_rows(frame)
+        rows = [
+            {
+                "stock_code": str(row["stock_code"]),
+                "stock_name": str(row["stock_name"]),
+                "industry_code": str(row["industry_code"]),
+            }
+            for row in classification_rows
+        ]
         if rows:
             return KRXLoadResult(rows=rows, source="file", warnings=[])
         if self.use_demo_fallback:
@@ -246,34 +338,67 @@ class KRXClient:
             for keyword in NON_COMMON_STOCK_KEYWORDS
         )
 
-    def _classification_lookup(self, frame: pd.DataFrame) -> dict[str, dict[str, str]]:
-        lookup: dict[str, dict[str, str]] = {}
+    def _classification_rows(self, frame: pd.DataFrame) -> list[dict[str, str]]:
+        rows: list[dict[str, str]] = []
         for _, row in frame.iterrows():
-            stock_code = self._first_value(row, "stock_code", "종목코드", "code").zfill(6)
+            stock_code = self._first_value(row, "stock_code", "종목코드", "code")
             stock_name = self._first_value(row, "stock_name", "종목명", "name")
             sector_l1 = self._first_value(row, "sector_l1", "대분류")
             sector_l2 = self._first_value(row, "sector_l2", "중분류")
             sector_l3 = self._first_value(row, "sector_l3", "소분류")
-            if not stock_code or not stock_name or not (sector_l1 and sector_l2 and sector_l3):
+            if sector_l1 and sector_l2 and sector_l3:
+                industry_code = industry_code_slug((sector_l1, sector_l2, sector_l3))
+            else:
+                industry_code = self._first_value(
+                    row, "industry_code", "industry", "소분류", "중분류", "대분류"
+                )
+            security_type = self._first_value(row, "security_type", "증권구분", "종목구분")
+            if not stock_code or not stock_name or not industry_code:
                 continue
-            lookup[stock_code] = {
-                "stock_name": stock_name,
-                "industry_code": industry_code_slug((sector_l1, sector_l2, sector_l3)),
-            }
-        return lookup
+            if self._is_non_common_equity(stock_name=stock_name, security_type=security_type):
+                continue
+            rows.append(
+                {
+                    "stock_code": stock_code.zfill(6),
+                    "stock_name": stock_name,
+                    "industry_code": industry_code,
+                    "security_type": security_type,
+                }
+            )
+        return rows
 
     @staticmethod
-    def _is_live_record_listed_common(
-        *,
-        stock_name: str,
-        security_type: str,
-        listing_status: str,
-    ) -> bool:
-        if listing_status and listing_status.upper() not in DEFAULT_LISTED_STATUSES:
-            return False
-        if security_type and security_type.upper() not in DEFAULT_COMMON_SECURITY_TYPES:
-            return False
-        return not KRXClient._is_non_common_equity(
-            stock_name=stock_name,
-            security_type=security_type,
-        )
+    def _classification_unavailable_warning(frame: pd.DataFrame) -> str:
+        return "stock_classification_missing" if frame.empty else "stock_classification_empty"
+
+    @staticmethod
+    def _normalize_live_stock_master_response(
+        payload: Mapping[str, Any],
+    ) -> list[dict[str, str]]:
+        records = payload.get("records", [])
+        if not isinstance(records, list):
+            raise ValueError("KRX stock master payload must contain a records list")
+
+        rows: list[dict[str, str]] = []
+        for item in records:
+            if not isinstance(item, Mapping):
+                continue
+            stock_code = str(item.get("stock_code") or item.get("short_code") or "").strip()
+            if not stock_code:
+                continue
+            rows.append(
+                {
+                    "stock_code": stock_code.zfill(6),
+                    "stock_name": str(
+                        item.get("stock_name") or item.get("isuAbwdNm") or ""
+                    ).strip(),
+                    "market": str(item.get("market") or item.get("mktNm") or "").strip(),
+                    "security_type": str(
+                        item.get("security_type") or item.get("security_group_type") or ""
+                    ).strip(),
+                    "listing_status": str(
+                        item.get("listing_status") or item.get("listing_status_name") or "LISTED"
+                    ).strip(),
+                }
+            )
+        return rows

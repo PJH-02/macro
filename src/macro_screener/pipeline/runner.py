@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 
 from macro_screener.config import AppConfig, load_config
 from macro_screener.data.dart_client import DARTClient, DARTLoadResult
-from macro_screener.data.krx_client import KRXClient
+from macro_screener.data.krx_client import KRXClient, KRXLoadResult
 from macro_screener.data.macro_client import (
     DEFAULT_CHANNEL_STATES,
     ManualMacroDataSource,
@@ -352,6 +352,43 @@ def _channel_state_snapshot_metadata(
     return metadata
 
 
+def _load_krx_stock_universe(
+    *,
+    config: AppConfig,
+    context: Mapping[str, Any],
+    use_demo_inputs: bool,
+    krx_client: KRXClient,
+) -> KRXLoadResult:
+    if use_demo_inputs:
+        return KRXLoadResult(
+            rows=krx_client.load_demo_stocks(),
+            source="demo",
+            warnings=[],
+        )
+
+    trading_date = parse_datetime(str(context["as_of_timestamp"])).strftime("%Y%m%d")
+    live_result = krx_client.load_live_stocks_result(trading_date=trading_date)
+    if live_result.rows:
+        return live_result
+
+    taxonomy_result = krx_client.load_stocks_result()
+    if taxonomy_result.rows and taxonomy_result.source == "file":
+        return KRXLoadResult(
+            rows=taxonomy_result.rows,
+            source="taxonomy_only",
+            warnings=[
+                *live_result.warnings,
+                "krx_live_unavailable_using_local_taxonomy_only",
+                *taxonomy_result.warnings,
+            ],
+        )
+    return KRXLoadResult(
+        rows=taxonomy_result.rows,
+        source=taxonomy_result.source,
+        warnings=[*live_result.warnings, *taxonomy_result.warnings],
+    )
+
+
 def run_pipeline_context(
     output_dir: str | Path,
     *,
@@ -399,20 +436,19 @@ def run_pipeline_context(
     warnings = list(macro_result.warnings)
     krx_client = KRXClient(
         stock_classification_path=_repo_relative(config.universe.stock_classification_path),
-        use_demo_fallback=True,
+        api_key_env=config.runtime.krx_api_key_env,
+        use_demo_fallback=use_demo_inputs,
     )
     stage1_rows, sector_rank_tables, channel_weights = _load_stage1_rows_and_rank_tables(
         config=config
     )
-    stock_result = krx_client.load_stocks_result()
-    _enforce_krx_source_policy(
+    stock_result = _load_krx_stock_universe(
         config=config,
-        mode=mode,
-        stock_source=stock_result.source,
+        context=context,
         use_demo_inputs=use_demo_inputs,
+        krx_client=krx_client,
     )
-    if not use_demo_inputs:
-        warnings.extend(stock_result.warnings)
+    warnings.extend(stock_result.warnings)
     stage1_result = _compute_stage1_result_compat(
         channel_states=macro_result.channel_states,
         exposures=stage1_rows,
@@ -451,7 +487,13 @@ def run_pipeline_context(
     stage2_status = SnapshotStatus.PUBLISHED
     stocks = stock_result.rows
     known_industries = {score.industry_code for score in stage1_result.industry_scores}
-    if not any(str(stock["industry_code"]) in known_industries for stock in stocks):
+    if stocks and not any(str(stock["industry_code"]) in known_industries for stock in stocks):
+        if use_demo_inputs:
+            stocks = krx_client.load_demo_stocks()
+            warnings.append("stock_universe_unmapped_using_demo_stocks")
+        else:
+            warnings.append("stock_universe_unmapped_after_taxonomy_join")
+    elif not stocks and use_demo_inputs:
         stocks = krx_client.load_demo_stocks()
         warnings.append("stock_universe_unmapped_using_demo_stocks")
     try:
