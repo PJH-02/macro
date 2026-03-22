@@ -22,6 +22,8 @@ Authority order for execution:
 3. sequence and verify work according to `doc/plan.md`
 4. treat `doc/open-questions.md` as the only surviving unresolved-question list
 
+**Execution gate (2026-03-22):** only Phase 1 grounding work may continue for now. Phases 2a-6 stay blocked until `doc/open-questions.md` reaches zero material implementation blockers and one concrete versioned Stage 1 sector-rank-table / channel-weight artifact is frozen.
+
 ## 2. Grounded current-state evidence
 
 The repo already has a real package/runtime skeleton. The remaining final-stage gap is not project scaffolding; it is the mismatch between current implementation behavior and the now-frozen final documentation posture.

@@ -253,12 +253,15 @@ Operator response and verification specifics live in `doc/plan.md`.
 
 ## 10. What is intentionally deferred
 
-These are not blockers for MVP implementation handoff, but they are not fully frozen yet:
+These do not block doc consolidation or the already-started Phase 1 provider-contract fixture work, but they **do** block full production implementation until they are frozen:
 - exact raw transform for each fixed Korea/US series
 - exact neutral-band `tau_c` values by channel
 - final US `ED` proxy choice when multiple acceptable realized series remain
 - whether ALFRED vintages are required before live collection starts
 - final filename/schema/ownership for the derived industry taxonomy file
+- final versioned Stage 1 sector-rank-table contents and channel weights in executable config
+
+These can remain deferred without blocking the production-readiness decision:
 - exact SQLite physical DDL and non-essential indexes
 - migration tool vs manual versioned SQL
 - non-file-based downstream service/API contract
