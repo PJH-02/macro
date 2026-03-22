@@ -73,11 +73,11 @@ The current ratified data design is **Korea + US external macro only**.
 
 | Channel | Korea-side series | US-side series | Main providers | Current transform idea |
 |---|---|---|---|---|
-| `G` | Korea Industrial Production YoY | US Industrial Production YoY | ECOS / KOSIS / FRED / ALFRED | 3-month moving average YoY |
-| `IC` | Korea CPI YoY | US CPI YoY | ECOS / KOSIS / FRED / ALFRED | 3-month moving average vs target band |
-| `FC` | Korea corporate credit spread | US corporate credit spread | ECOS / FRED / ALFRED | z-score vs history |
-| `ED` | Korea exports to US YoY | US real imports of goods YoY | KOSIS / FRED / ALFRED | 3-month moving average YoY |
-| `FX` | USD/KRW | Broad trade-weighted US dollar index | ECOS / approved FX source / FRED / ALFRED | 3-month log return |
+| `G` | Korea Industrial Production YoY | US Industrial Production YoY | ECOS / FRED | 3-month moving average YoY |
+| `IC` | Korea CPI YoY | US CPI YoY | ECOS / FRED | 3-month moving average vs target band |
+| `FC` | Korea corporate credit spread | US corporate credit spread | ECOS / FRED | z-score vs history |
+| `ED` | Korea exports to US YoY | US real imports of goods YoY | ECOS / FRED | 3-month moving average YoY |
+| `FX` | USD/KRW | Broad trade-weighted US dollar index | ECOS / FRED | 3-month log return |
 
 Important `ED` rule:
 - primary US `ED` series = **US real imports of goods YoY**
@@ -203,12 +203,12 @@ Stock ranking tie-breakers are still explicit and deterministic.
 
 | Provider | Current role in the program | Data used today | Runtime status |
 |---|---|---|---|
-| `KRX` | market/universe source | common-stock universe, market overlays, KOSPI/KOSDAQ stock context | active runtime provider |
+| `KRX` | market/universe source | common-stock universe via sanctioned master download, then local taxonomy join | active runtime provider |
 | `DART` | disclosure source | filings / disclosure events for Stage 2 | active runtime provider |
-| `ECOS` | Korea macro/statistical source | Korea-side macro series such as CPI / spreads / approved macro inputs | active runtime provider path |
-| `KOSIS` | Korea macro/statistical source | Korea-side macro series, especially trade/export style data | active runtime provider path |
-| `FRED` | US macro source | current/latest US macro series | active runtime provider path |
-| `ALFRED` | US historical macro source | vintage-aware historical validation for revisable US series | active runtime provider path for PIT-safe history |
+| `ECOS` | Korea macro/statistical source | Korea activity / CPI / credit spread / FX / country-export series | active runtime provider path |
+| `KOSIS` | Korea macro/statistical source | contract fixtures and future direct runtime path; not the primary live path today | partial / planned runtime path |
+| `FRED` | US macro source | current US activity / CPI / credit spread / goods-demand / broad USD series | active runtime provider path |
+| `ALFRED` | US historical macro source | intended vintage-aware historical validation path | planned / partial runtime path |
 | `BIS` | reference / future source | not used in the current runtime path | not an MVP runtime provider |
 | `OECD` | reference / future source | not used in the current runtime path | not an MVP runtime provider |
 | `IMF` | reference / backfill source | not used in the current MVP runtime path; only allowed as secondary/reference/backfill under doc rules | not an MVP runtime provider |
@@ -233,9 +233,14 @@ What is production-like today:
 - immutable snapshots are published
 - SQLite acts as an operational / audit store
 - the runtime now uses the provisional Stage 1 artifact in the live runner path
+- production live mode can now fetch Stage 1 macro inputs from official ECOS/FRED sources
+- production live mode can now build a live Korean stock universe from the sanctioned KIS/KRX master-download workflow and join it to the local taxonomy authority
+- DART live mode is used when `DART_API_KEY` is present, with stale-cache degradation kept explicit
 
 What is still intentionally provisional:
 - the Stage 1 artifact is **provisional**, not a final reviewed research artifact
+- KOSIS direct runtime parameterization is not the primary live path yet
+- ALFRED/vintage retrieval is not yet the primary implemented historical path
 - some fallback-heavy/manual compatibility paths still exist in the runtime
 - live provider credentials / connectivity are not proven by this README alone
 
