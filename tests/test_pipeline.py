@@ -95,12 +95,18 @@ class PipelinePublicationTests(unittest.TestCase):
             snapshot_path = Path(latest["snapshot_json"])
             stock_parquet = Path(latest["stock_parquet"])
             industry_parquet = Path(latest["industry_parquet"])
+            industry_csv = Path(latest["industry_csv"])
+            screened_stock_csv = Path(latest["screened_stock_csv"])
+            screened_by_industry_json = Path(latest["screened_stocks_by_industry_json"])
             database_path = Path(tmpdir) / "data" / "macro_screener.sqlite3"
 
             self.assertTrue(latest_path.exists())
             self.assertTrue(snapshot_path.exists())
             self.assertTrue(stock_parquet.exists())
             self.assertTrue(industry_parquet.exists())
+            self.assertTrue(industry_csv.exists())
+            self.assertTrue(screened_stock_csv.exists())
+            self.assertTrue(screened_by_industry_json.exists())
             self.assertTrue(database_path.exists())
 
             latest_payload = json.loads(latest_path.read_text(encoding="utf-8"))
@@ -111,6 +117,13 @@ class PipelinePublicationTests(unittest.TestCase):
             self.assertFalse(stock_rows.empty)
             self.assertEqual(stock_rows.iloc[0]["rank"], 1)
             self.assertEqual(pd.read_parquet(industry_parquet).iloc[0]["rank"], 1)
+            screened_stock_rows = pd.read_csv(screened_stock_csv)
+            self.assertFalse(screened_stock_rows.empty)
+            self.assertEqual(int(screened_stock_rows.iloc[0]["rank"]), 1)
+            screened_groups = json.loads(screened_by_industry_json.read_text(encoding="utf-8"))
+            self.assertTrue(screened_groups)
+            self.assertIn("stocks", screened_groups[0])
+            self.assertTrue(screened_groups[0]["stocks"])
 
             connection = sqlite3.connect(database_path)
             try:

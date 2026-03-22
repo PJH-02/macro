@@ -276,8 +276,111 @@ flowchart TD
     G --> I[compute_stock_scores]
     H --> I
     I --> J[publish_snapshot]
-    J --> K[Parquet + SQLite + latest.json]
+    J --> K[Parquet + CSV + JSON + SQLite + latest.json]
 ```
+
+## 실행 방법
+
+실제 production 스타일 실행을 하려면, 저장소 루트 `.env`에 provider key를 넣으면 됩니다.
+현재 런타임은 `.env`를 자동으로 읽습니다.
+
+현재 의미 있는 키:
+- `DART_API_KEY`
+- `ECOS_API_KEY`
+- `FRED_API_KEY`
+- `KOSIS_API_KEY`
+- 이후 API-key 기반 KRX fetch를 쓸 경우 `KRX_API_KEY`
+
+대표 실행 예시는 다음과 같습니다.
+
+### 1) 수동 실행
+
+```bash
+python3 -m macro_screener.cli manual-run \
+  --output-dir ./out \
+  --run-id manual-prod-run
+```
+
+### 2) 스케줄 방식 실행
+
+```bash
+python3 -m macro_screener.cli scheduled-run \
+  --output-dir ./out \
+  --trading-date 2026-03-23 \
+  --run-type pre_open
+```
+
+### 3) 백테스트 / 리플레이
+
+```bash
+python3 -m macro_screener.cli backtest-run \
+  --output-dir ./out \
+  --start-date 2026-03-20 \
+  --end-date 2026-03-23
+```
+
+엄격한 production-live 동작을 원하면 다음 설정을 사용하면 됩니다.
+
+```yaml
+environment: "production"
+runtime:
+  normal_mode: "live"
+```
+
+이 모드에서는:
+- manual macro default를 정상 기본 경로로 허용하지 않고,
+- non-live KRX source를 거부하며,
+- demo/file DART fallback으로 fake success가 나는 것을 막습니다.
+
+## 이 프로그램이 최종 결과를 만드는 방식
+
+이 프로그램의 최종 운영상 목표는 **최종 screened stock list** 입니다.
+
+런타임은 다음 순서로 결과를 만듭니다.
+1. 매크로 입력 fetch / resolve
+2. 5개 macro channel 상태 계산
+3. Stage 1에서 전체 업종 랭킹 계산
+4. DART + Stage 1 맥락을 결합해 Stage 2 종목 점수 계산
+5. 기계친화적 산출물과 운영자 친화적 산출물을 함께 발행
+
+개념 흐름:
+
+```mermaid
+flowchart LR
+    A[실제 매크로 입력] --> B[Stage 1 channel states]
+    B --> C[최종 업종 랭킹]
+    C --> D[종목별 업종 맥락]
+    E[DART 공시] --> F[Stage 2 종목 점수]
+    D --> F
+    F --> G[최종 screened stock list]
+    G --> H[CSV / JSON / Parquet 산출물]
+```
+
+### 가장 중요한 결과 뷰 2개
+
+#### 1) 최종 업종 랭킹
+Stage 1의 최종 업종 순위표입니다.
+
+사용 파일:
+- `industry_scores.csv`
+- `industry_scores.parquet`
+
+#### 2) 최종 screened stock list
+이게 가장 중요한 최종 결과입니다.
+Stage 2가 계산한 최종 종목 랭킹입니다.
+
+사용 파일:
+- `screened_stock_list.csv` ← 운영자 입장에서 가장 보기 쉬운 파일
+- `stock_scores.parquet`
+
+업종별로 종목이 어떻게 묶였는지 보고 싶다면:
+- `screened_stocks_by_industry.json`
+
+이 JSON은 업종 순위별로 종목 리스트를 묶어서,
+- 어떤 업종이 상위였는지,
+- 각 업종 안에서 어떤 종목이 최종 선별되었는지,
+- 최종 stock list가 업종별로 어떻게 분포하는지
+를 바로 볼 수 있게 해줍니다.
 
 ## 발행 계약
 
@@ -289,6 +392,9 @@ flowchart TD
 하나의 published run은 보통 다음을 씁니다.
 - industry parquet
 - stock parquet
+- industry CSV
+- final screened stock CSV
+- 업종별 screened stocks JSON
 - snapshot JSON
 - latest pointer JSON
 - snapshots / published windows / watermarks / channel-state snapshots 를 위한 SQLite 레코드

@@ -276,8 +276,110 @@ flowchart TD
     G --> I[compute_stock_scores]
     H --> I
     I --> J[publish_snapshot]
-    J --> K[Parquet + SQLite + latest.json]
+    J --> K[Parquet + CSV + JSON + SQLite + latest.json]
 ```
+
+## How to run
+
+For real production-style runs, put your provider keys in the repository root `.env`.
+The current runtime reads `.env` automatically.
+
+Currently relevant keys are:
+- `DART_API_KEY`
+- `ECOS_API_KEY`
+- `FRED_API_KEY`
+- `KOSIS_API_KEY`
+- `KRX_API_KEY` if/when you enable the later API-keyed KRX fetch path
+
+Typical commands:
+
+### 1) Manual run
+
+```bash
+python3 -m macro_screener.cli manual-run \
+  --output-dir ./out \
+  --run-id manual-prod-run
+```
+
+### 2) Scheduled-style run
+
+```bash
+python3 -m macro_screener.cli scheduled-run \
+  --output-dir ./out \
+  --trading-date 2026-03-23 \
+  --run-type pre_open
+```
+
+### 3) Backtest / replay
+
+```bash
+python3 -m macro_screener.cli backtest-run \
+  --output-dir ./out \
+  --start-date 2026-03-20 \
+  --end-date 2026-03-23
+```
+
+If you want strict production-live behavior, use a config that sets:
+
+```yaml
+environment: "production"
+runtime:
+  normal_mode: "live"
+```
+
+In that mode:
+- manual macro defaults are not allowed as the normal source of truth,
+- non-live KRX sources are rejected,
+- and fake DART success via demo/file fallback is rejected.
+
+## How the program generates its final result
+
+The final operator-facing goal of the program is **the screened stock list**.
+
+The runtime generates results in this order:
+1. fetch or resolve macro inputs,
+2. classify the 5 macro channels,
+3. rank all industries in Stage 1,
+4. score all visible stocks in Stage 2 using DART + Stage 1 context,
+5. publish a snapshot with both machine-friendly and operator-friendly files.
+
+Conceptually:
+
+```mermaid
+flowchart LR
+    A[Live macro inputs] --> B[Stage 1 channel states]
+    B --> C[Final industry rank]
+    C --> D[Industry context for each stock]
+    E[DART disclosures] --> F[Stage 2 stock score]
+    D --> F
+    F --> G[Final screened stock list]
+    G --> H[CSV / JSON / Parquet snapshot outputs]
+```
+
+### The two most important result views
+
+#### 1) Final industry rank
+This is the ranked industry table from Stage 1.
+
+Use:
+- `industry_scores.csv`
+- `industry_scores.parquet`
+
+#### 2) Final screened stock list
+This is the most important end result.
+It is the final ranked stock table from Stage 2.
+
+Use:
+- `screened_stock_list.csv` ← easiest operator-facing file
+- `stock_scores.parquet`
+
+If you want to see the stock list grouped by industry, use:
+- `screened_stocks_by_industry.json`
+
+That JSON groups stocks under each final industry rank, so you can answer:
+- which industries ranked highest,
+- which stocks were selected inside each industry,
+- and how the final stock list was distributed across industries.
 
 ## Publication contract
 
@@ -289,6 +391,9 @@ The canonical downstream MVP publication contract is:
 A published run writes:
 - industry parquet
 - stock parquet
+- industry CSV
+- final screened stock CSV
+- screened-stocks-by-industry JSON
 - snapshot JSON
 - latest pointer JSON
 - SQLite records for snapshots / published windows / watermarks / channel-state snapshots

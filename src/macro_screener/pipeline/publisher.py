@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 from pathlib import Path
+from typing import Any
 
 import pandas as pd  # type: ignore[import-untyped]
 
@@ -13,6 +14,52 @@ from macro_screener.models import Snapshot, SnapshotStatus
 
 def ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def _build_screened_stocks_by_industry(snapshot: Snapshot) -> list[dict[str, Any]]:
+    industry_lookup = {
+        score.industry_code: {
+            "industry_code": score.industry_code,
+            "industry_name": score.industry_name,
+            "industry_rank": score.rank,
+            "industry_score": score.final_score,
+        }
+        for score in snapshot.industry_scores
+    }
+    grouped: dict[str, dict[str, Any]] = {}
+    for stock in snapshot.stock_scores:
+        industry_info = industry_lookup.get(
+            stock.industry_code,
+            {
+                "industry_code": stock.industry_code,
+                "industry_name": stock.industry_code,
+                "industry_rank": None,
+                "industry_score": None,
+            },
+        )
+        bucket = grouped.setdefault(
+            stock.industry_code,
+            {
+                **industry_info,
+                "stocks": [],
+            },
+        )
+        bucket["stocks"].append(stock.to_dict())
+
+    ranked_groups = sorted(
+        grouped.values(),
+        key=lambda item: (
+            item["industry_rank"] is None,
+            item["industry_rank"] if item["industry_rank"] is not None else 10**9,
+            str(item["industry_code"]),
+        ),
+    )
+    for bucket in ranked_groups:
+        bucket["stocks"] = sorted(
+            bucket["stocks"],
+            key=lambda item: (int(item["rank"]), str(item["stock_code"])),
+        )
+    return ranked_groups
 
 
 def publish_snapshot(
@@ -31,14 +78,31 @@ def publish_snapshot(
 
     industry_path = snapshot_root / "industry_scores.parquet"
     stock_path = snapshot_root / "stock_scores.parquet"
+    industry_csv_path = snapshot_root / "industry_scores.csv"
+    screened_stock_csv_path = snapshot_root / "screened_stock_list.csv"
+    screened_by_industry_json_path = snapshot_root / "screened_stocks_by_industry.json"
     snapshot_json_path = snapshot_root / "snapshot.json"
     latest_path = config.paths.resolve(config.paths.latest_snapshot_pointer, output_dir)
 
-    pd.DataFrame([score.to_dict() for score in snapshot.industry_scores]).to_parquet(
+    industry_frame = pd.DataFrame([score.to_dict() for score in snapshot.industry_scores])
+    stock_frame = pd.DataFrame([score.to_dict() for score in snapshot.stock_scores])
+
+    industry_frame.to_parquet(
         industry_path, index=False
     )
-    pd.DataFrame([score.to_dict() for score in snapshot.stock_scores]).to_parquet(
+    stock_frame.to_parquet(
         stock_path, index=False
+    )
+    industry_frame.to_csv(industry_csv_path, index=False, encoding="utf-8-sig")
+    stock_frame.to_csv(screened_stock_csv_path, index=False, encoding="utf-8-sig")
+    screened_by_industry_json_path.write_text(
+        json.dumps(
+            _build_screened_stocks_by_industry(snapshot),
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
     )
     snapshot_json_path.write_text(
         json.dumps(snapshot.to_dict(), ensure_ascii=False, indent=2, sort_keys=True),
@@ -71,6 +135,9 @@ def publish_snapshot(
         "snapshot_json": str(snapshot_json_path),
         "industry_parquet": str(industry_path),
         "stock_parquet": str(stock_path),
+        "industry_csv": str(industry_csv_path),
+        "screened_stock_csv": str(screened_stock_csv_path),
+        "screened_stocks_by_industry_json": str(screened_by_industry_json_path),
     }
     if snapshot.status in {SnapshotStatus.PUBLISHED, SnapshotStatus.INCOMPLETE}:
         ensure_parent(latest_path)
