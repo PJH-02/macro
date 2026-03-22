@@ -8,6 +8,7 @@ import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
+from typing import Literal
 from unittest.mock import patch
 
 import pandas as pd  # type: ignore[import-untyped]
@@ -25,6 +26,20 @@ from macro_screener.mvp import (
     run_scheduled_stub,
 )
 from macro_screener.pipeline.runtime import bootstrap_runtime
+
+
+def _cli_test_env() -> dict[str, str]:
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
+    for key in (
+        "DART_API_KEY",
+        "ECOS_API_KEY",
+        "FRED_API_KEY",
+        "KOSIS_API_KEY",
+        "KRX_API_KEY",
+    ):
+        env[key] = ""
+    return env
 
 
 def _stub_live_dart_load_disclosures(
@@ -342,8 +357,6 @@ class PipelinePublicationTests(unittest.TestCase):
                 tmpdir,
                 allow_local_file_inputs_in_live_mode=True,
             )
-            env = os.environ.copy()
-            env["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
             completed = subprocess.run(
                 [
                     "python3",
@@ -364,7 +377,7 @@ class PipelinePublicationTests(unittest.TestCase):
                 check=True,
                 capture_output=True,
                 text=True,
-                env=env,
+                env=_cli_test_env(),
             )
             payload = json.loads(completed.stdout)
             self.assertEqual(payload["snapshot"]["run_id"], "cli-manual-run")
@@ -372,8 +385,6 @@ class PipelinePublicationTests(unittest.TestCase):
 
     def test_cli_demo_run_smoke(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            env = os.environ.copy()
-            env["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
             completed = subprocess.run(
                 [
                     "python3",
@@ -388,7 +399,7 @@ class PipelinePublicationTests(unittest.TestCase):
                 check=True,
                 capture_output=True,
                 text=True,
-                env=env,
+                env=_cli_test_env(),
             )
             payload = json.loads(completed.stdout)
             self.assertEqual(payload["snapshot"]["run_id"], DEFAULT_DEMO_RUN_ID)
@@ -396,8 +407,6 @@ class PipelinePublicationTests(unittest.TestCase):
 
     def test_cli_backtest_run_smoke(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            env = os.environ.copy()
-            env["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
             completed = subprocess.run(
                 [
                     "python3",
@@ -414,7 +423,7 @@ class PipelinePublicationTests(unittest.TestCase):
                 check=True,
                 capture_output=True,
                 text=True,
-                env=env,
+                env=_cli_test_env(),
             )
             payload = json.loads(completed.stdout)
             self.assertEqual(payload["trading_dates"], ["2026-03-20", "2026-03-23"])
@@ -466,7 +475,7 @@ class DartRuntimePolicyTests(unittest.TestCase):
                     exc_type: object,
                     exc: object,
                     tb: object,
-                ) -> bool:
+                ) -> Literal[False]:
                     del exc_type, exc, tb
                     return False
 

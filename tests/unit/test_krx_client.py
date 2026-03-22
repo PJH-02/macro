@@ -52,9 +52,8 @@ def test_normalize_live_stock_master_response_joins_taxonomy_and_filters_non_com
         },
     ]
 
-    result = KRXClient(stock_classification_path=classification_path).normalize_live_stock_master_response(
-        response
-    )
+    client = KRXClient(stock_classification_path=classification_path)
+    result = client.normalize_live_stock_master_response(response)
 
     assert result.source == "live"
     assert result.warnings == []
@@ -90,9 +89,8 @@ def test_normalize_live_stock_master_response_warns_on_missing_taxonomy(tmp_path
         },
     ]
 
-    result = KRXClient(stock_classification_path=classification_path).normalize_live_stock_master_response(
-        response
-    )
+    client = KRXClient(stock_classification_path=classification_path)
+    result = client.normalize_live_stock_master_response(response)
 
     assert result.rows == [
         {

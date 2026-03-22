@@ -47,7 +47,7 @@ def test_production_live_mode_rejects_file_backed_krx_inputs(tmp_path: Path) -> 
     with patch("macro_screener.pipeline.runner._resolve_macro_states", return_value=live_macro):
         with pytest.raises(
             RuntimeError,
-            match="krx_live_source_required_in_production_live_mode:file",
+            match="krx_live_source_required_in_production_live_mode:taxonomy_only",
         ):
             run_manual(tmp_path, run_id="prod-krx-guard", config_path=config_path)
 

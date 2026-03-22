@@ -193,7 +193,10 @@ def test_local_file_is_ignored_when_live_mode_disallows_it(
 ) -> None:
     disclosures_path = tmp_path / "dart_disclosures.json"
     disclosures_path.write_text(
-        '[{"stock_code":"111111","title":"local file disclosure","accepted_at":"2026-03-21T09:00:00+09:00"}]',
+        (
+            '[{"stock_code":"111111","title":"local file disclosure",'
+            '"accepted_at":"2026-03-21T09:00:00+09:00"}]'
+        ),
         encoding="utf-8",
     )
     captured_params: list[dict[str, str]] = []

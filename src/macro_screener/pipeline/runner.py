@@ -251,6 +251,7 @@ def _load_disclosures(
     output_dir: Path,
     config: AppConfig,
     store: Any,
+    mode: RunMode,
     input_cutoff: str,
     use_demo_inputs: bool,
 ) -> DARTLoadResult:
@@ -261,7 +262,14 @@ def _load_disclosures(
             watermark=input_cutoff,
             source="demo",
         )
-    allow_degraded_inputs = config.runtime.allow_local_file_inputs_in_live_mode
+    allow_degraded_inputs = (
+        config.runtime.allow_local_file_inputs_in_live_mode
+        or not _should_enforce_live_runtime_policy(
+            mode=mode,
+            config=config,
+            use_demo_inputs=use_demo_inputs,
+        )
+    )
     client = DARTClient(
         api_key_env=config.runtime.dart_api_key_env,
         use_demo_fallback=allow_degraded_inputs,
@@ -497,6 +505,12 @@ def run_pipeline_context(
         use_demo_inputs=use_demo_inputs,
         krx_client=krx_client,
     )
+    _enforce_krx_source_policy(
+        config=config,
+        mode=mode,
+        stock_source=stock_result.source,
+        use_demo_inputs=use_demo_inputs,
+    )
     warnings.extend(stock_result.warnings)
     stage1_result = _compute_stage1_result_compat(
         channel_states=macro_result.channel_states,
@@ -523,6 +537,7 @@ def run_pipeline_context(
         output_dir=output_root,
         config=config,
         store=store,
+        mode=mode,
         input_cutoff=str(context["input_cutoff"]),
         use_demo_inputs=use_demo_inputs,
     )
