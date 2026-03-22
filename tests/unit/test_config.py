@@ -46,6 +46,13 @@ def test_missing_config_uses_repo_defaults(tmp_path: Path, monkeypatch: MonkeyPa
     assert config.stage2.decay_half_lives["governance_risk"] == 120
     assert config.universe.industry_master_path == "data/reference/industry_master.csv"
     assert config.universe.markets == ("KOSPI", "KOSDAQ")
+    assert config.runtime.normal_mode == "live"
+    assert config.runtime.ecos_api_key_env == "ECOS_API_KEY"
+    assert config.runtime.fred_api_key_env == "FRED_API_KEY"
+    assert config.runtime.kosis_api_key_env == "KOSIS_API_KEY"
+    assert config.runtime.krx_api_key_env == "KRX_API_KEY"
+    assert config.runtime.allow_manual_macro_states_in_live_mode is False
+    assert config.runtime.allow_local_file_inputs_in_live_mode is False
 
 
 def test_show_config_cli_uses_custom_file() -> None:

@@ -188,7 +188,14 @@ class Stage2Config(SerializableMixin):
 class RuntimePolicyConfig(SerializableMixin):
     retries: int = 3
     scheduler_enabled: bool = True
+    normal_mode: str = "live"
     dart_api_key_env: str = "DART_API_KEY"
+    ecos_api_key_env: str = "ECOS_API_KEY"
+    fred_api_key_env: str = "FRED_API_KEY"
+    kosis_api_key_env: str = "KOSIS_API_KEY"
+    krx_api_key_env: str = "KRX_API_KEY"
+    allow_manual_macro_states_in_live_mode: bool = False
+    allow_local_file_inputs_in_live_mode: bool = False
     stage1_only_on_stage2_failure: bool = True
     stale_dart_after_retries: bool = True
     reuse_last_known_channel_states: bool = True
@@ -200,7 +207,18 @@ class RuntimePolicyConfig(SerializableMixin):
         return cls(
             retries=int(payload.get("retries", 3)),
             scheduler_enabled=bool(payload.get("scheduler_enabled", True)),
+            normal_mode=str(payload.get("normal_mode", "live")),
             dart_api_key_env=str(payload.get("dart_api_key_env", "DART_API_KEY")),
+            ecos_api_key_env=str(payload.get("ecos_api_key_env", "ECOS_API_KEY")),
+            fred_api_key_env=str(payload.get("fred_api_key_env", "FRED_API_KEY")),
+            kosis_api_key_env=str(payload.get("kosis_api_key_env", "KOSIS_API_KEY")),
+            krx_api_key_env=str(payload.get("krx_api_key_env", "KRX_API_KEY")),
+            allow_manual_macro_states_in_live_mode=bool(
+                payload.get("allow_manual_macro_states_in_live_mode", False)
+            ),
+            allow_local_file_inputs_in_live_mode=bool(
+                payload.get("allow_local_file_inputs_in_live_mode", False)
+            ),
             stage1_only_on_stage2_failure=bool(payload.get("stage1_only_on_stage2_failure", True)),
             stale_dart_after_retries=bool(payload.get("stale_dart_after_retries", True)),
             reuse_last_known_channel_states=bool(

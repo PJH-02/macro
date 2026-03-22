@@ -63,7 +63,14 @@ stage2:
 runtime:
   retries: 3
   scheduler_enabled: true
+  normal_mode: "live"
   dart_api_key_env: "DART_API_KEY"
+  ecos_api_key_env: "ECOS_API_KEY"
+  fred_api_key_env: "FRED_API_KEY"
+  kosis_api_key_env: "KOSIS_API_KEY"
+  krx_api_key_env: "KRX_API_KEY"
+  allow_manual_macro_states_in_live_mode: false
+  allow_local_file_inputs_in_live_mode: false
   stage1_only_on_stage2_failure: true
   stale_dart_after_retries: true
   reuse_last_known_channel_states: true
