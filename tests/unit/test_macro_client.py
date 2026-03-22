@@ -5,11 +5,14 @@ from datetime import datetime
 from pathlib import Path
 
 from macro_screener.data.macro_client import (
+    FIXED_CHANNEL_SERIES_ROSTER,
+    FIXED_SERIES_CLASSIFIER_SPECS,
     LiveMacroDataSource,
     MacroSeriesSignal,
     build_ecos_request_contract,
     build_fred_request_contract,
     build_kosis_request_contract,
+    classify_macro_series_value,
     combine_channel_signal_states,
     signal_from_ecos_response,
     signal_from_fred_response,
@@ -151,3 +154,40 @@ def test_live_macro_data_source_builds_channel_states_and_fallback_metadata() ->
     ]
     assert "us_real_imports_goods_fallback_to_pce_goods" in result.warnings
     assert result.input_cutoff == datetime.fromisoformat("2026-03-21T00:00:00")
+
+
+def test_fixed_channel_roster_encodes_ed_fallback_only() -> None:
+    assert FIXED_CHANNEL_SERIES_ROSTER["ED"].korea_series_id == "kr_exports_us_yoy_3mma"
+    assert FIXED_CHANNEL_SERIES_ROSTER["ED"].us_series_id == "us_real_imports_goods_yoy_3mma"
+    assert (
+        FIXED_CHANNEL_SERIES_ROSTER["ED"].us_degraded_fallback_series_id
+        == "us_real_pce_goods_yoy_3mma"
+    )
+    assert FIXED_CHANNEL_SERIES_ROSTER["G"].us_degraded_fallback_series_id is None
+    assert FIXED_SERIES_CLASSIFIER_SPECS["us_real_pce_goods_yoy_3mma"].degraded_fallback_only
+
+
+def test_classify_macro_series_value_applies_fixed_prd_thresholds() -> None:
+    assert classify_macro_series_value("kr_ipi_yoy_3mma", 1.01) == 1
+    assert classify_macro_series_value("kr_ipi_yoy_3mma", -1.01) == -1
+    assert classify_macro_series_value("kr_ipi_yoy_3mma", 1.0) == 0
+
+    assert classify_macro_series_value("kr_cpi_yoy_3mma", 2.8) == 1
+    assert classify_macro_series_value("kr_cpi_yoy_3mma", 1.0) == -1
+    assert classify_macro_series_value("kr_cpi_yoy_3mma", 2.0) == 0
+
+    assert classify_macro_series_value("kr_credit_spread_z36", -0.6) == 1
+    assert classify_macro_series_value("kr_credit_spread_z36", 0.6) == -1
+    assert classify_macro_series_value("kr_credit_spread_z36", 0.1) == 0
+
+    assert classify_macro_series_value("usdkrw_3m_log_return", 2.6) == 1
+    assert classify_macro_series_value("broad_usd_3m_log_return", -2.1) == -1
+
+
+def test_classify_macro_series_value_rejects_unknown_series() -> None:
+    try:
+        classify_macro_series_value("unknown_series", 0.0)
+    except KeyError as exc:
+        assert "unknown macro series classifier spec" in str(exc)
+    else:  # pragma: no cover - defensive assertion
+        raise AssertionError("expected classify_macro_series_value to reject unknown series")

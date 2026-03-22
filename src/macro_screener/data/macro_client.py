@@ -59,6 +59,126 @@ class MacroSeriesSignal:
 
 
 @dataclass(frozen=True, slots=True)
+class MacroSeriesClassifierSpec:
+    series_id: str
+    channel: str
+    positive_cutoff: float
+    negative_cutoff: float
+    positive_when: str = "higher"
+    degraded_fallback_only: bool = False
+
+    def __post_init__(self) -> None:
+        if self.channel not in CHANNELS:
+            raise ValueError(f"unsupported classifier channel: {self.channel}")
+        if self.positive_when not in {"higher", "lower"}:
+            raise ValueError("positive_when must be 'higher' or 'lower'")
+
+
+@dataclass(frozen=True, slots=True)
+class MacroChannelRoster:
+    korea_series_id: str
+    us_series_id: str
+    us_degraded_fallback_series_id: str | None = None
+
+
+FIXED_CHANNEL_SERIES_ROSTER: dict[str, MacroChannelRoster] = {
+    "G": MacroChannelRoster(
+        korea_series_id="kr_ipi_yoy_3mma",
+        us_series_id="us_ipi_yoy_3mma",
+    ),
+    "IC": MacroChannelRoster(
+        korea_series_id="kr_cpi_yoy_3mma",
+        us_series_id="us_cpi_yoy_3mma",
+    ),
+    "FC": MacroChannelRoster(
+        korea_series_id="kr_credit_spread_z36",
+        us_series_id="us_credit_spread_z36",
+    ),
+    "ED": MacroChannelRoster(
+        korea_series_id="kr_exports_us_yoy_3mma",
+        us_series_id="us_real_imports_goods_yoy_3mma",
+        us_degraded_fallback_series_id="us_real_pce_goods_yoy_3mma",
+    ),
+    "FX": MacroChannelRoster(
+        korea_series_id="usdkrw_3m_log_return",
+        us_series_id="broad_usd_3m_log_return",
+    ),
+}
+
+FIXED_SERIES_CLASSIFIER_SPECS: dict[str, MacroSeriesClassifierSpec] = {
+    "kr_ipi_yoy_3mma": MacroSeriesClassifierSpec(
+        series_id="kr_ipi_yoy_3mma",
+        channel="G",
+        positive_cutoff=1.0,
+        negative_cutoff=-1.0,
+    ),
+    "us_ipi_yoy_3mma": MacroSeriesClassifierSpec(
+        series_id="us_ipi_yoy_3mma",
+        channel="G",
+        positive_cutoff=1.0,
+        negative_cutoff=-1.0,
+    ),
+    "kr_cpi_yoy_3mma": MacroSeriesClassifierSpec(
+        series_id="kr_cpi_yoy_3mma",
+        channel="IC",
+        positive_cutoff=2.75,
+        negative_cutoff=1.25,
+    ),
+    "us_cpi_yoy_3mma": MacroSeriesClassifierSpec(
+        series_id="us_cpi_yoy_3mma",
+        channel="IC",
+        positive_cutoff=2.75,
+        negative_cutoff=1.25,
+    ),
+    "kr_credit_spread_z36": MacroSeriesClassifierSpec(
+        series_id="kr_credit_spread_z36",
+        channel="FC",
+        positive_cutoff=-0.5,
+        negative_cutoff=0.5,
+        positive_when="lower",
+    ),
+    "us_credit_spread_z36": MacroSeriesClassifierSpec(
+        series_id="us_credit_spread_z36",
+        channel="FC",
+        positive_cutoff=-0.5,
+        negative_cutoff=0.5,
+        positive_when="lower",
+    ),
+    "kr_exports_us_yoy_3mma": MacroSeriesClassifierSpec(
+        series_id="kr_exports_us_yoy_3mma",
+        channel="ED",
+        positive_cutoff=2.0,
+        negative_cutoff=-2.0,
+    ),
+    "us_real_imports_goods_yoy_3mma": MacroSeriesClassifierSpec(
+        series_id="us_real_imports_goods_yoy_3mma",
+        channel="ED",
+        positive_cutoff=1.5,
+        negative_cutoff=-1.5,
+    ),
+    "us_real_pce_goods_yoy_3mma": MacroSeriesClassifierSpec(
+        series_id="us_real_pce_goods_yoy_3mma",
+        channel="ED",
+        positive_cutoff=1.5,
+        negative_cutoff=-1.5,
+        degraded_fallback_only=True,
+    ),
+    "usdkrw_3m_log_return": MacroSeriesClassifierSpec(
+        series_id="usdkrw_3m_log_return",
+        channel="FX",
+        positive_cutoff=2.5,
+        negative_cutoff=-2.5,
+    ),
+    "broad_usd_3m_log_return": MacroSeriesClassifierSpec(
+        series_id="broad_usd_3m_log_return",
+        channel="FX",
+        positive_cutoff=2.0,
+        negative_cutoff=-2.0,
+    ),
+}
+
+
+@dataclass(frozen=True, slots=True)
 class LiveMacroDataSource:
     channel_signals: Mapping[str, Sequence[MacroSeriesSignal]]
     source_name: str = "live_macro"
@@ -392,6 +512,23 @@ def _build_signal_from_series_record(
         warning_flags=tuple(_dedupe_flags(warning_flags)),
         fallback_used=fallback_used,
     )
+
+
+def classify_macro_series_value(series_id: str, value: float) -> int:
+    spec = FIXED_SERIES_CLASSIFIER_SPECS.get(series_id)
+    if spec is None:
+        raise KeyError(f"unknown macro series classifier spec: {series_id}")
+    if spec.positive_when == "lower":
+        if value < spec.positive_cutoff:
+            return 1
+        if value > spec.negative_cutoff:
+            return -1
+        return 0
+    if value > spec.positive_cutoff:
+        return 1
+    if value < spec.negative_cutoff:
+        return -1
+    return 0
 
 
 def _parse_series_timestamp(value: str) -> datetime:
