@@ -88,6 +88,7 @@ class DARTClient:
     api_url: str = "https://opendart.fss.or.kr/api/list.json"
     timeout_seconds: float = 20.0
     use_demo_fallback: bool = True
+    allow_local_file_inputs: bool = True
 
     def load_demo_disclosures(self) -> list[dict[str, Any]]:
         return [dict(item) for item in DEFAULT_DISCLOSURES]
@@ -102,7 +103,7 @@ class DARTClient:
         allow_stale: bool = True,
     ) -> DARTLoadResult:
         cutoff = parse_datetime(input_cutoff)
-        if self.disclosures_path.exists():
+        if self.disclosures_path.exists() and self.allow_local_file_inputs:
             local_payload = self._load_local_file(self.disclosures_path)
             disclosures = self._filter_by_cutoff(local_payload, cutoff)
             watermark = cutoff.isoformat()
@@ -178,6 +179,9 @@ class DARTClient:
                     watermark=cutoff.isoformat(),
                     source="demo",
                 )
+
+        if not self.use_demo_fallback:
+            raise RuntimeError(f"{self.api_key_env} is not configured")
 
         warnings = (
             ["dart_source_unconfigured_using_demo_fallback"]

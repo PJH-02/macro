@@ -13,6 +13,7 @@ from unittest.mock import patch
 import pandas as pd  # type: ignore[import-untyped]
 
 from macro_screener.config import load_config
+from macro_screener.data.dart_client import DARTClient, DARTLoadResult
 from macro_screener.data.macro_client import ManualMacroDataSource
 from macro_screener.models import ChannelState
 from macro_screener.mvp import (
@@ -26,7 +27,51 @@ from macro_screener.mvp import (
 from macro_screener.pipeline.runtime import bootstrap_runtime
 
 
+def _stub_live_dart_load_disclosures(
+    _client: DARTClient,
+    *,
+    input_cutoff: str,
+    retries: int,
+    store: object | None = None,
+    cache_path: Path | None = None,
+    allow_stale: bool = True,
+) -> DARTLoadResult:
+    del _client, retries, store, cache_path, allow_stale
+    return DARTLoadResult(
+        disclosures=DARTClient(use_demo_fallback=True).load_demo_disclosures(),
+        warnings=[],
+        watermark=input_cutoff,
+        source="live",
+    )
+
+
+def _write_runtime_override(
+    directory: str | Path,
+    *,
+    allow_local_file_inputs_in_live_mode: bool,
+) -> Path:
+    config_path = Path(directory) / "runtime-override.yaml"
+    config_path.write_text(
+        (
+            "runtime:\n"
+            f"  allow_local_file_inputs_in_live_mode: "
+            f"{str(allow_local_file_inputs_in_live_mode).lower()}\n"
+        ),
+        encoding="utf-8",
+    )
+    return config_path
+
+
 class PipelinePublicationTests(unittest.TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        patcher = patch(
+            "macro_screener.pipeline.runner.DARTClient.load_disclosures",
+            new=_stub_live_dart_load_disclosures,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_manual_run_publishes_expected_artifacts(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             result = run_manual(tmpdir, run_id="manual-test-run")
@@ -293,6 +338,10 @@ class PipelinePublicationTests(unittest.TestCase):
 
     def test_cli_manual_run_smoke(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
+            config_path = _write_runtime_override(
+                tmpdir,
+                allow_local_file_inputs_in_live_mode=True,
+            )
             env = os.environ.copy()
             env["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
             completed = subprocess.run(
@@ -303,6 +352,8 @@ class PipelinePublicationTests(unittest.TestCase):
                     "manual-run",
                     "--output-dir",
                     tmpdir,
+                    "--config",
+                    str(config_path),
                     "--run-id",
                     "cli-manual-run",
                     "--channel-state",
@@ -369,6 +420,75 @@ class PipelinePublicationTests(unittest.TestCase):
             self.assertEqual(payload["trading_dates"], ["2026-03-20", "2026-03-23"])
             self.assertTrue(
                 (Path(payload["output_dir"]) / "data" / "snapshots" / "latest.json").exists()
+            )
+
+
+class DartRuntimePolicyTests(unittest.TestCase):
+    def test_manual_run_requires_live_dart_input_when_unconfigured(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"DART_API_KEY": ""}, clear=False):
+                with self.assertRaisesRegex(RuntimeError, "DART_API_KEY"):
+                    run_manual(tmpdir, run_id="missing-dart-live-run")
+
+    def test_manual_run_marks_stale_dart_cache_as_incomplete(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cache_path = Path(tmpdir) / "data" / "cache" / "dart" / "latest.json"
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            cache_path.write_text(
+                json.dumps(
+                    {
+                        "source": "stale_cache",
+                        "watermark": "2026-03-21T18:00:00+09:00",
+                        "disclosures": [
+                            {
+                                "stock_code": "005930",
+                                "event_code": "B01",
+                                "title": "대규모 공급계약 체결",
+                                "trading_days_elapsed": 1,
+                                "accepted_at": "2026-03-20T18:00:00+09:00",
+                            }
+                        ],
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            class _FailingClient:
+                def __init__(self, *args: object, **kwargs: object) -> None:
+                    del args, kwargs
+
+                def __enter__(self) -> "_FailingClient":
+                    return self
+
+                def __exit__(
+                    self,
+                    exc_type: object,
+                    exc: object,
+                    tb: object,
+                ) -> bool:
+                    del exc_type, exc, tb
+                    return False
+
+                def get(self, *args: object, **kwargs: object) -> object:
+                    del args, kwargs
+                    raise RuntimeError("simulated dart outage")
+
+            with patch.dict(os.environ, {"DART_API_KEY": "test-key"}, clear=False):
+                with patch("macro_screener.data.dart_client.httpx.Client", _FailingClient):
+                    result = run_manual(tmpdir, run_id="stale-dart-cache-run")
+
+            latest_path = Path(tmpdir) / "data" / "snapshots" / "latest.json"
+            latest_payload = json.loads(latest_path.read_text(encoding="utf-8"))
+
+            self.assertEqual(result["snapshot"]["status"], "incomplete")
+            self.assertEqual(latest_payload["status"], "incomplete")
+            self.assertIn("dart_source_degraded_stale_cache", result["warnings"])
+            self.assertTrue(
+                any(
+                    warning.startswith("dart_api_failed_using_stale_cache:")
+                    for warning in result["warnings"]
+                )
             )
 
 

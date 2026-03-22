@@ -168,3 +168,63 @@ def test_live_disclosures_filter_duplicates_at_or_before_cursor(
         "rcept_dt": "20260321",
         "rcept_no": "202603210001",
     }
+
+
+def test_missing_api_key_raises_when_demo_fallback_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.delenv("DART_API_KEY", raising=False)
+
+    with pytest.raises(RuntimeError, match="DART_API_KEY"):
+        DARTClient(
+            disclosures_path=tmp_path / "dart_disclosures.json",
+            use_demo_fallback=False,
+            allow_local_file_inputs=False,
+        ).load_disclosures(
+            input_cutoff="2026-03-21T18:00:00+09:00",
+            retries=1,
+        )
+
+
+def test_local_file_is_ignored_when_live_mode_disallows_it(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    disclosures_path = tmp_path / "dart_disclosures.json"
+    disclosures_path.write_text(
+        '[{"stock_code":"111111","title":"local file disclosure","accepted_at":"2026-03-21T09:00:00+09:00"}]',
+        encoding="utf-8",
+    )
+    captured_params: list[dict[str, str]] = []
+    payload = {
+        "page_no": 1,
+        "list": [
+            {
+                "stock_code": "005930",
+                "report_nm": "공급계약 체결",
+                "rcept_dt": "20260321",
+                "rcept_no": "202603210001",
+            }
+        ],
+    }
+
+    def _client_factory(*args: Any, **kwargs: Any) -> _DummyClient:
+        del args, kwargs
+        return _DummyClient(payload=payload, captured_params=captured_params)
+
+    monkeypatch.setattr("macro_screener.data.dart_client.httpx.Client", _client_factory)
+    monkeypatch.setenv("DART_API_KEY", "test-key")
+
+    result = DARTClient(
+        disclosures_path=disclosures_path,
+        use_demo_fallback=False,
+        allow_local_file_inputs=False,
+    ).load_disclosures(
+        input_cutoff="2026-03-21T18:00:00+09:00",
+        retries=1,
+    )
+
+    assert captured_params[0]["bgn_de"] == "20260219"
+    assert result.source == "live"
+    assert [item["stock_code"] for item in result.disclosures] == ["005930"]

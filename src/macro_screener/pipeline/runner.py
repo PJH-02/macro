@@ -261,7 +261,12 @@ def _load_disclosures(
             watermark=input_cutoff,
             source="demo",
         )
-    client = DARTClient(api_key_env=config.runtime.dart_api_key_env)
+    allow_degraded_inputs = config.runtime.allow_local_file_inputs_in_live_mode
+    client = DARTClient(
+        api_key_env=config.runtime.dart_api_key_env,
+        use_demo_fallback=allow_degraded_inputs,
+        allow_local_file_inputs=allow_degraded_inputs,
+    )
     cache_path = output_dir / "data" / "cache" / "dart" / "latest.json"
     return client.load_disclosures(
         input_cutoff=input_cutoff,
@@ -270,6 +275,50 @@ def _load_disclosures(
         cache_path=cache_path,
         allow_stale=config.runtime.stale_dart_after_retries,
     )
+
+
+def _should_enforce_live_runtime_policy(
+    *,
+    mode: RunMode,
+    config: AppConfig,
+    use_demo_inputs: bool,
+) -> bool:
+    return (
+        not use_demo_inputs
+        and mode in {RunMode.MANUAL, RunMode.SCHEDULED}
+        and config.runtime.normal_mode == "live"
+    )
+
+
+def _dart_runtime_status(
+    *,
+    mode: RunMode,
+    config: AppConfig,
+    use_demo_inputs: bool,
+    disclosure_result: DARTLoadResult,
+    warnings: list[str],
+) -> SnapshotStatus | None:
+    if not _should_enforce_live_runtime_policy(
+        mode=mode,
+        config=config,
+        use_demo_inputs=use_demo_inputs,
+    ):
+        return None
+    if disclosure_result.source == "live":
+        return None
+    if disclosure_result.source == "stale_cache":
+        warnings.append("dart_source_degraded_stale_cache")
+        return SnapshotStatus.INCOMPLETE
+    if disclosure_result.source in {"demo", "file"}:
+        if not config.runtime.allow_local_file_inputs_in_live_mode:
+            raise RuntimeError(
+                "normal_mode=live requires DART live input or stale cache; "
+                f"received {disclosure_result.source}"
+            )
+        warnings.append(f"dart_source_degraded_{disclosure_result.source}")
+        return SnapshotStatus.INCOMPLETE
+    warnings.append(f"dart_source_degraded_{disclosure_result.source}")
+    return SnapshotStatus.INCOMPLETE
 
 
 def _channel_state_metadata_kwargs(
@@ -485,6 +534,15 @@ def run_pipeline_context(
     )
     warnings.extend(disclosure_result.warnings)
     stage2_status = SnapshotStatus.PUBLISHED
+    dart_status = _dart_runtime_status(
+        mode=mode,
+        config=config,
+        use_demo_inputs=use_demo_inputs,
+        disclosure_result=disclosure_result,
+        warnings=warnings,
+    )
+    if dart_status is not None:
+        stage2_status = dart_status
     stocks = stock_result.rows
     known_industries = {score.industry_code for score in stage1_result.industry_scores}
     if stocks and not any(str(stock["industry_code"]) in known_industries for stock in stocks):
