@@ -37,6 +37,7 @@ DEFAULT_STOCKS: list[dict[str, Any]] = [
 ]
 
 NON_COMMON_STOCK_KEYWORDS = ("ETF", "ETN", "REIT", "리츠", "SPAC", "스팩")
+DEFAULT_ALLOWED_MARKETS: tuple[str, ...] = ("KOSPI", "KOSDAQ")
 LIVE_STOCK_MASTER_SERVICE_FAMILY = "유가증권 종목기본정보"
 
 
@@ -103,27 +104,6 @@ class KRXClient:
             return pd.DataFrame(columns=["종목코드", "종목명", "대분류", "중분류", "소분류"])
         return pd.read_csv(self.stock_classification_path, dtype=str).fillna("")
 
-    def build_live_stock_master_request(
-        self,
-        *,
-        trading_date: str,
-        auth_key: str | None = None,
-    ) -> dict[str, Any]:
-        resolved_auth_key = (
-            auth_key if auth_key is not None else (os.getenv(self.api_key_env, "") or "")
-        ).strip()
-        if not resolved_auth_key:
-            raise ValueError(f"Missing KRX auth key env: {self.api_key_env}")
-        return {
-            "provider": "krx",
-            "service_family": LIVE_STOCK_MASTER_SERVICE_FAMILY,
-            "transport": {
-                "headers": {"AUTH_KEY": resolved_auth_key},
-                "response_format": "json",
-            },
-            "params": {"basDd": trading_date},
-        }
-
     def load_live_stocks_result(
         self,
         *,
@@ -145,8 +125,8 @@ class KRXClient:
             )
         try:
             request_payload = self.build_live_stock_master_request(
-                trading_date=trading_date,
                 auth_key=auth_key,
+                bas_dd=trading_date,
             )
             live_rows = self._normalize_live_stock_master_response(fetcher(request_payload))
         except Exception as exc:
