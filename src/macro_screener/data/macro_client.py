@@ -55,18 +55,42 @@ class PersistedMacroDataSource:
     store: SnapshotRegistry
 
     def fetch_channel_states(self) -> MacroLoadResult:
-        states = self.store.load_last_channel_states()
-        if not states:
+        snapshot = self.store.load_last_channel_state_snapshot()
+        if snapshot is None:
             raise ValueError("no persisted macro channel states available")
+        states = snapshot["channel_states"]
+        metadata = snapshot.get("metadata", {})
+        warning_flags = list(metadata.get("warning_flags", []))
+        source_name = str(metadata.get("source_name", "last_known"))
+        source_version = (
+            str(metadata["source_version"])
+            if metadata.get("source_version") is not None
+            else None
+        )
+        fallback_mode = (
+            str(metadata["fallback_mode"])
+            if metadata.get("fallback_mode") is not None
+            else "last_known_channel_states"
+        )
+        warning_flags_by_channel = {
+            channel: list(warning_flags) for channel in {state.channel for state in states}
+        }
+        confidence_by_channel = {
+            str(channel): float(value)
+            for channel, value in metadata.get("confidence_by_channel", {}).items()
+        }
+        as_of_timestamp_raw = metadata.get("as_of_timestamp")
+        input_cutoff_raw = metadata.get("input_cutoff")
         return MacroLoadResult(
             channel_states={state.channel: state.state for state in states},
-            source_name="last_known",
-            warnings=["macro_source_unavailable_using_last_known_channel_states"],
-            fallback_mode="last_known_channel_states",
-            warning_flags_by_channel={
-                channel: ["macro_source_unavailable_using_last_known_channel_states"]
-                for channel in CHANNELS
-            },
+            source_name=source_name,
+            warnings=warning_flags,
+            as_of_timestamp=None if as_of_timestamp_raw is None else datetime.fromisoformat(str(as_of_timestamp_raw)),
+            input_cutoff=None if input_cutoff_raw is None else datetime.fromisoformat(str(input_cutoff_raw)),
+            source_version=source_version,
+            fallback_mode=fallback_mode,
+            confidence_by_channel=confidence_by_channel,
+            warning_flags_by_channel=warning_flags_by_channel,
         )
 
 

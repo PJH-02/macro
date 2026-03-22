@@ -272,6 +272,14 @@ def _rank_industries(
     return [industry["industry_code"] for industry in ranked]
 
 
+
+
+def load_stage1_artifact(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("stage1 artifact must be a mapping")
+    return payload
+
 def build_provisional_stage1_artifact(
     industry_master_path: Path,
     *,

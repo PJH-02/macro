@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 import os
 import sqlite3
 import subprocess
@@ -10,6 +11,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pandas as pd  # type: ignore[import-untyped]
+
+from macro_screener.config import load_config
+from macro_screener.models import ChannelState
+from macro_screener.pipeline.runtime import bootstrap_runtime
+from macro_screener.data.macro_client import ManualMacroDataSource
 
 from macro_screener.mvp import (
     DEFAULT_DEMO_RUN_ID,
@@ -51,6 +57,64 @@ class PipelinePublicationTests(unittest.TestCase):
             finally:
                 connection.close()
             self.assertEqual(rows, [("manual-test-run", "published")])
+
+    def test_manual_run_uses_materialized_stage1_artifact_universe(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = run_manual(tmpdir, run_id="artifact-universe-run")
+            industry_parquet = Path(result["latest"]["industry_parquet"])
+            industry_scores = pd.read_parquet(industry_parquet)
+            industry_master_rows = pd.read_csv(
+                Path("data/reference/industry_master.csv"),
+                dtype=str,
+            ).fillna("")
+
+            self.assertEqual(len(industry_scores), len(industry_master_rows))
+            self.assertGreater(len(industry_scores), 3)
+
+    def test_manual_run_persists_fallback_channel_state_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = load_config(None)
+            registry = bootstrap_runtime(config, Path(tmpdir)).store
+            registry.save_channel_states(
+                run_id="seed-run",
+                channel_states=[
+                    ChannelState(channel="G", state=1, effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00")),
+                    ChannelState(channel="IC", state=0, effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00")),
+                    ChannelState(channel="FC", state=0, effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00")),
+                    ChannelState(channel="ED", state=1, effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00")),
+                    ChannelState(channel="FX", state=0, effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00")),
+                ],
+                source="last_known",
+                metadata={
+                    "source_name": "last_known",
+                    "source_version": "mvp-1",
+                    "fallback_mode": "last_known_channel_states",
+                    "as_of_timestamp": "2026-03-21T08:30:00+09:00",
+                    "input_cutoff": "2026-03-21T08:25:00+09:00",
+                    "warning_flags": ["macro_source_unavailable_using_last_known_channel_states"],
+                    "confidence_by_channel": {"G": 0.7, "ED": 0.6},
+                },
+            )
+
+            original_fetch = ManualMacroDataSource.fetch_channel_states
+
+            def _raising_fetch(self: ManualMacroDataSource):
+                if self.source_name == "manual_config":
+                    raise ValueError("force persisted fallback")
+                return original_fetch(self)
+
+            with patch.object(ManualMacroDataSource, "fetch_channel_states", _raising_fetch):
+                run_manual(tmpdir, run_id="persisted-fallback-run")
+
+            snapshot = registry.load_last_channel_state_snapshot()
+            assert snapshot is not None
+            metadata = snapshot["metadata"]
+            self.assertEqual(metadata["source_name"], "last_known")
+            self.assertEqual(metadata["source_version"], "mvp-1")
+            self.assertEqual(metadata["fallback_mode"], "last_known_channel_states")
+            self.assertEqual(metadata["input_cutoff"], "2026-03-21T08:25:00+09:00")
+            self.assertEqual(metadata["confidence_by_channel"]["G"], 0.7)
+            self.assertIn("macro_source_unavailable_using_last_known_channel_states", metadata["warning_flags"])
 
     def test_publish_is_immutable_for_duplicate_run_ids(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

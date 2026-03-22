@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 from macro_screener.config import AppConfig, load_config
 from macro_screener.data.dart_client import DARTClient, DARTLoadResult
 from macro_screener.data.krx_client import KRXClient
+from macro_screener.data.reference import load_industry_master_records, load_stage1_artifact
 from macro_screener.data.macro_client import (
     DEFAULT_CHANNEL_STATES,
     ManualMacroDataSource,
@@ -123,31 +124,52 @@ def _resolve_macro_states(
     store: Any,
     channel_states: dict[str, int] | None,
     use_demo_inputs: bool,
-) -> tuple[dict[str, int], str, list[str]]:
+) -> Any:
     if channel_states is not None:
         merged_states = {**config.stage1.manual_channel_states, **channel_states}
-        result = ManualMacroDataSource(
+        return ManualMacroDataSource(
             merged_states,
             source_name="manual_override",
         ).fetch_channel_states()
-        return result.channel_states, result.source, result.warnings
     if use_demo_inputs:
-        result = ManualMacroDataSource(
+        return ManualMacroDataSource(
             DEFAULT_CHANNEL_STATES,
             source_name="demo_manual",
         ).fetch_channel_states()
-        return result.channel_states, result.source, result.warnings
     try:
-        result = ManualMacroDataSource(
+        return ManualMacroDataSource(
             config.stage1.manual_channel_states,
             source_name="manual_config",
         ).fetch_channel_states()
-        return result.channel_states, result.source, result.warnings
     except ValueError:
         if config.runtime.reuse_last_known_channel_states:
-            persisted = PersistedMacroDataSource(store).fetch_channel_states()
-            return persisted.channel_states, persisted.source, persisted.warnings
+            return PersistedMacroDataSource(store).fetch_channel_states()
         raise
+
+
+def _load_stage1_rows_and_rank_tables(*, config: AppConfig) -> tuple[list[dict[str, Any]], dict[str, dict[str, list[str]]] | None, dict[str, float] | None]:
+    artifact_path = _repo_relative(config.stage1.rank_table_artifact_path)
+    industry_master_path = _repo_relative(config.universe.industry_master_path)
+    if artifact_path.exists() and industry_master_path.exists():
+        artifact = load_stage1_artifact(artifact_path)
+        industry_rows = load_industry_master_records(industry_master_path)
+        rows = [
+            {
+                "industry_code": row["industry_code"],
+                "industry_name": row["industry_name"],
+                "exposures": {},
+            }
+            for row in industry_rows
+        ]
+        sector_rank_tables = artifact.get("sector_rank_tables")
+        channel_weights = artifact.get("channel_weights")
+        if isinstance(sector_rank_tables, dict) and isinstance(channel_weights, dict):
+            return rows, sector_rank_tables, {str(k): float(v) for k, v in channel_weights.items()}
+    exposure_result = KRXClient(
+        stock_classification_path=_repo_relative(config.universe.stock_classification_path),
+        use_demo_fallback=True,
+    ).load_exposures_result()
+    return exposure_result.rows, None, None
 
 
 def _load_disclosures(
@@ -180,25 +202,14 @@ def _channel_state_metadata_kwargs(
     *,
     context: Mapping[str, Any],
     config: AppConfig,
-    macro_source: str,
-    macro_warnings: list[str],
-    use_demo_inputs: bool,
-    channel_states: dict[str, int],
+    macro_result: Any,
 ) -> dict[str, Any]:
-    fallback_mode: str | None = None
-    if use_demo_inputs:
-        fallback_mode = "demo"
-    elif macro_source == "last_known":
-        fallback_mode = "last_known_channel_states"
-    warning_map = (
-        {channel: list(macro_warnings) for channel in channel_states}
-        if macro_warnings
-        else None
-    )
+    warning_map = macro_result.warning_flags_by_channel or None
     kwargs: dict[str, Any] = {
-        "input_cutoff": str(context["input_cutoff"]),
-        "channel_state_source_version": config.config_version,
-        "channel_state_fallback_mode": fallback_mode,
+        "input_cutoff": macro_result.input_cutoff or parse_datetime(str(context["input_cutoff"])),
+        "channel_state_source_version": macro_result.source_version or config.config_version,
+        "channel_state_confidence": macro_result.confidence_by_channel or None,
+        "channel_state_fallback_mode": macro_result.fallback_mode,
         "channel_state_warning_flags": warning_map,
     }
     return kwargs
@@ -211,9 +222,9 @@ def _compute_stage1_result_compat(
     overlay_adjustments: dict[str, float],
     context: Mapping[str, Any],
     config: AppConfig,
-    macro_source: str,
-    macro_warnings: list[str],
-    use_demo_inputs: bool,
+    macro_result: Any,
+    sector_rank_tables: dict[str, dict[str, list[str]]] | None = None,
+    channel_weights: dict[str, float] | None = None,
 ) -> Any:
     kwargs: dict[str, Any] = {
         "channel_states": channel_states,
@@ -223,15 +234,16 @@ def _compute_stage1_result_compat(
         "run_type": str(context["run_type"]),
         "as_of_timestamp": str(context["as_of_timestamp"]),
         "config_version": config.config_version,
-        "channel_state_source": macro_source,
+        "channel_state_source": macro_result.source_name,
     }
+    if sector_rank_tables is not None:
+        kwargs["sector_rank_tables"] = sector_rank_tables
+    if channel_weights is not None:
+        kwargs["channel_weights"] = channel_weights
     optional_kwargs = _channel_state_metadata_kwargs(
         context=context,
         config=config,
-        macro_source=macro_source,
-        macro_warnings=macro_warnings,
-        use_demo_inputs=use_demo_inputs,
-        channel_states=channel_states,
+        macro_result=macro_result,
     )
     supported = inspect.signature(compute_stage1_result).parameters
     for key, value in optional_kwargs.items():
@@ -244,23 +256,19 @@ def _channel_state_snapshot_metadata(
     *,
     context: Mapping[str, Any],
     config: AppConfig,
-    macro_source: str,
-    macro_warnings: list[str],
-    use_demo_inputs: bool,
+    macro_result: Any,
 ) -> dict[str, Any]:
-    fallback_mode: str | None = None
-    if use_demo_inputs:
-        fallback_mode = "demo"
-    elif macro_source == "last_known":
-        fallback_mode = "last_known_channel_states"
-    return {
-        "source_name": macro_source,
-        "source_version": config.config_version,
-        "fallback_mode": fallback_mode,
-        "as_of_timestamp": str(context["as_of_timestamp"]),
-        "input_cutoff": str(context["input_cutoff"]),
-        "warning_flags": list(macro_warnings),
+    metadata = {
+        "source_name": macro_result.source_name,
+        "source_version": macro_result.source_version or config.config_version,
+        "fallback_mode": macro_result.fallback_mode,
+        "as_of_timestamp": str((macro_result.as_of_timestamp or parse_datetime(str(context["as_of_timestamp"]))).isoformat()),
+        "input_cutoff": str((macro_result.input_cutoff or parse_datetime(str(context["input_cutoff"]))).isoformat()),
+        "warning_flags": list(macro_result.warnings),
     }
+    if macro_result.confidence_by_channel:
+        metadata["confidence_by_channel"] = dict(macro_result.confidence_by_channel)
+    return metadata
 
 
 def run_pipeline_context(
@@ -294,40 +302,39 @@ def run_pipeline_context(
                 "warnings": ["duplicate_scheduled_window_skipped"],
             }
 
-    macro_states, macro_source, macro_warnings = _resolve_macro_states(
+    macro_result = _resolve_macro_states(
         config=config,
         store=store,
         channel_states=channel_states,
         use_demo_inputs=use_demo_inputs,
     )
-    warnings = list(macro_warnings)
+    warnings = list(macro_result.warnings)
     krx_client = KRXClient(
         stock_classification_path=_repo_relative(config.universe.stock_classification_path),
         use_demo_fallback=True,
     )
-    exposure_result = krx_client.load_exposures_result()
+    stage1_rows, sector_rank_tables, channel_weights = _load_stage1_rows_and_rank_tables(config=config)
+    stock_result = krx_client.load_stocks_result()
     if not use_demo_inputs:
-        warnings.extend(exposure_result.warnings)
+        warnings.extend(stock_result.warnings)
     stage1_result = _compute_stage1_result_compat(
-        channel_states=macro_states,
-        exposures=exposure_result.rows,
+        channel_states=macro_result.channel_states,
+        exposures=stage1_rows,
         overlay_adjustments=DEFAULT_OVERLAYS,
         context=context,
         config=config,
-        macro_source=macro_source,
-        macro_warnings=macro_warnings,
-        use_demo_inputs=use_demo_inputs,
+        macro_result=macro_result,
+        sector_rank_tables=sector_rank_tables,
+        channel_weights=channel_weights,
     )
     store.save_channel_states(
         run_id=stage1_result.run_id,
         channel_states=stage1_result.channel_states,
-        source=macro_source,
+        source=macro_result.source_name,
         metadata=_channel_state_snapshot_metadata(
             context=context,
             config=config,
-            macro_source=macro_source,
-            macro_warnings=macro_warnings,
-            use_demo_inputs=use_demo_inputs,
+            macro_result=macro_result,
         ),
     )
 
@@ -340,9 +347,6 @@ def run_pipeline_context(
     )
     warnings.extend(disclosure_result.warnings)
     stage2_status = SnapshotStatus.PUBLISHED
-    stock_result = krx_client.load_stocks_result()
-    if not use_demo_inputs:
-        warnings.extend(stock_result.warnings)
     stocks = stock_result.rows
     known_industries = {score.industry_code for score in stage1_result.industry_scores}
     if not any(str(stock["industry_code"]) in known_industries for stock in stocks):
