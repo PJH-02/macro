@@ -34,6 +34,7 @@ stage1:
 
     assert config.config_version == "custom"
     assert config.stage1.manual_channel_states["G"] == 1
+    assert config.stage1.rank_table_artifact_path == "config/stage1_sector_rank_tables.v1.json"
     assert config.schedule.pre_open_time == "08:30"
 
 
@@ -43,6 +44,7 @@ def test_missing_config_uses_repo_defaults(tmp_path: Path, monkeypatch: MonkeyPa
     config = load_config()
 
     assert config.stage2.decay_half_lives["governance_risk"] == 120
+    assert config.universe.industry_master_path == "data/reference/industry_master.csv"
     assert config.universe.markets == ("KOSPI", "KOSDAQ")
 
 

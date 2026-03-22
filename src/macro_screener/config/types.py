@@ -51,6 +51,7 @@ class ScheduleConfig(SerializableMixin):
 class UniverseConfig(SerializableMixin):
     markets: tuple[str, ...] = ("KOSPI", "KOSDAQ")
     stock_classification_path: str = "stock_classification.csv"
+    industry_master_path: str = "data/reference/industry_master.csv"
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "UniverseConfig":
@@ -59,6 +60,9 @@ class UniverseConfig(SerializableMixin):
             markets=markets,
             stock_classification_path=str(
                 payload.get("stock_classification_path", "stock_classification.csv")
+            ),
+            industry_master_path=str(
+                payload.get("industry_master_path", "data/reference/industry_master.csv")
             ),
         )
 
@@ -69,6 +73,13 @@ class Stage1Config(SerializableMixin):
     manual_channel_states: dict[str, int] = field(
         default_factory=lambda: {"G": 0, "IC": 0, "FC": 0, "ED": 0, "FX": 0}
     )
+    rank_table_artifact_path: str = "config/stage1_sector_rank_tables.v1.json"
+    channel_weights: dict[str, float] = field(
+        default_factory=lambda: {"G": 1.0, "IC": 1.0, "FC": 1.0, "ED": 1.0, "FX": 1.0}
+    )
+    neutral_bands: dict[str, float] = field(
+        default_factory=lambda: {"G": 0.25, "IC": 0.25, "FC": 0.25, "ED": 0.25, "FX": 0.5}
+    )
 
     def __post_init__(self) -> None:
         if set(self.channels) != {"G", "IC", "FC", "ED", "FX"}:
@@ -78,6 +89,10 @@ class Stage1Config(SerializableMixin):
         }
         if invalid_values:
             raise ValueError(f"Invalid manual channel state values: {sorted(invalid_values)}")
+        if set(self.channel_weights) != set(self.channels):
+            raise ValueError("Stage1 channel weights must cover the MVP channel set exactly.")
+        if set(self.neutral_bands) != set(self.channels):
+            raise ValueError("Stage1 neutral bands must cover the MVP channel set exactly.")
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "Stage1Config":
@@ -88,11 +103,30 @@ class Stage1Config(SerializableMixin):
                 {"G": 0, "IC": 0, "FC": 0, "ED": 0, "FX": 0},
             ).items()
         }
+        channel_weights = {
+            str(key): float(value)
+            for key, value in payload.get(
+                "channel_weights",
+                {"G": 1.0, "IC": 1.0, "FC": 1.0, "ED": 1.0, "FX": 1.0},
+            ).items()
+        }
+        neutral_bands = {
+            str(key): float(value)
+            for key, value in payload.get(
+                "neutral_bands",
+                {"G": 0.25, "IC": 0.25, "FC": 0.25, "ED": 0.25, "FX": 0.5},
+            ).items()
+        }
         return cls(
             channels=tuple(
                 str(item) for item in payload.get("channels", ["G", "IC", "FC", "ED", "FX"])
             ),
             manual_channel_states=manual_states,
+            rank_table_artifact_path=str(
+                payload.get("rank_table_artifact_path", "config/stage1_sector_rank_tables.v1.json")
+            ),
+            channel_weights=channel_weights,
+            neutral_bands=neutral_bands,
         )
 
 

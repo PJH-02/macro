@@ -47,25 +47,54 @@ class ChannelState(SerializableMixin):
     channel: str
     state: int
     effective_at: datetime
-    source: str = "manual"
+    as_of_timestamp: datetime | None = None
+    input_cutoff: datetime | None = None
+    source_name: str = "manual"
+    source_version: str | None = None
     confidence: float | None = None
+    fallback_mode: str | None = None
+    warning_flags: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if self.channel not in {"G", "IC", "FC", "ED", "FX"}:
             raise ValueError(f"Unsupported channel: {self.channel}")
         if self.state not in {-1, 0, 1}:
             raise ValueError(f"Channel state must be -1, 0, or 1, got {self.state}")
+        if self.as_of_timestamp is None:
+            object.__setattr__(self, "as_of_timestamp", self.effective_at)
+        if self.input_cutoff is None:
+            object.__setattr__(self, "input_cutoff", self.as_of_timestamp)
+
+    @property
+    def source(self) -> str:
+        return self.source_name
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "ChannelState":
+        effective_at_raw = payload.get("effective_at", payload.get("as_of_timestamp"))
+        if effective_at_raw is None:
+            raise ValueError("ChannelState requires effective_at or as_of_timestamp")
+        as_of_timestamp_raw = payload.get("as_of_timestamp", effective_at_raw)
+        input_cutoff_raw = payload.get("input_cutoff", as_of_timestamp_raw)
         return cls(
             channel=str(payload["channel"]),
             state=int(payload["state"]),
-            effective_at=parse_datetime(payload["effective_at"]),
-            source=str(payload.get("source", "manual")),
+            effective_at=parse_datetime(effective_at_raw),
+            as_of_timestamp=parse_datetime(as_of_timestamp_raw),
+            input_cutoff=parse_datetime(input_cutoff_raw),
+            source_name=str(payload.get("source_name", payload.get("source", "manual"))),
+            source_version=(
+                str(payload["source_version"])
+                if payload.get("source_version") is not None
+                else None
+            ),
             confidence=(
                 float(payload["confidence"]) if payload.get("confidence") is not None else None
             ),
+            fallback_mode=(
+                str(payload["fallback_mode"]) if payload.get("fallback_mode") is not None else None
+            ),
+            warning_flags=[str(item) for item in payload.get("warning_flags", [])],
         )
 
 
@@ -79,6 +108,9 @@ class IndustryScore(SerializableMixin):
     rank: int
     negative_penalty: float = 0.0
     positive_contribution: float = 0.0
+    channel_contributions: dict[str, float] = field(
+        default_factory=lambda: {"G": 0.0, "IC": 0.0, "FC": 0.0, "ED": 0.0, "FX": 0.0}
+    )
 
     def tie_breaker_key(self) -> tuple[float, float, str]:
         return (abs(self.negative_penalty), -self.positive_contribution, self.industry_code)
@@ -94,6 +126,17 @@ class IndustryScore(SerializableMixin):
             rank=int(payload["rank"]),
             negative_penalty=float(payload.get("negative_penalty", 0.0)),
             positive_contribution=float(payload.get("positive_contribution", 0.0)),
+            channel_contributions={
+                "G": 0.0,
+                "IC": 0.0,
+                "FC": 0.0,
+                "ED": 0.0,
+                "FX": 0.0,
+                **{
+                    str(key): float(value)
+                    for key, value in payload.get("channel_contributions", {}).items()
+                },
+            },
         )
 
 

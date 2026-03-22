@@ -5,7 +5,7 @@ import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 import httpx
 
@@ -60,6 +60,28 @@ class DARTLoadResult:
 
 
 @dataclass(frozen=True, slots=True)
+class DARTDisclosureCursor:
+    accepted_at: str
+    input_cutoff: str
+    rcept_dt: str | None = None
+    rcept_no: str | None = None
+
+    def to_dict(self) -> dict[str, str]:
+        payload = {
+            "accepted_at": self.accepted_at,
+            "input_cutoff": self.input_cutoff,
+        }
+        if self.rcept_dt:
+            payload["rcept_dt"] = self.rcept_dt
+        if self.rcept_no:
+            payload["rcept_no"] = self.rcept_no
+        return payload
+
+    def sort_key(self) -> tuple[str, str]:
+        return (self.accepted_at, self.rcept_no or "")
+
+
+@dataclass(frozen=True, slots=True)
 class DARTClient:
     disclosures_path: Path = Path("data/dart_disclosures.json")
     api_key_env: str = "DART_API_KEY"
@@ -102,22 +124,34 @@ class DARTClient:
         api_key = os.getenv(self.api_key_env)
         if api_key:
             try:
-                existing_watermark = (
-                    store.get_watermark(source_name="dart", resource_key="disclosures")
-                    if store
+                existing_cursor_payload = (
+                    store.get_watermark_payload(source_name="dart", resource_key="disclosures")
+                    if store is not None
                     else None
                 )
-                disclosures, next_watermark = self._fetch_live_disclosures(
+                existing_watermark = (
+                    store.get_watermark(source_name="dart", resource_key="disclosures")
+                    if store is not None
+                    else None
+                )
+                existing_cursor_input = (
+                    existing_cursor_payload
+                    if existing_cursor_payload is not None
+                    else existing_watermark
+                )
+                existing_cursor = self._coerce_cursor(existing_cursor_input)
+                disclosures, next_cursor = self._fetch_live_disclosures(
                     api_key=api_key,
                     input_cutoff=cutoff,
-                    watermark=existing_watermark,
+                    cursor=existing_cursor,
                     retries=retries,
                 )
-                if store is not None and next_watermark is not None:
-                    store.upsert_watermark(
+                next_watermark = None if next_cursor is None else self._cursor_to_text(next_cursor)
+                if store is not None and next_cursor is not None:
+                    store.upsert_watermark_payload(
                         source_name="dart",
                         resource_key="disclosures",
-                        watermark_value=next_watermark,
+                        payload=next_cursor.to_dict(),
                     )
                 if cache_path is not None:
                     self._write_cache(cache_path, disclosures, next_watermark, source="live")
@@ -165,10 +199,10 @@ class DARTClient:
         *,
         api_key: str,
         input_cutoff: datetime,
-        watermark: str | None,
+        cursor: DARTDisclosureCursor | None,
         retries: int,
-    ) -> tuple[list[dict[str, Any]], str | None]:
-        start_date = self._watermark_start_date(watermark, input_cutoff)
+    ) -> tuple[list[dict[str, Any]], DARTDisclosureCursor | None]:
+        start_date = self._watermark_start_date(cursor, input_cutoff)
         params = {
             "crtfc_key": api_key,
             "bgn_de": start_date.strftime("%Y%m%d"),
@@ -188,20 +222,25 @@ class DARTClient:
                 items = payload.get("list", [])
                 disclosures = [self._normalize_live_item(item, input_cutoff) for item in items]
                 normalized = [item for item in disclosures if item is not None]
-                next_watermark = payload.get("page_no") or input_cutoff.isoformat()
-                return normalized, str(next_watermark)
+                visible = self._filter_visible_disclosures(normalized, input_cutoff)
+                new_items = self._filter_items_after_cursor(visible, cursor)
+                next_cursor = self._next_cursor(visible, input_cutoff=input_cutoff, current=cursor)
+                return new_items, next_cursor
             except Exception as exc:  # pragma: no cover - exercised only with live calls
                 last_exc = exc
         if last_exc is not None:
             raise last_exc
-        return [], watermark
+        return [], cursor
 
     @staticmethod
-    def _watermark_start_date(watermark: str | None, input_cutoff: datetime) -> datetime:
-        if watermark is None:
+    def _watermark_start_date(
+        cursor: DARTDisclosureCursor | None,
+        input_cutoff: datetime,
+    ) -> datetime:
+        if cursor is None:
             return input_cutoff - timedelta(days=30)
         try:
-            return parse_datetime(watermark)
+            return parse_datetime(cursor.accepted_at)
         except ValueError:
             return input_cutoff - timedelta(days=30)
 
@@ -211,6 +250,7 @@ class DARTClient:
         if not stock_code:
             return None
         filed_date = str(item.get("rcept_dt") or "")
+        receipt_no = str(item.get("rcept_no") or "").strip() or None
         if len(filed_date) == 8:
             accepted_at = f"{filed_date[:4]}-{filed_date[4:6]}-{filed_date[6:8]}T18:00:00+09:00"
         else:
@@ -222,6 +262,8 @@ class DARTClient:
             "title": str(item.get("report_nm") or "").strip(),
             "trading_days_elapsed": elapsed_days,
             "accepted_at": accepted_at,
+            "rcept_dt": filed_date or None,
+            "rcept_no": receipt_no,
         }
 
     @staticmethod
@@ -250,6 +292,119 @@ class DARTClient:
             if parse_datetime(str(accepted_at)) <= cutoff:
                 filtered.append(dict(disclosure))
         return filtered
+
+    @classmethod
+    def _filter_visible_disclosures(
+        cls,
+        disclosures: list[dict[str, Any]],
+        cutoff: datetime,
+    ) -> list[dict[str, Any]]:
+        return cls._filter_by_cutoff(disclosures, cutoff)
+
+    @classmethod
+    def _filter_items_after_cursor(
+        cls,
+        disclosures: list[dict[str, Any]],
+        cursor: DARTDisclosureCursor | None,
+    ) -> list[dict[str, Any]]:
+        if cursor is None:
+            return [dict(item) for item in disclosures]
+        filtered: list[dict[str, Any]] = []
+        current_key = cursor.sort_key()
+        for disclosure in disclosures:
+            candidate_cursor = cls._cursor_from_disclosure(disclosure, cursor.input_cutoff)
+            if candidate_cursor is None:
+                filtered.append(dict(disclosure))
+                continue
+            if candidate_cursor.sort_key() > current_key:
+                filtered.append(dict(disclosure))
+        return filtered
+
+    @classmethod
+    def _next_cursor(
+        cls,
+        disclosures: list[dict[str, Any]],
+        *,
+        input_cutoff: datetime,
+        current: DARTDisclosureCursor | None,
+    ) -> DARTDisclosureCursor:
+        cursor_candidates = [cls._cursor_for_cutoff(input_cutoff)]
+        if current is not None:
+            cursor_candidates.append(current)
+        for disclosure in disclosures:
+            candidate = cls._cursor_from_disclosure(disclosure, input_cutoff.isoformat())
+            if candidate is not None:
+                cursor_candidates.append(candidate)
+        return max(cursor_candidates, key=lambda item: item.sort_key())
+
+    @staticmethod
+    def _cursor_for_cutoff(input_cutoff: datetime) -> DARTDisclosureCursor:
+        cutoff_text = input_cutoff.isoformat()
+        return DARTDisclosureCursor(accepted_at=cutoff_text, input_cutoff=cutoff_text)
+
+    @staticmethod
+    def _cursor_from_disclosure(
+        disclosure: Mapping[str, Any],
+        input_cutoff: str,
+    ) -> DARTDisclosureCursor | None:
+        accepted_at = disclosure.get("accepted_at")
+        if accepted_at is None:
+            return None
+        return DARTDisclosureCursor(
+            accepted_at=str(accepted_at),
+            input_cutoff=input_cutoff,
+            rcept_dt=(
+                str(disclosure["rcept_dt"])
+                if disclosure.get("rcept_dt") not in (None, "")
+                else None
+            ),
+            rcept_no=(
+                str(disclosure["rcept_no"])
+                if disclosure.get("rcept_no") not in (None, "")
+                else None
+            ),
+        )
+
+    @classmethod
+    def _coerce_cursor(
+        cls,
+        value: Mapping[str, Any] | str | None,
+    ) -> DARTDisclosureCursor | None:
+        if value is None:
+            return None
+        if isinstance(value, Mapping):
+            return cls._cursor_from_payload(value)
+        text = value.strip()
+        if not text:
+            return None
+        try:
+            payload = json.loads(text)
+        except json.JSONDecodeError:
+            payload = None
+        if isinstance(payload, dict):
+            return cls._cursor_from_payload(payload)
+        try:
+            cutoff_text = parse_datetime(text).isoformat()
+        except ValueError:
+            return None
+        return DARTDisclosureCursor(accepted_at=cutoff_text, input_cutoff=cutoff_text)
+
+    @staticmethod
+    def _cursor_from_payload(payload: Mapping[str, Any]) -> DARTDisclosureCursor | None:
+        accepted_at = payload.get("accepted_at") or payload.get("input_cutoff")
+        if accepted_at is None:
+            return None
+        input_cutoff = payload.get("input_cutoff") or accepted_at
+        return DARTDisclosureCursor(
+            accepted_at=str(accepted_at),
+            input_cutoff=str(input_cutoff),
+            rcept_dt=str(payload["rcept_dt"]) if payload.get("rcept_dt") is not None else None,
+            rcept_no=str(payload["rcept_no"]) if payload.get("rcept_no") is not None else None,
+        )
+
+    @staticmethod
+    def _cursor_to_text(cursor: DARTDisclosureCursor) -> str:
+        return json.dumps(cursor.to_dict(), ensure_ascii=False, sort_keys=True)
 
     @staticmethod
     def _write_cache(

@@ -20,6 +20,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "universe": {
         "markets": ["KOSPI", "KOSDAQ"],
         "stock_classification_path": "stock_classification.csv",
+        "industry_master_path": "data/reference/industry_master.csv",
     },
     "stage1": {
         "channels": ["G", "IC", "FC", "ED", "FX"],
@@ -30,6 +31,9 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "ED": 0,
             "FX": 0,
         },
+        "rank_table_artifact_path": "config/stage1_sector_rank_tables.v1.json",
+        "channel_weights": {"G": 1.0, "IC": 1.0, "FC": 1.0, "ED": 1.0, "FX": 1.0},
+        "neutral_bands": {"G": 0.25, "IC": 0.25, "FC": 0.25, "ED": 0.25, "FX": 0.5},
     },
     "stage2": {
         "score_weights": {"dart": 1.0, "industry": 0.35, "financial": 0.0},

@@ -36,6 +36,13 @@ NON_COMMON_STOCK_KEYWORDS = ("ETF", "ETN", "REIT", "리츠", "SPAC", "스팩")
 
 
 @dataclass(frozen=True, slots=True)
+class KRXLoadResult:
+    rows: list[dict[str, Any]]
+    source: str
+    warnings: list[str]
+
+
+@dataclass(frozen=True, slots=True)
 class KRXClient:
     stock_classification_path: Path | None = None
     exposure_matrix_path: Path = Path("data/industry_exposures.json")
@@ -49,11 +56,28 @@ class KRXClient:
         return [dict(item) for item in DEFAULT_STOCKS]
 
     def load_exposures(self) -> list[dict[str, Any]]:
+        return self.load_exposures_result().rows
+
+    def load_exposures_result(self) -> KRXLoadResult:
         if self.exposure_matrix_path.exists():
             payload = json.loads(self.exposure_matrix_path.read_text(encoding="utf-8"))
             if isinstance(payload, list):
-                return [dict(item) for item in payload]
-        return self.load_demo_exposures() if self.use_demo_fallback else []
+                return KRXLoadResult(
+                    rows=[dict(item) for item in payload],
+                    source="file",
+                    warnings=[],
+                )
+        if self.use_demo_fallback:
+            return KRXLoadResult(
+                rows=self.load_demo_exposures(),
+                source="demo",
+                warnings=["krx_exposure_matrix_missing_using_demo_fallback"],
+            )
+        return KRXLoadResult(
+            rows=[],
+            source="unavailable",
+            warnings=["krx_exposure_matrix_missing"],
+        )
 
     def load_stock_classification(self) -> pd.DataFrame:
         if self.stock_classification_path is None or not self.stock_classification_path.exists():
@@ -61,9 +85,22 @@ class KRXClient:
         return pd.read_csv(self.stock_classification_path, dtype=str).fillna("")
 
     def load_stocks(self) -> list[dict[str, Any]]:
+        return self.load_stocks_result().rows
+
+    def load_stocks_result(self) -> KRXLoadResult:
         frame = self.load_stock_classification()
         if frame.empty:
-            return self.load_demo_stocks() if self.use_demo_fallback else []
+            if self.use_demo_fallback:
+                return KRXLoadResult(
+                    rows=self.load_demo_stocks(),
+                    source="demo",
+                    warnings=["stock_classification_missing_using_demo_fallback"],
+                )
+            return KRXLoadResult(
+                rows=[],
+                source="unavailable",
+                warnings=["stock_classification_missing"],
+            )
         rows: list[dict[str, Any]] = []
         for _, row in frame.iterrows():
             stock_code = self._first_value(row, "stock_code", "종목코드", "code")
@@ -83,7 +120,19 @@ class KRXClient:
                     "industry_code": industry_code,
                 }
             )
-        return rows or (self.load_demo_stocks() if self.use_demo_fallback else [])
+        if rows:
+            return KRXLoadResult(rows=rows, source="file", warnings=[])
+        if self.use_demo_fallback:
+            return KRXLoadResult(
+                rows=self.load_demo_stocks(),
+                source="demo",
+                warnings=["stock_classification_empty_using_demo_fallback"],
+            )
+        return KRXLoadResult(
+            rows=[],
+            source="unavailable",
+            warnings=["stock_classification_empty"],
+        )
 
     def load_ohlcv(self) -> pd.DataFrame:
         if not self.ohlcv_path.exists():

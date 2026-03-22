@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import pandas as pd  # type: ignore[import-untyped]
 
@@ -100,6 +101,55 @@ class PipelinePublicationTests(unittest.TestCase):
                 connection.close()
             self.assertEqual(count, 1)
 
+    def test_scheduled_duplicate_window_keeps_existing_latest_pointer(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            latest_path = Path(tmpdir) / "data" / "snapshots" / "latest.json"
+            first = run_scheduled_stub(
+                tmpdir,
+                trading_date="2026-03-23",
+                run_type="post_close",
+                attempted_at="2026-03-23T15:46:00+09:00",
+            )
+            first_latest = json.loads(latest_path.read_text(encoding="utf-8"))
+
+            second = run_scheduled_stub(
+                tmpdir,
+                trading_date="2026-03-23",
+                run_type="post_close",
+                attempted_at="2026-03-23T15:47:00+09:00",
+            )
+            second_latest = json.loads(latest_path.read_text(encoding="utf-8"))
+
+            self.assertEqual(first["snapshot"]["status"], "published")
+            self.assertEqual(second["snapshot"]["status"], "duplicate")
+            self.assertEqual(second_latest, first_latest)
+            self.assertEqual(second_latest["run_id"], first["snapshot"]["run_id"])
+
+    def test_stage2_failure_publishes_incomplete_stage1_snapshot(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            latest_path = Path(tmpdir) / "data" / "snapshots" / "latest.json"
+
+            with patch(
+                "macro_screener.pipeline.runner.compute_stock_scores",
+                side_effect=RuntimeError("stage2 boom"),
+            ):
+                result = run_manual(tmpdir, run_id="stage1-only-run")
+
+            latest_payload = json.loads(latest_path.read_text(encoding="utf-8"))
+            snapshot_path = Path(latest_payload["snapshot_json"])
+            snapshot_payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+            stock_scores = pd.read_parquet(Path(latest_payload["stock_parquet"]))
+
+            self.assertEqual(result["snapshot"]["status"], "incomplete")
+            self.assertEqual(latest_payload["status"], "incomplete")
+            self.assertEqual(snapshot_payload["status"], "incomplete")
+            self.assertTrue(stock_scores.empty)
+            self.assertTrue(snapshot_payload["industry_scores"])
+            self.assertIn(
+                "stage2_failed_publishing_stage1_only: stage2 boom",
+                result["warnings"],
+            )
+
     def test_backtest_run_skips_weekends_and_uses_isolated_namespace(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             plan = build_backtest_plan(start_date="2026-03-20", end_date="2026-03-23")
@@ -114,6 +164,32 @@ class PipelinePublicationTests(unittest.TestCase):
             self.assertTrue(
                 (Path(result["output_dir"]) / "data" / "snapshots" / "latest.json").exists()
             )
+
+    def test_backtest_pre_open_uses_previous_trading_day_cutoff(self) -> None:
+        plan = build_backtest_plan(
+            start_date="2026-03-23",
+            end_date="2026-03-23",
+            run_type="pre_open",
+        )
+
+        self.assertEqual(len(plan), 1)
+        self.assertEqual(plan[0]["as_of_timestamp"], "2026-03-23T08:30:00+09:00")
+        self.assertEqual(plan[0]["input_cutoff"], "2026-03-20T18:00:00+09:00")
+
+    def test_backtest_batch_id_makes_run_ids_reproducible(self) -> None:
+        plan = build_backtest_plan(
+            start_date="2026-03-20",
+            end_date="2026-03-23",
+            batch_id="replay-batch",
+        )
+
+        self.assertEqual(
+            [item["run_id"] for item in plan],
+            [
+                "replay-batch-2026-03-20-post_close",
+                "replay-batch-2026-03-23-post_close",
+            ],
+        )
 
     def test_cli_manual_run_smoke(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Mapping
@@ -175,6 +176,93 @@ def _load_disclosures(
     )
 
 
+def _channel_state_metadata_kwargs(
+    *,
+    context: Mapping[str, Any],
+    config: AppConfig,
+    macro_source: str,
+    macro_warnings: list[str],
+    use_demo_inputs: bool,
+    channel_states: dict[str, int],
+) -> dict[str, Any]:
+    fallback_mode: str | None = None
+    if use_demo_inputs:
+        fallback_mode = "demo"
+    elif macro_source == "last_known":
+        fallback_mode = "last_known_channel_states"
+    warning_map = (
+        {channel: list(macro_warnings) for channel in channel_states}
+        if macro_warnings
+        else None
+    )
+    kwargs: dict[str, Any] = {
+        "input_cutoff": str(context["input_cutoff"]),
+        "channel_state_source_version": config.config_version,
+        "channel_state_fallback_mode": fallback_mode,
+        "channel_state_warning_flags": warning_map,
+    }
+    return kwargs
+
+
+def _compute_stage1_result_compat(
+    *,
+    channel_states: dict[str, int],
+    exposures: list[dict[str, Any]],
+    overlay_adjustments: dict[str, float],
+    context: Mapping[str, Any],
+    config: AppConfig,
+    macro_source: str,
+    macro_warnings: list[str],
+    use_demo_inputs: bool,
+) -> Any:
+    kwargs: dict[str, Any] = {
+        "channel_states": channel_states,
+        "exposures": exposures,
+        "overlay_adjustments": overlay_adjustments,
+        "run_id": str(context["run_id"]),
+        "run_type": str(context["run_type"]),
+        "as_of_timestamp": str(context["as_of_timestamp"]),
+        "config_version": config.config_version,
+        "channel_state_source": macro_source,
+    }
+    optional_kwargs = _channel_state_metadata_kwargs(
+        context=context,
+        config=config,
+        macro_source=macro_source,
+        macro_warnings=macro_warnings,
+        use_demo_inputs=use_demo_inputs,
+        channel_states=channel_states,
+    )
+    supported = inspect.signature(compute_stage1_result).parameters
+    for key, value in optional_kwargs.items():
+        if key in supported and value is not None:
+            kwargs[key] = value
+    return compute_stage1_result(**kwargs)
+
+
+def _channel_state_snapshot_metadata(
+    *,
+    context: Mapping[str, Any],
+    config: AppConfig,
+    macro_source: str,
+    macro_warnings: list[str],
+    use_demo_inputs: bool,
+) -> dict[str, Any]:
+    fallback_mode: str | None = None
+    if use_demo_inputs:
+        fallback_mode = "demo"
+    elif macro_source == "last_known":
+        fallback_mode = "last_known_channel_states"
+    return {
+        "source_name": macro_source,
+        "source_version": config.config_version,
+        "fallback_mode": fallback_mode,
+        "as_of_timestamp": str(context["as_of_timestamp"]),
+        "input_cutoff": str(context["input_cutoff"]),
+        "warning_flags": list(macro_warnings),
+    }
+
+
 def run_pipeline_context(
     output_dir: str | Path,
     *,
@@ -212,24 +300,35 @@ def run_pipeline_context(
         channel_states=channel_states,
         use_demo_inputs=use_demo_inputs,
     )
+    warnings = list(macro_warnings)
     krx_client = KRXClient(
         stock_classification_path=_repo_relative(config.universe.stock_classification_path),
         use_demo_fallback=True,
     )
-    stage1_result = compute_stage1_result(
+    exposure_result = krx_client.load_exposures_result()
+    if not use_demo_inputs:
+        warnings.extend(exposure_result.warnings)
+    stage1_result = _compute_stage1_result_compat(
         channel_states=macro_states,
-        exposures=krx_client.load_exposures(),
+        exposures=exposure_result.rows,
         overlay_adjustments=DEFAULT_OVERLAYS,
-        run_id=str(context["run_id"]),
-        run_type=str(context["run_type"]),
-        as_of_timestamp=str(context["as_of_timestamp"]),
-        config_version=config.config_version,
-        channel_state_source=macro_source,
+        context=context,
+        config=config,
+        macro_source=macro_source,
+        macro_warnings=macro_warnings,
+        use_demo_inputs=use_demo_inputs,
     )
     store.save_channel_states(
         run_id=stage1_result.run_id,
         channel_states=stage1_result.channel_states,
         source=macro_source,
+        metadata=_channel_state_snapshot_metadata(
+            context=context,
+            config=config,
+            macro_source=macro_source,
+            macro_warnings=macro_warnings,
+            use_demo_inputs=use_demo_inputs,
+        ),
     )
 
     disclosure_result = _load_disclosures(
@@ -239,9 +338,12 @@ def run_pipeline_context(
         input_cutoff=str(context["input_cutoff"]),
         use_demo_inputs=use_demo_inputs,
     )
-    warnings = [*macro_warnings, *disclosure_result.warnings]
+    warnings.extend(disclosure_result.warnings)
     stage2_status = SnapshotStatus.PUBLISHED
-    stocks = krx_client.load_stocks()
+    stock_result = krx_client.load_stocks_result()
+    if not use_demo_inputs:
+        warnings.extend(stock_result.warnings)
+    stocks = stock_result.rows
     known_industries = {score.industry_code for score in stage1_result.industry_scores}
     if not any(str(stock["industry_code"]) in known_industries for stock in stocks):
         stocks = krx_client.load_demo_stocks()

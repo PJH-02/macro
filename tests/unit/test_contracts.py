@@ -150,3 +150,40 @@ def test_snapshot_registry_tracks_watermarks_and_last_known_channel_states(tmp_p
 
     assert registry.get_watermark(source_name="dart", resource_key="disclosures") == "w1"
     assert registry.load_last_channel_states() is not None
+
+
+def test_snapshot_registry_persists_channel_state_snapshot_metadata(tmp_path: Path) -> None:
+    config_path = tmp_path / "config"
+    config_path.mkdir(parents=True)
+    (config_path / "default.yaml").write_text("{}", encoding="utf-8")
+    config = load_config(config_path / "default.yaml")
+    registry = SnapshotRegistry.for_config(config=config, base_path=tmp_path)
+    registry.initialize()
+
+    registry.save_channel_states(
+        run_id="run-1",
+        channel_states=[
+            ChannelState(channel="G", state=1, effective_at=datetime(2026, 3, 21, 8, 30)),
+            ChannelState(channel="IC", state=0, effective_at=datetime(2026, 3, 21, 8, 30)),
+            ChannelState(channel="FC", state=0, effective_at=datetime(2026, 3, 21, 8, 30)),
+            ChannelState(channel="ED", state=1, effective_at=datetime(2026, 3, 21, 8, 30)),
+            ChannelState(channel="FX", state=0, effective_at=datetime(2026, 3, 21, 8, 30)),
+        ],
+        source="last_known",
+        metadata={
+            "source_name": "last_known",
+            "source_version": "mvp-1",
+            "fallback_mode": "last_known_channel_states",
+            "as_of_timestamp": "2026-03-21T08:30:00",
+            "input_cutoff": "2026-03-21T08:25:00",
+            "warning_flags": ["macro_source_unavailable_using_last_known_channel_states"],
+        },
+    )
+
+    snapshot = registry.load_last_channel_state_snapshot()
+
+    assert snapshot is not None
+    assert snapshot["metadata"]["source_name"] == "last_known"
+    assert snapshot["metadata"]["source_version"] == "mvp-1"
+    assert snapshot["metadata"]["fallback_mode"] == "last_known_channel_states"
+    assert snapshot["metadata"]["input_cutoff"] == "2026-03-21T08:25:00"
