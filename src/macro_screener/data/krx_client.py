@@ -57,16 +57,28 @@ class KRXClient:
     use_demo_fallback: bool = True
     allowed_markets: tuple[str, ...] = DEFAULT_ALLOWED_MARKETS
 
-    @staticmethod
-    def build_live_stock_master_request(*, auth_key: str, bas_dd: str) -> dict[str, Any]:
+    def build_live_stock_master_request(
+        self,
+        *,
+        auth_key: str | None = None,
+        bas_dd: str | None = None,
+        trading_date: str | None = None,
+    ) -> dict[str, Any]:
+        raw_auth_key = auth_key if auth_key is not None else os.getenv(self.api_key_env)
+        resolved_auth_key = "" if raw_auth_key is None else raw_auth_key.strip()
+        if not resolved_auth_key:
+            raise ValueError(f"Missing KRX auth key env: {self.api_key_env}")
+        resolved_bas_dd = (bas_dd or trading_date or "").strip()
+        if not resolved_bas_dd:
+            raise ValueError("Missing KRX trading_date/bas_dd")
         return {
             "provider": "krx",
             "service_family": LIVE_STOCK_MASTER_SERVICE_FAMILY,
             "transport": {
-                "headers": {"AUTH_KEY": auth_key},
+                "headers": {"AUTH_KEY": resolved_auth_key},
                 "response_format": "json",
             },
-            "params": {"basDd": bas_dd},
+            "params": {"basDd": resolved_bas_dd},
         }
 
     def load_demo_exposures(self) -> list[dict[str, Any]]:

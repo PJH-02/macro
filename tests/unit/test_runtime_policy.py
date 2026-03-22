@@ -4,6 +4,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from _pytest.monkeypatch import MonkeyPatch
 
 from macro_screener.data.dart_client import DARTLoadResult
 from macro_screener.data.krx_client import KRXLoadResult
@@ -25,13 +26,18 @@ def _write_production_config(path: Path) -> None:
     )
 
 
-def test_production_live_mode_rejects_manual_macro_defaults(tmp_path: Path) -> None:
+def test_production_live_mode_rejects_manual_macro_defaults(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
     config_path = tmp_path / "config" / "default.yaml"
     _write_production_config(config_path)
+    monkeypatch.chdir(tmp_path)
+    for key in ("ECOS_API_KEY", "FRED_API_KEY", "KOSIS_API_KEY", "KRX_API_KEY"):
+        monkeypatch.delenv(key, raising=False)
 
     with pytest.raises(
         RuntimeError,
-        match="manual_macro_source_forbidden_in_production_live_mode:manual_config",
+        match="Missing macro provider auth key env: ECOS_API_KEY",
     ):
         run_manual(tmp_path, run_id="prod-manual-macro", config_path=config_path)
 

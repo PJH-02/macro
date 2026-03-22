@@ -13,6 +13,7 @@ from macro_screener.data.macro_client import (
     DEFAULT_CHANNEL_STATES,
     ManualMacroDataSource,
     PersistedMacroDataSource,
+    load_live_macro_data_source,
 )
 from macro_screener.data.reference import (
     load_industry_master_records,
@@ -126,6 +127,8 @@ def _resolve_macro_states(
     *,
     config: AppConfig,
     store: Any,
+    context: Mapping[str, Any],
+    mode: RunMode,
     channel_states: dict[str, int] | None,
     use_demo_inputs: bool,
 ) -> Any:
@@ -140,6 +143,23 @@ def _resolve_macro_states(
             DEFAULT_CHANNEL_STATES,
             source_name="demo_manual",
         ).fetch_channel_states()
+    if _is_production_live_mode(config=config, mode=mode, use_demo_inputs=use_demo_inputs):
+        try:
+            return load_live_macro_data_source(
+                as_of_timestamp=str(context["as_of_timestamp"]),
+                input_cutoff=str(context["input_cutoff"]),
+                ecos_api_key_env=config.runtime.ecos_api_key_env,
+                fred_api_key_env=config.runtime.fred_api_key_env,
+                source_name="ecos_fred_live",
+                source_version=config.config_version,
+            ).fetch_channel_states()
+        except Exception as exc:
+            if config.runtime.reuse_last_known_channel_states:
+                try:
+                    return PersistedMacroDataSource(store).fetch_channel_states()
+                except Exception:
+                    raise exc from None
+            raise
     try:
         return ManualMacroDataSource(
             config.stage1.manual_channel_states,
@@ -480,6 +500,8 @@ def run_pipeline_context(
     macro_result = _resolve_macro_states(
         config=config,
         store=store,
+        context=context,
+        mode=mode,
         channel_states=channel_states,
         use_demo_inputs=use_demo_inputs,
     )
