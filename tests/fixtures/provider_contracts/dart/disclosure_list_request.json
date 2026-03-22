@@ -1,9 +1,0 @@
-{
-  "provider": "dart",
-  "endpoint": "list.json",
-  "params": {
-    "bgn_de": "20260320",
-    "end_de": "20260322",
-    "last_reprt_at": "Y"
-  }
-}
