@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime
 from typing import Any, Mapping, Protocol, Sequence
 
@@ -183,6 +183,24 @@ class LiveMacroDataSource:
     channel_signals: Mapping[str, Sequence[MacroSeriesSignal]]
     source_name: str = "live_macro"
     source_version: str | None = None
+
+    @classmethod
+    def from_fixed_series_signals(
+        cls,
+        *,
+        series_signals: Mapping[str, MacroSeriesSignal],
+        degraded_mode: bool = False,
+        source_name: str = "live_macro",
+        source_version: str | None = None,
+    ) -> "LiveMacroDataSource":
+        return cls(
+            channel_signals=build_fixed_channel_signal_map(
+                series_signals,
+                degraded_mode=degraded_mode,
+            ),
+            source_name=source_name,
+            source_version=source_version,
+        )
 
     def fetch_channel_states(self) -> MacroLoadResult:
         channel_states: dict[str, int] = {}
@@ -531,6 +549,30 @@ def classify_macro_series_value(series_id: str, value: float) -> int:
     return 0
 
 
+def build_fixed_channel_signal_map(
+    series_signals: Mapping[str, MacroSeriesSignal],
+    *,
+    degraded_mode: bool = False,
+) -> dict[str, tuple[MacroSeriesSignal, MacroSeriesSignal]]:
+    channel_signals: dict[str, tuple[MacroSeriesSignal, MacroSeriesSignal]] = {}
+    for channel, roster in FIXED_CHANNEL_SERIES_ROSTER.items():
+        korea_signal = _require_series_signal(series_signals, roster.korea_series_id)
+        us_signal = series_signals.get(roster.us_series_id)
+        if us_signal is None:
+            fallback_series_id = roster.us_degraded_fallback_series_id
+            if not degraded_mode or fallback_series_id is None:
+                raise ValueError(
+                    f"missing required primary US series for {channel}: {roster.us_series_id}"
+                )
+            fallback_signal = _require_series_signal(series_signals, fallback_series_id)
+            us_signal = _mark_degraded_fallback_signal(
+                fallback_signal,
+                primary_series_id=roster.us_series_id,
+            )
+        channel_signals[channel] = (korea_signal, us_signal)
+    return channel_signals
+
+
 def _parse_series_timestamp(value: str) -> datetime:
     text = value.strip()
     if len(text) == 7:
@@ -542,3 +584,29 @@ def _parse_series_timestamp(value: str) -> datetime:
 
 def _dedupe_flags(flags: Sequence[str] | Any) -> list[str]:
     return list(dict.fromkeys(str(flag) for flag in flags if str(flag).strip()))
+
+
+def _require_series_signal(
+    series_signals: Mapping[str, MacroSeriesSignal],
+    series_id: str,
+) -> MacroSeriesSignal:
+    signal = series_signals.get(series_id)
+    if signal is None:
+        raise ValueError(f"missing required macro series signal: {series_id}")
+    return signal
+
+
+def _mark_degraded_fallback_signal(
+    signal: MacroSeriesSignal,
+    *,
+    primary_series_id: str,
+) -> MacroSeriesSignal:
+    return replace(
+        signal,
+        warning_flags=tuple(
+            _dedupe_flags(
+                [*signal.warning_flags, f"{primary_series_id}_fallback_signal_used"]
+            )
+        ),
+        fallback_used=True,
+    )

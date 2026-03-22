@@ -10,6 +10,7 @@ from macro_screener.data.macro_client import (
     LiveMacroDataSource,
     MacroSeriesSignal,
     build_ecos_request_contract,
+    build_fixed_channel_signal_map,
     build_fred_request_contract,
     build_kosis_request_contract,
     classify_macro_series_value,
@@ -32,6 +33,7 @@ def _signal(
     channel: str,
     state: int,
     *,
+    series_id: str | None = None,
     confidence: float = 1.0,
     fallback_used: bool = False,
     warning_flags: tuple[str, ...] = (),
@@ -40,7 +42,7 @@ def _signal(
 ) -> MacroSeriesSignal:
     return MacroSeriesSignal(
         channel=channel,
-        series_id=f"{channel}-signal",
+        series_id=series_id or f"{channel}-signal",
         provider="fixture",
         state=state,
         as_of_timestamp=datetime.fromisoformat(as_of_timestamp),
@@ -191,3 +193,85 @@ def test_classify_macro_series_value_rejects_unknown_series() -> None:
         assert "unknown macro series classifier spec" in str(exc)
     else:  # pragma: no cover - defensive assertion
         raise AssertionError("expected classify_macro_series_value to reject unknown series")
+
+
+def test_build_fixed_channel_signal_map_uses_primary_series_when_present() -> None:
+    series_signals = {
+        "kr_ipi_yoy_3mma": _signal("G", 1, series_id="kr_ipi_yoy_3mma"),
+        "us_ipi_yoy_3mma": _signal("G", 0, series_id="us_ipi_yoy_3mma"),
+        "kr_cpi_yoy_3mma": _signal("IC", 1, series_id="kr_cpi_yoy_3mma"),
+        "us_cpi_yoy_3mma": _signal("IC", 0, series_id="us_cpi_yoy_3mma"),
+        "kr_credit_spread_z36": _signal("FC", -1, series_id="kr_credit_spread_z36"),
+        "us_credit_spread_z36": _signal("FC", 1, series_id="us_credit_spread_z36"),
+        "kr_exports_us_yoy_3mma": _signal("ED", 1, series_id="kr_exports_us_yoy_3mma"),
+        "us_real_imports_goods_yoy_3mma": _signal(
+            "ED",
+            1,
+            series_id="us_real_imports_goods_yoy_3mma",
+        ),
+        "usdkrw_3m_log_return": _signal("FX", -1, series_id="usdkrw_3m_log_return"),
+        "broad_usd_3m_log_return": _signal("FX", -1, series_id="broad_usd_3m_log_return"),
+    }
+
+    signal_map = build_fixed_channel_signal_map(series_signals)
+
+    assert signal_map["ED"][1].series_id == "us_real_imports_goods_yoy_3mma"
+    assert signal_map["ED"][1].fallback_used is False
+
+
+def test_build_fixed_channel_signal_map_uses_ed_fallback_only_in_degraded_mode() -> None:
+    series_signals = {
+        "kr_ipi_yoy_3mma": _signal("G", 1, series_id="kr_ipi_yoy_3mma"),
+        "us_ipi_yoy_3mma": _signal("G", 0, series_id="us_ipi_yoy_3mma"),
+        "kr_cpi_yoy_3mma": _signal("IC", 1, series_id="kr_cpi_yoy_3mma"),
+        "us_cpi_yoy_3mma": _signal("IC", 0, series_id="us_cpi_yoy_3mma"),
+        "kr_credit_spread_z36": _signal("FC", -1, series_id="kr_credit_spread_z36"),
+        "us_credit_spread_z36": _signal("FC", 1, series_id="us_credit_spread_z36"),
+        "kr_exports_us_yoy_3mma": _signal("ED", 1, series_id="kr_exports_us_yoy_3mma"),
+        "us_real_pce_goods_yoy_3mma": _signal(
+            "ED",
+            0,
+            series_id="us_real_pce_goods_yoy_3mma",
+        ),
+        "usdkrw_3m_log_return": _signal("FX", -1, series_id="usdkrw_3m_log_return"),
+        "broad_usd_3m_log_return": _signal("FX", -1, series_id="broad_usd_3m_log_return"),
+    }
+
+    signal_map = build_fixed_channel_signal_map(series_signals, degraded_mode=True)
+
+    assert signal_map["ED"][1].series_id == "us_real_pce_goods_yoy_3mma"
+    assert signal_map["ED"][1].fallback_used is True
+    assert signal_map["ED"][1].warning_flags == (
+        "us_real_imports_goods_yoy_3mma_fallback_signal_used",
+    )
+
+
+def test_live_macro_data_source_from_fixed_series_signals_builds_channel_map() -> None:
+    series_signals = {
+        "kr_ipi_yoy_3mma": _signal("G", 1, series_id="kr_ipi_yoy_3mma"),
+        "us_ipi_yoy_3mma": _signal("G", 1, series_id="us_ipi_yoy_3mma"),
+        "kr_cpi_yoy_3mma": _signal("IC", 1, series_id="kr_cpi_yoy_3mma"),
+        "us_cpi_yoy_3mma": _signal("IC", 0, series_id="us_cpi_yoy_3mma"),
+        "kr_credit_spread_z36": _signal("FC", -1, series_id="kr_credit_spread_z36"),
+        "us_credit_spread_z36": _signal("FC", 1, series_id="us_credit_spread_z36"),
+        "kr_exports_us_yoy_3mma": _signal("ED", 1, series_id="kr_exports_us_yoy_3mma"),
+        "us_real_pce_goods_yoy_3mma": _signal(
+            "ED",
+            0,
+            series_id="us_real_pce_goods_yoy_3mma",
+        ),
+        "usdkrw_3m_log_return": _signal("FX", -1, series_id="usdkrw_3m_log_return"),
+        "broad_usd_3m_log_return": _signal("FX", -1, series_id="broad_usd_3m_log_return"),
+    }
+
+    result = LiveMacroDataSource.from_fixed_series_signals(
+        series_signals=series_signals,
+        degraded_mode=True,
+        source_name="fixed-roster-live",
+    ).fetch_channel_states()
+
+    assert result.source_name == "fixed-roster-live"
+    assert result.channel_states["G"] == 1
+    assert result.channel_states["ED"] == 1
+    assert result.fallback_mode == "degraded_live"
+    assert "us_real_imports_goods_yoy_3mma_fallback_signal_used" in result.warnings
