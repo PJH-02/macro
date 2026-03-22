@@ -1,22 +1,20 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
 import os
 import sqlite3
 import subprocess
 import tempfile
 import unittest
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
 
 import pandas as pd  # type: ignore[import-untyped]
 
 from macro_screener.config import load_config
-from macro_screener.models import ChannelState
-from macro_screener.pipeline.runtime import bootstrap_runtime
 from macro_screener.data.macro_client import ManualMacroDataSource
-
+from macro_screener.models import ChannelState
 from macro_screener.mvp import (
     DEFAULT_DEMO_RUN_ID,
     build_backtest_plan,
@@ -25,6 +23,7 @@ from macro_screener.mvp import (
     run_manual,
     run_scheduled_stub,
 )
+from macro_screener.pipeline.runtime import bootstrap_runtime
 
 
 class PipelinePublicationTests(unittest.TestCase):
@@ -48,7 +47,9 @@ class PipelinePublicationTests(unittest.TestCase):
             snapshot_payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
             self.assertEqual(latest_payload["run_id"], "manual-test-run")
             self.assertEqual(snapshot_payload["status"], "published")
-            self.assertEqual(pd.read_parquet(stock_parquet).iloc[0]["rank"], 1)
+            stock_rows = pd.read_parquet(stock_parquet)
+            self.assertFalse(stock_rows.empty)
+            self.assertEqual(stock_rows.iloc[0]["rank"], 1)
             self.assertEqual(pd.read_parquet(industry_parquet).iloc[0]["rank"], 1)
 
             connection = sqlite3.connect(database_path)
@@ -57,6 +58,18 @@ class PipelinePublicationTests(unittest.TestCase):
             finally:
                 connection.close()
             self.assertEqual(rows, [("manual-test-run", "published")])
+
+    def test_manual_run_does_not_fallback_to_demo_stocks_when_artifact_codes_match(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = run_manual(tmpdir, run_id="artifact-stock-join-run")
+            self.assertNotIn("stock_universe_unmapped_using_demo_stocks", result["warnings"])
+            self.assertNotIn(
+                "stage2_unmapped_stock_universe_publishing_stage1_only",
+                result["warnings"],
+            )
+            self.assertTrue(result["snapshot"]["stock_scores"])
 
     def test_manual_run_uses_materialized_stage1_artifact_universe(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -78,11 +91,31 @@ class PipelinePublicationTests(unittest.TestCase):
             registry.save_channel_states(
                 run_id="seed-run",
                 channel_states=[
-                    ChannelState(channel="G", state=1, effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00")),
-                    ChannelState(channel="IC", state=0, effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00")),
-                    ChannelState(channel="FC", state=0, effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00")),
-                    ChannelState(channel="ED", state=1, effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00")),
-                    ChannelState(channel="FX", state=0, effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00")),
+                    ChannelState(
+                        channel="G",
+                        state=1,
+                        effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00"),
+                    ),
+                    ChannelState(
+                        channel="IC",
+                        state=0,
+                        effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00"),
+                    ),
+                    ChannelState(
+                        channel="FC",
+                        state=0,
+                        effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00"),
+                    ),
+                    ChannelState(
+                        channel="ED",
+                        state=1,
+                        effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00"),
+                    ),
+                    ChannelState(
+                        channel="FX",
+                        state=0,
+                        effective_at=datetime.fromisoformat("2026-03-21T08:30:00+09:00"),
+                    ),
                 ],
                 source="last_known",
                 metadata={
@@ -98,7 +131,7 @@ class PipelinePublicationTests(unittest.TestCase):
 
             original_fetch = ManualMacroDataSource.fetch_channel_states
 
-            def _raising_fetch(self: ManualMacroDataSource):
+            def _raising_fetch(self: ManualMacroDataSource) -> object:
                 if self.source_name == "manual_config":
                     raise ValueError("force persisted fallback")
                 return original_fetch(self)
@@ -114,7 +147,10 @@ class PipelinePublicationTests(unittest.TestCase):
             self.assertEqual(metadata["fallback_mode"], "last_known_channel_states")
             self.assertEqual(metadata["input_cutoff"], "2026-03-21T08:25:00+09:00")
             self.assertEqual(metadata["confidence_by_channel"]["G"], 0.7)
-            self.assertIn("macro_source_unavailable_using_last_known_channel_states", metadata["warning_flags"])
+            self.assertIn(
+                "macro_source_unavailable_using_last_known_channel_states",
+                metadata["warning_flags"],
+            )
 
     def test_publish_is_immutable_for_duplicate_run_ids(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

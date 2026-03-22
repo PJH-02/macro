@@ -7,6 +7,8 @@ from typing import Any
 
 import pandas as pd  # type: ignore[import-untyped]
 
+from macro_screener.data.reference import industry_code_slug
+
 DEFAULT_EXPOSURES: list[dict[str, Any]] = [
     {
         "industry_code": "AUTO",
@@ -105,9 +107,15 @@ class KRXClient:
         for _, row in frame.iterrows():
             stock_code = self._first_value(row, "stock_code", "종목코드", "code")
             stock_name = self._first_value(row, "stock_name", "종목명", "name")
-            industry_code = self._first_value(
-                row, "industry_code", "industry", "소분류", "중분류", "대분류"
-            )
+            sector_l1 = self._first_value(row, "sector_l1", "대분류")
+            sector_l2 = self._first_value(row, "sector_l2", "중분류")
+            sector_l3 = self._first_value(row, "sector_l3", "소분류")
+            if sector_l1 and sector_l2 and sector_l3:
+                industry_code = industry_code_slug((sector_l1, sector_l2, sector_l3))
+            else:
+                industry_code = self._first_value(
+                    row, "industry_code", "industry", "소분류", "중분류", "대분류"
+                )
             security_type = self._first_value(row, "security_type", "증권구분", "종목구분")
             if not stock_code or not stock_name or not industry_code:
                 continue

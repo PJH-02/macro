@@ -81,12 +81,20 @@ class PersistedMacroDataSource:
         }
         as_of_timestamp_raw = metadata.get("as_of_timestamp")
         input_cutoff_raw = metadata.get("input_cutoff")
+        as_of_timestamp = (
+            None
+            if as_of_timestamp_raw is None
+            else datetime.fromisoformat(str(as_of_timestamp_raw))
+        )
+        input_cutoff = (
+            None if input_cutoff_raw is None else datetime.fromisoformat(str(input_cutoff_raw))
+        )
         return MacroLoadResult(
             channel_states={state.channel: state.state for state in states},
             source_name=source_name,
             warnings=warning_flags,
-            as_of_timestamp=None if as_of_timestamp_raw is None else datetime.fromisoformat(str(as_of_timestamp_raw)),
-            input_cutoff=None if input_cutoff_raw is None else datetime.fromisoformat(str(input_cutoff_raw)),
+            as_of_timestamp=as_of_timestamp,
+            input_cutoff=input_cutoff,
             source_version=source_version,
             fallback_mode=fallback_mode,
             confidence_by_channel=confidence_by_channel,

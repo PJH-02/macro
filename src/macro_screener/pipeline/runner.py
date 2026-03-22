@@ -9,11 +9,14 @@ from zoneinfo import ZoneInfo
 from macro_screener.config import AppConfig, load_config
 from macro_screener.data.dart_client import DARTClient, DARTLoadResult
 from macro_screener.data.krx_client import KRXClient
-from macro_screener.data.reference import load_industry_master_records, load_stage1_artifact
 from macro_screener.data.macro_client import (
     DEFAULT_CHANNEL_STATES,
     ManualMacroDataSource,
     PersistedMacroDataSource,
+)
+from macro_screener.data.reference import (
+    load_industry_master_records,
+    load_stage1_artifact,
 )
 from macro_screener.models import RunMode, RunType, ScheduledWindowKey, Snapshot, SnapshotStatus
 from macro_screener.pipeline.publisher import publish_snapshot
@@ -147,7 +150,14 @@ def _resolve_macro_states(
         raise
 
 
-def _load_stage1_rows_and_rank_tables(*, config: AppConfig) -> tuple[list[dict[str, Any]], dict[str, dict[str, list[str]]] | None, dict[str, float] | None]:
+def _load_stage1_rows_and_rank_tables(
+    *,
+    config: AppConfig,
+) -> tuple[
+    list[dict[str, Any]],
+    dict[str, dict[str, list[str]]] | None,
+    dict[str, float] | None,
+]:
     artifact_path = _repo_relative(config.stage1.rank_table_artifact_path)
     industry_master_path = _repo_relative(config.universe.industry_master_path)
     if artifact_path.exists() and industry_master_path.exists():
@@ -262,8 +272,15 @@ def _channel_state_snapshot_metadata(
         "source_name": macro_result.source_name,
         "source_version": macro_result.source_version or config.config_version,
         "fallback_mode": macro_result.fallback_mode,
-        "as_of_timestamp": str((macro_result.as_of_timestamp or parse_datetime(str(context["as_of_timestamp"]))).isoformat()),
-        "input_cutoff": str((macro_result.input_cutoff or parse_datetime(str(context["input_cutoff"]))).isoformat()),
+        "as_of_timestamp": str(
+            (
+                macro_result.as_of_timestamp
+                or parse_datetime(str(context["as_of_timestamp"]))
+            ).isoformat()
+        ),
+        "input_cutoff": str(
+            (macro_result.input_cutoff or parse_datetime(str(context["input_cutoff"]))).isoformat()
+        ),
         "warning_flags": list(macro_result.warnings),
     }
     if macro_result.confidence_by_channel:
@@ -313,7 +330,9 @@ def run_pipeline_context(
         stock_classification_path=_repo_relative(config.universe.stock_classification_path),
         use_demo_fallback=True,
     )
-    stage1_rows, sector_rank_tables, channel_weights = _load_stage1_rows_and_rank_tables(config=config)
+    stage1_rows, sector_rank_tables, channel_weights = _load_stage1_rows_and_rank_tables(
+        config=config
+    )
     stock_result = krx_client.load_stocks_result()
     if not use_demo_inputs:
         warnings.extend(stock_result.warnings)
@@ -361,6 +380,11 @@ def run_pipeline_context(
             unknown_ratio_warning_threshold=config.runtime.unknown_dart_ratio_warning_threshold,
         )
         warnings.extend(stage2_warnings)
+        if not stock_scores and stocks:
+            if not config.runtime.stage1_only_on_stage2_failure:
+                raise ValueError("stage2_stock_universe_unmapped")
+            stage2_status = SnapshotStatus.INCOMPLETE
+            warnings.append("stage2_unmapped_stock_universe_publishing_stage1_only")
     except Exception as exc:
         if not config.runtime.stage1_only_on_stage2_failure:
             raise
