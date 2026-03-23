@@ -66,6 +66,7 @@ class KRXClient:
         bas_dd: str | None = None,
         trading_date: str | None = None,
     ) -> dict[str, Any]:
+        """실시간 종목 마스터 요청을 구성한다."""
         raw_auth_key = auth_key if auth_key is not None else os.getenv(self.api_key_env)
         resolved_auth_key = "" if raw_auth_key is None else raw_auth_key.strip()
         if not resolved_auth_key:
@@ -84,15 +85,19 @@ class KRXClient:
         }
 
     def load_demo_exposures(self) -> list[dict[str, Any]]:
+        """데모 노출도 데이터를 불러온다."""
         return [dict(item) for item in DEFAULT_EXPOSURES]
 
     def load_demo_stocks(self) -> list[dict[str, Any]]:
+        """데모 종목 데이터를 불러온다."""
         return [dict(item) for item in DEFAULT_STOCKS]
 
     def load_exposures(self) -> list[dict[str, Any]]:
+        """노출도 목록을 불러온다."""
         return self.load_exposures_result().rows
 
     def load_exposures_result(self) -> KRXLoadResult:
+        """노출도 로드 결과를 불러온다."""
         if self.exposure_matrix_path.exists():
             payload = json.loads(self.exposure_matrix_path.read_text(encoding="utf-8"))
             if isinstance(payload, list):
@@ -114,6 +119,7 @@ class KRXClient:
         )
 
     def load_stock_classification(self) -> pd.DataFrame:
+        """종목 분류표를 불러온다."""
         if self.stock_classification_path is None or not self.stock_classification_path.exists():
             return pd.DataFrame(columns=["종목코드", "종목명", "대분류", "중분류", "소분류"])
         return pd.read_csv(self.stock_classification_path, dtype=str).fillna("")
@@ -124,27 +130,12 @@ class KRXClient:
         trading_date: str,
         fetcher: Callable[[dict[str, Any]], Mapping[str, Any]] | None = None,
     ) -> KRXLoadResult:
+        """실시간 종목 로드 결과를 불러온다."""
         auth_key = os.getenv(self.api_key_env, "").strip()
         if fetcher is None:
-            try:
-                return self._load_live_stocks_via_master_download()
-            except Exception as exc:
-                warning_prefix = (
-                    "krx_live_source_unconfigured"
-                    if not auth_key
-                    else "krx_live_fetcher_unconfigured"
-                )
-                return KRXLoadResult(
-                    rows=[],
-                    source="unavailable",
-                    warnings=[warning_prefix, f"krx_master_download_failed: {exc}"],
-                )
+            return self._load_live_stocks_without_fetcher(auth_key=auth_key)
         if not auth_key:
-            return KRXLoadResult(
-                rows=[],
-                source="unavailable",
-                warnings=["krx_live_source_unconfigured"],
-            )
+            return self._unavailable_live_result("krx_live_source_unconfigured")
         try:
             request_payload = self.build_live_stock_master_request(
                 auth_key=auth_key,
@@ -152,21 +143,34 @@ class KRXClient:
             )
             live_rows = self._normalize_live_stock_master_response(fetcher(request_payload))
         except Exception as exc:
-            return KRXLoadResult(
-                rows=[],
-                source="unavailable",
-                warnings=[f"krx_live_fetch_failed: {exc}"],
-            )
+            return self._unavailable_live_result(f"krx_live_fetch_failed: {exc}")
         if not live_rows:
-            return KRXLoadResult(
-                rows=[],
-                source="unavailable",
-                warnings=["krx_live_records_empty"],
-            )
+            return self._unavailable_live_result("krx_live_records_empty")
 
         return self.normalize_live_stock_records(live_rows)
 
+    def _load_live_stocks_without_fetcher(self, *, auth_key: str) -> KRXLoadResult:
+        """명시적 fetcher 없이 실시간 종목 결과를 불러온다."""
+        try:
+            return self._load_live_stocks_via_master_download()
+        except Exception as exc:
+            warning_prefix = (
+                "krx_live_source_unconfigured"
+                if not auth_key
+                else "krx_live_fetcher_unconfigured"
+            )
+            return self._unavailable_live_result(
+                warning_prefix,
+                f"krx_master_download_failed: {exc}",
+            )
+
+    @staticmethod
+    def _unavailable_live_result(*warnings: str) -> KRXLoadResult:
+        """실시간 종목 경로의 실패 결과를 만든다."""
+        return KRXLoadResult(rows=[], source="unavailable", warnings=list(warnings))
+
     def normalize_live_stock_records(self, live_rows: Sequence[Mapping[str, Any]]) -> KRXLoadResult:
+        """실시간 종목 레코드를 분류표 기준으로 정규화한다."""
         frame = self.load_stock_classification()
         taxonomy_rows = self._classification_rows(frame, include_non_common=True)
         if not taxonomy_rows:
@@ -219,6 +223,7 @@ class KRXClient:
         )
 
     def _load_live_stocks_via_master_download(self) -> KRXLoadResult:
+        """마스터 다운로드 경로로 실시간 종목을 불러온다."""
         live_result = self.normalize_live_stock_records(self._load_master_download_records())
         warnings = [*live_result.warnings, "krx_live_source_master_download"]
         if live_result.rows:
@@ -230,9 +235,11 @@ class KRXClient:
         )
 
     def load_stocks(self) -> list[dict[str, Any]]:
+        """종목 목록을 불러온다."""
         return self.load_stocks_result().rows
 
     def load_stocks_result(self) -> KRXLoadResult:
+        """종목 로드 결과를 불러온다."""
         frame = self.load_stock_classification()
         if frame.empty:
             if self.use_demo_fallback:
@@ -270,6 +277,7 @@ class KRXClient:
         )
 
     def load_ohlcv(self) -> pd.DataFrame:
+        """OHLCV 데이터를 불러온다."""
         if not self.ohlcv_path.exists():
             return pd.DataFrame(
                 columns=["stock_code", "trading_date", "open", "high", "low", "close", "volume"]
@@ -278,6 +286,7 @@ class KRXClient:
 
     @staticmethod
     def _first_value(row: pd.Series, *columns: str) -> str:
+        """후보 컬럼에서 첫 값을 선택한다."""
         for column in columns:
             value = row.get(column)
             if value is None:
@@ -289,6 +298,7 @@ class KRXClient:
 
     @staticmethod
     def _is_non_common_equity(*, stock_name: str, security_type: str) -> bool:
+        """보통주가 아닌 종목인지 판단한다."""
         upper_name = stock_name.upper()
         upper_type = security_type.upper()
         return any(
@@ -302,6 +312,7 @@ class KRXClient:
         *,
         include_non_common: bool = False,
     ) -> list[dict[str, str]]:
+        """분류표를 종목 행 목록으로 정리한다."""
         rows: list[dict[str, str]] = []
         for _, row in frame.iterrows():
             stock_code = self._first_value(row, "stock_code", "종목코드", "code")
@@ -335,17 +346,24 @@ class KRXClient:
 
     @staticmethod
     def _classification_unavailable_warning(frame: pd.DataFrame) -> str:
+        """분류표 부재 경고 코드를 반환한다."""
         return "stock_classification_missing" if frame.empty else "stock_classification_empty"
 
     @staticmethod
-    def _load_master_download_records() -> list[dict[str, str]]:
+    def _load_kis_security_module() -> Any:
+        """KIS 보안 모듈을 동적으로 불러온다."""
         module_path = Path(__file__).resolve().parents[2] / "security" / "kis_security_defended.py"
         spec = importlib.util.spec_from_file_location("kis_security_defended_runtime", module_path)
         if spec is None or spec.loader is None:
             raise RuntimeError(f"Unable to load KIS security module: {module_path}")
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
+        return module
 
+    @staticmethod
+    def _load_master_download_records() -> list[dict[str, str]]:
+        """마스터 다운로드 종목 레코드를 불러온다."""
+        module = KRXClient._load_kis_security_module()
         with tempfile.TemporaryDirectory() as tmpdir:
             workdir = Path(tmpdir)
             kospi = module.load_kospi_master(workdir)
@@ -371,6 +389,7 @@ class KRXClient:
     def _normalize_live_stock_master_response(
         payload: Mapping[str, Any],
     ) -> list[dict[str, str]]:
+        """실시간 종목 마스터 응답을 레코드 목록으로 정규화한다."""
         records = payload.get("records", [])
         if not isinstance(records, list):
             raise ValueError("KRX stock master payload must contain a records list")

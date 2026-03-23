@@ -6,9 +6,9 @@ import urllib.request
 import zipfile
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, cast
 
-import pandas as pd
+import pandas as pd  # type: ignore[import-untyped]
 
 MASTER_BASE = "https://new.real.download.dws.co.kr/common/master"
 KIND_CORP_LIST_URL = "https://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13"
@@ -30,20 +30,76 @@ KOSPI_WIDTHS = [
 ]
 
 KOSPI_FIELDS = [
-    "증권그룹코드", "시가총액규모구분코드", "지수업종대분류코드", "지수업종중분류코드", "지수업종소분류코드",
-    "제조업여부", "저유동성여부", "지배구조지수종목여부", "KOSPI200섹터업종코드", "KOSPI100여부",
-    "KOSPI50여부", "KRX종목여부", "ETP상품구분코드", "ELW발행여부", "KRX100여부",
-    "KRX자동차여부", "KRX반도체여부", "KRX바이오여부", "KRX은행여부", "SPAC여부",
-    "KRX에너지화학여부", "KRX철강여부", "단기과열코드", "KRX미디어통신여부", "KRX건설여부",
-    "삭제필드1", "KRX증권여부", "KRX선박여부", "KRX보험여부", "KRX운송여부",
-    "SRI여부", "기준가", "정규시장매매수량단위", "시간외시장매매수량단위", "거래정지여부",
-    "정리매매여부", "관리종목여부", "시장경고구분코드", "시장경고위험예고여부", "불성실공시여부",
-    "우회상장여부", "락구분코드", "액면가변경구분코드", "증자구분코드", "증거금비율",
-    "신용가능여부", "신용기간", "전일거래량", "액면가", "상장일자",
-    "상장주수천주", "자본금", "결산월", "공모가", "우선주구분코드",
-    "공매도과열여부", "이상급등여부", "KRX300여부", "KOSPI여부", "매출액",
-    "영업이익", "경상이익", "당기순이익", "ROE", "기준년월",
-    "시가총액억", "그룹사코드", "회사신용한도초과여부", "담보대출가능여부", "대주가능여부",
+    "증권그룹코드",
+    "시가총액규모구분코드",
+    "지수업종대분류코드",
+    "지수업종중분류코드",
+    "지수업종소분류코드",
+    "제조업여부",
+    "저유동성여부",
+    "지배구조지수종목여부",
+    "KOSPI200섹터업종코드",
+    "KOSPI100여부",
+    "KOSPI50여부",
+    "KRX종목여부",
+    "ETP상품구분코드",
+    "ELW발행여부",
+    "KRX100여부",
+    "KRX자동차여부",
+    "KRX반도체여부",
+    "KRX바이오여부",
+    "KRX은행여부",
+    "SPAC여부",
+    "KRX에너지화학여부",
+    "KRX철강여부",
+    "단기과열코드",
+    "KRX미디어통신여부",
+    "KRX건설여부",
+    "삭제필드1",
+    "KRX증권여부",
+    "KRX선박여부",
+    "KRX보험여부",
+    "KRX운송여부",
+    "SRI여부",
+    "기준가",
+    "정규시장매매수량단위",
+    "시간외시장매매수량단위",
+    "거래정지여부",
+    "정리매매여부",
+    "관리종목여부",
+    "시장경고구분코드",
+    "시장경고위험예고여부",
+    "불성실공시여부",
+    "우회상장여부",
+    "락구분코드",
+    "액면가변경구분코드",
+    "증자구분코드",
+    "증거금비율",
+    "신용가능여부",
+    "신용기간",
+    "전일거래량",
+    "액면가",
+    "상장일자",
+    "상장주수천주",
+    "자본금",
+    "결산월",
+    "공모가",
+    "우선주구분코드",
+    "공매도과열여부",
+    "이상급등여부",
+    "KRX300여부",
+    "KOSPI여부",
+    "매출액",
+    "영업이익",
+    "경상이익",
+    "당기순이익",
+    "ROE",
+    "기준년월",
+    "시가총액억",
+    "그룹사코드",
+    "회사신용한도초과여부",
+    "담보대출가능여부",
+    "대주가능여부",
 ]
 
 KOSDAQ_WIDTHS = [
@@ -57,19 +113,70 @@ KOSDAQ_WIDTHS = [
 ]
 
 KOSDAQ_FIELDS = [
-    "증권그룹코드", "시가총액규모구분코드", "지수업종대분류코드", "지수업종중분류코드", "지수업종소분류코드",
-    "벤처기업여부", "저유동성여부", "KRX종목여부", "ETP상품구분코드", "KRX100여부",
-    "KRX자동차여부", "KRX반도체여부", "KRX바이오여부", "KRX은행여부", "SPAC여부",
-    "KRX에너지화학여부", "KRX철강여부", "단기과열코드", "KRX미디어통신여부", "KRX건설여부",
-    "투자주의환기여부", "KRX증권여부", "KRX선박여부", "KRX보험여부", "KRX운송여부",
-    "KOSDAQ150여부", "기준가", "정규시장매매수량단위", "시간외시장매매수량단위", "거래정지여부",
-    "정리매매여부", "관리종목여부", "시장경고구분코드", "시장경고위험예고여부", "불성실공시여부",
-    "우회상장여부", "락구분코드", "액면가변경구분코드", "증자구분코드", "증거금비율",
-    "신용가능여부", "신용기간", "전일거래량", "액면가", "상장일자",
-    "상장주수천주", "자본금", "결산월", "공모가", "우선주구분코드",
-    "공매도과열여부", "이상급등여부", "KRX300여부", "매출액", "영업이익",
-    "경상이익", "당기순이익", "ROE", "기준년월", "시가총액억",
-    "그룹사코드", "회사신용한도초과여부", "담보대출가능여부", "대주가능여부",
+    "증권그룹코드",
+    "시가총액규모구분코드",
+    "지수업종대분류코드",
+    "지수업종중분류코드",
+    "지수업종소분류코드",
+    "벤처기업여부",
+    "저유동성여부",
+    "KRX종목여부",
+    "ETP상품구분코드",
+    "KRX100여부",
+    "KRX자동차여부",
+    "KRX반도체여부",
+    "KRX바이오여부",
+    "KRX은행여부",
+    "SPAC여부",
+    "KRX에너지화학여부",
+    "KRX철강여부",
+    "단기과열코드",
+    "KRX미디어통신여부",
+    "KRX건설여부",
+    "투자주의환기여부",
+    "KRX증권여부",
+    "KRX선박여부",
+    "KRX보험여부",
+    "KRX운송여부",
+    "KOSDAQ150여부",
+    "기준가",
+    "정규시장매매수량단위",
+    "시간외시장매매수량단위",
+    "거래정지여부",
+    "정리매매여부",
+    "관리종목여부",
+    "시장경고구분코드",
+    "시장경고위험예고여부",
+    "불성실공시여부",
+    "우회상장여부",
+    "락구분코드",
+    "액면가변경구분코드",
+    "증자구분코드",
+    "증거금비율",
+    "신용가능여부",
+    "신용기간",
+    "전일거래량",
+    "액면가",
+    "상장일자",
+    "상장주수천주",
+    "자본금",
+    "결산월",
+    "공모가",
+    "우선주구분코드",
+    "공매도과열여부",
+    "이상급등여부",
+    "KRX300여부",
+    "매출액",
+    "영업이익",
+    "경상이익",
+    "당기순이익",
+    "ROE",
+    "기준년월",
+    "시가총액억",
+    "그룹사코드",
+    "회사신용한도초과여부",
+    "담보대출가능여부",
+    "대주가능여부",
 ]
 
 assert len(KOSPI_WIDTHS) == len(KOSPI_FIELDS)
@@ -135,8 +242,24 @@ KIND_INDUSTRY_RULES = [
 
 PRODUCT_OVERRIDE_RULES = [
     (("2차전지", "이차전지", "BATTERY", "배터리", "ESS"), "이차전지"),
-    (("반도체 제조", "메모리", "HBM", "DRAM", "NAND", "파운드리", "웨이퍼", "시스템반도체"), "반도체"),
-    (("MLCC", "INDUCTOR", "CHIP RESISTOR", "카메라모듈", "통신모듈", "전자부품", "패키지 기판", "FC-BGA", "PCB"), "전자부품"),
+    (
+        ("반도체 제조", "메모리", "HBM", "DRAM", "NAND", "파운드리", "웨이퍼", "시스템반도체"),
+        "반도체",
+    ),
+    (
+        (
+            "MLCC",
+            "INDUCTOR",
+            "CHIP RESISTOR",
+            "카메라모듈",
+            "통신모듈",
+            "전자부품",
+            "패키지 기판",
+            "FC-BGA",
+            "PCB",
+        ),
+        "전자부품",
+    ),
     (("OLED", "LCD", "디스플레이"), "디스플레이"),
     (("반도체",), "반도체"),
     (("기지국", "안테나", "라우터", "통신장비", "네트워크 장비"), "통신장비"),
@@ -274,6 +397,7 @@ SMALL_TO_LARGE_MAP = {
 
 class KindCorpListParser(HTMLParser):
     def __init__(self) -> None:
+        """객체의 초기 상태를 설정한다."""
         super().__init__()
         self.in_td = False
         self.in_th = False
@@ -283,6 +407,7 @@ class KindCorpListParser(HTMLParser):
         self.rows: list[list[str]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        """HTML 시작 태그를 처리한다."""
         if tag == "td":
             self.in_td = True
             self.current = []
@@ -293,6 +418,7 @@ class KindCorpListParser(HTMLParser):
             self.row = []
 
     def handle_endtag(self, tag: str) -> None:
+        """HTML 종료 태그를 처리한다."""
         if tag == "td" and self.in_td:
             self.row.append(" ".join("".join(self.current).split()))
             self.in_td = False
@@ -305,17 +431,20 @@ class KindCorpListParser(HTMLParser):
                 self.row = []
 
     def handle_data(self, data: str) -> None:
+        """HTML 텍스트 데이터를 처리한다."""
         if self.in_td or self.in_th:
             self.current.append(data)
 
 
 def _clean_scalar(value: object) -> str:
+    """정리 스칼라을 처리한다."""
     if pd.isna(value):
         return ""
     return str(value).strip()
 
 
 def _clean_columns(df: pd.DataFrame, columns: list[str] | None = None) -> pd.DataFrame:
+    """정리 컬럼을 처리한다."""
     out = df.copy()
     target_cols = columns or list(out.columns)
     for col in target_cols:
@@ -326,11 +455,13 @@ def _clean_columns(df: pd.DataFrame, columns: list[str] | None = None) -> pd.Dat
 
 
 def _is_valid_idx_code(code: object) -> bool:
+    """유효 idx 코드 여부를 판단한다."""
     value = _clean_scalar(code)
     return value not in {"", "0000"}
 
 
 def _normalize_stock_code(code: object) -> str:
+    """종목 코드을 정규화한다"""
     value = _clean_scalar(code).upper()
     if value.isdigit():
         return value.zfill(6)
@@ -338,20 +469,24 @@ def _normalize_stock_code(code: object) -> str:
 
 
 def _normalize_text(text: object) -> str:
+    """텍스트을 정규화한다"""
     return " ".join(_clean_scalar(text).upper().split())
 
 
 def _contains_any(text: str, keywords: Iterable[str]) -> bool:
+    """contains 임의을 처리한다."""
     return any(keyword.upper() in text for keyword in keywords)
 
 
 def _fetch_bytes(url: str) -> bytes:
+    """fetch 바이트을 처리한다."""
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(request, context=ssl._create_unverified_context()) as response:
-        return response.read()
+        return cast(bytes, response.read())
 
 
 def download_and_extract(zip_filename: str, extracted_filename: str, out_dir: Path) -> Path:
+    """원격 압축 파일을 내려받아 해제한다."""
     out_dir.mkdir(parents=True, exist_ok=True)
     zip_path = out_dir / zip_filename
     zip_path.write_bytes(_fetch_bytes(f"{MASTER_BASE}/{zip_filename}"))
@@ -363,16 +498,22 @@ def download_and_extract(zip_filename: str, extracted_filename: str, out_dir: Pa
     return out_dir / extracted_filename
 
 
-def split_fixed_width(text: str, widths: Iterable[int], field_names: Iterable[str]) -> dict[str, str]:
+def split_fixed_width(
+    text: str,
+    widths: Iterable[int],
+    field_names: Iterable[str],
+) -> dict[str, str]:
+    """고정폭 텍스트를 필드별로 분리한다."""
     position = 0
     out: dict[str, str] = {}
-    for width, name in zip(widths, field_names):
+    for width, name in zip(widths, field_names, strict=False):
         out[name] = text[position:position + width].strip()
         position += width
     return out
 
 
 def _score_sector_name(code: str, name: str) -> tuple[int, int, int]:
+    """점수 섹터 이름을 처리한다."""
     text = (name or "").strip()
     if not text:
         return (10_000, 0, 0)
@@ -388,6 +529,7 @@ def _score_sector_name(code: str, name: str) -> tuple[int, int, int]:
 
 
 def choose_sector_name(code: str, raw_line: str) -> tuple[str, str]:
+    """업종 코드를 대표 이름으로 매핑한다."""
     candidate_fixed = raw_line[5:45].rstrip()
     candidate_official = raw_line[3:43].rstrip()
 
@@ -397,6 +539,7 @@ def choose_sector_name(code: str, raw_line: str) -> tuple[str, str]:
 
 
 def load_sector_master(workdir: Path) -> pd.DataFrame:
+    """업종 마스터를 불러온다."""
     path = download_and_extract("idxcode.mst.zip", "idxcode.mst", workdir)
 
     rows = []
@@ -424,7 +567,14 @@ def load_sector_master(workdir: Path) -> pd.DataFrame:
     return df.drop_duplicates(subset=["업종코드", "업종명"], keep="first").reset_index(drop=True)
 
 
-def parse_stock_master(path: Path, market: str, tail_width: int, widths: list[int], field_names: list[str]) -> pd.DataFrame:
+def parse_stock_master(
+    path: Path,
+    market: str,
+    tail_width: int,
+    widths: list[int],
+    field_names: list[str],
+) -> pd.DataFrame:
+    """종목 마스터 파일을 파싱한다."""
     rows = []
     with open(path, "r", encoding="cp949") as file:
         for raw_line in file:
@@ -454,16 +604,19 @@ def parse_stock_master(path: Path, market: str, tail_width: int, widths: list[in
 
 
 def load_kospi_master(workdir: Path) -> pd.DataFrame:
+    """KOSPI 종목 마스터를 불러온다."""
     path = download_and_extract("kospi_code.mst.zip", "kospi_code.mst", workdir)
     return parse_stock_master(path, "KOSPI", 228, KOSPI_WIDTHS, KOSPI_FIELDS)
 
 
 def load_kosdaq_master(workdir: Path) -> pd.DataFrame:
+    """KOSDAQ 종목 마스터를 불러온다."""
     path = download_and_extract("kosdaq_code.mst.zip", "kosdaq_code.mst", workdir)
     return parse_stock_master(path, "KOSDAQ", 222, KOSDAQ_WIDTHS, KOSDAQ_FIELDS)
 
 
 def attach_sector_names(stock_df: pd.DataFrame, sector_df: pd.DataFrame) -> pd.DataFrame:
+    """종목 데이터에 업종명을 연결한다."""
     lookup = sector_df[["업종코드", "업종명"]].drop_duplicates().copy()
     out = stock_df.copy()
 
@@ -483,6 +636,7 @@ def attach_sector_names(stock_df: pd.DataFrame, sector_df: pd.DataFrame) -> pd.D
 
 
 def classify_security(row: pd.Series) -> tuple[str, str]:
+    """종목 유형을 분류한다."""
     group_code = row.get("증권그룹코드", "")
     etp_code = row.get("ETP상품구분코드", "")
     preferred_code = row.get("우선주구분코드", "")
@@ -532,21 +686,28 @@ def classify_security(row: pd.Series) -> tuple[str, str]:
 
 
 def load_kind_company_profiles() -> pd.DataFrame:
+    """KIND 기업 프로필을 불러온다."""
     html = _fetch_bytes(KIND_CORP_LIST_URL).decode("euc-kr", "replace")
     return parse_kind_company_list_html(html)
 
 
 def parse_kind_company_list_html(html: str) -> pd.DataFrame:
+    """KIND 기업 목록 HTML을 파싱한다."""
     parser = KindCorpListParser()
     parser.feed(html)
     rows = [row for row in parser.rows if len(row) == len(parser.headers)]
     df = pd.DataFrame(rows, columns=parser.headers)
     df = _clean_columns(df)
     df["종목코드"] = df["종목코드"].map(_normalize_stock_code)
-    return df[KIND_COLUMNS].drop_duplicates(subset=["종목코드"], keep="first").reset_index(drop=True)
+    return (
+        df[KIND_COLUMNS]
+        .drop_duplicates(subset=["종목코드"], keep="first")
+        .reset_index(drop=True)
+    )
 
 
 def _first_active_flag_label(row: pd.Series) -> str:
+    """첫 활성 플래그 label을 처리한다."""
     for flag_column, label in KRX_FLAG_LABELS:
         if row.get(flag_column, "") == "Y":
             return label
@@ -554,12 +715,14 @@ def _first_active_flag_label(row: pd.Series) -> str:
 
 
 def _official_classification_name(row: pd.Series, code_column: str, name_column: str) -> str:
+    """official 분류 이름을 처리한다."""
     if _is_valid_idx_code(row.get(code_column, "")):
         return _clean_scalar(row.get(name_column, ""))
     return ""
 
 
 def normalize_kind_industry(industry: object) -> str:
+    """KIND 업종명을 정규화한다."""
     text = _clean_scalar(industry)
     normalized = _normalize_text(industry)
 
@@ -571,6 +734,7 @@ def normalize_kind_industry(industry: object) -> str:
 
 
 def detect_product_override(row: pd.Series) -> str:
+    """제품 기반 분류 예외를 탐지한다."""
     combined_text = _normalize_text(f"{row.get('업종', '')} {row.get('주요제품', '')}")
     for keywords, label in PRODUCT_OVERRIDE_RULES:
         if _contains_any(combined_text, keywords):
@@ -579,6 +743,7 @@ def detect_product_override(row: pd.Series) -> str:
 
 
 def determine_small_classification(row: pd.Series) -> str:
+    """소분류를 결정한다."""
     official_small = _official_classification_name(row, "지수업종소분류코드", "지수업종소분류명")
     if official_small:
         return official_small
@@ -610,6 +775,7 @@ def determine_small_classification(row: pd.Series) -> str:
 
 
 def determine_middle_classification(row: pd.Series, small_classification: str) -> str:
+    """중분류를 결정한다."""
     official_middle = _official_classification_name(row, "지수업종중분류코드", "지수업종중분류명")
     if official_middle:
         return official_middle
@@ -625,7 +791,12 @@ def determine_middle_classification(row: pd.Series, small_classification: str) -
     return SMALL_TO_LARGE_MAP.get(small_classification, "기타")
 
 
-def determine_large_classification(row: pd.Series, small_classification: str, middle_classification: str) -> str:
+def determine_large_classification(
+    row: pd.Series,
+    small_classification: str,
+    middle_classification: str,
+) -> str:
+    """대분류를 결정한다."""
     official_large = _official_classification_name(row, "지수업종대분류코드", "지수업종대분류명")
     if official_large:
         return official_large
@@ -641,6 +812,7 @@ def determine_large_classification(row: pd.Series, small_classification: str, mi
 
 
 def build_classification_frame(stock_df: pd.DataFrame, kind_df: pd.DataFrame) -> pd.DataFrame:
+    """최종 분류 데이터프레임을 구성한다."""
     stocks = _clean_columns(stock_df)
     stocks["종목코드"] = stocks["종목코드"].map(_normalize_stock_code)
 
@@ -648,8 +820,14 @@ def build_classification_frame(stock_df: pd.DataFrame, kind_df: pd.DataFrame) ->
     kind_profiles["종목코드"] = kind_profiles["종목코드"].map(_normalize_stock_code)
     kind_profiles = kind_profiles[KIND_COLUMNS].drop_duplicates(subset=["종목코드"], keep="first")
 
-    common_stocks = stocks[stocks.apply(lambda row: classify_security(row)[0] == "보통주", axis=1)].copy()
-    common_stocks = common_stocks.merge(kind_profiles[["종목코드", "업종", "주요제품"]], on="종목코드", how="left")
+    common_stocks = stocks[
+        stocks.apply(lambda row: classify_security(row)[0] == "보통주", axis=1)
+    ].copy()
+    common_stocks = common_stocks.merge(
+        kind_profiles[["종목코드", "업종", "주요제품"]],
+        on="종목코드",
+        how="left",
+    )
     common_stocks = _clean_columns(common_stocks)
 
     common_stocks["소분류"] = common_stocks.apply(determine_small_classification, axis=1)
@@ -668,6 +846,7 @@ def build_classification_frame(stock_df: pd.DataFrame, kind_df: pd.DataFrame) ->
 
 
 def save_classification_csv(df: pd.DataFrame, out_dir: Path) -> Path:
+    """분류 CSV를 저장한다."""
     out_dir.mkdir(parents=True, exist_ok=True)
     output_path = out_dir / OUTPUT_FILENAME
     df.to_csv(output_path, index=False, encoding="utf-8-sig")
@@ -675,6 +854,7 @@ def save_classification_csv(df: pd.DataFrame, out_dir: Path) -> Path:
 
 
 def main() -> None:
+    """CLI 진입점을 실행한다."""
     workdir = Path(os.getcwd())
     out_dir = workdir / OUT_DIR
 

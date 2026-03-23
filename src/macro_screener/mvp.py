@@ -75,4 +75,5 @@ __all__ = [
 def build_scheduled_stub_context(
     trading_date: str, run_type: str
 ) -> dict[str, str | dict[str, str]]:
+    """스케줄 스텁 컨텍스트를 구성한다."""
     return build_scheduled_context(trading_date, run_type)

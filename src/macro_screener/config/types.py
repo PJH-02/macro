@@ -17,6 +17,7 @@ class PathConfig(SerializableMixin):
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "PathConfig":
+        """딕셔너리 payload로 객체를 생성한다."""
         return cls(
             data_dir=str(payload.get("data_dir", "data")),
             log_dir=str(payload.get("log_dir", "data/logs")),
@@ -28,6 +29,7 @@ class PathConfig(SerializableMixin):
         )
 
     def resolve(self, relative_path: str, base_path: Path) -> Path:
+        """확정을 처리한다."""
         path = Path(relative_path)
         return path if path.is_absolute() else base_path / path
 
@@ -40,6 +42,7 @@ class ScheduleConfig(SerializableMixin):
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "ScheduleConfig":
+        """딕셔너리 payload로 객체를 생성한다."""
         return cls(
             timezone=str(payload.get("timezone", "Asia/Seoul")),
             pre_open_time=str(payload.get("pre_open_time", "08:30")),
@@ -55,6 +58,7 @@ class UniverseConfig(SerializableMixin):
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "UniverseConfig":
+        """딕셔너리 payload로 객체를 생성한다."""
         markets = tuple(str(item) for item in payload.get("markets", ["KOSPI", "KOSDAQ"]))
         return cls(
             markets=markets,
@@ -82,6 +86,7 @@ class Stage1Config(SerializableMixin):
     )
 
     def __post_init__(self) -> None:
+        """입력값의 유효성을 검증한다."""
         if set(self.channels) != {"G", "IC", "FC", "ED", "FX"}:
             raise ValueError("Stage1 channels must exactly match the MVP channel set.")
         invalid_values = {
@@ -96,6 +101,7 @@ class Stage1Config(SerializableMixin):
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "Stage1Config":
+        """딕셔너리 payload로 객체를 생성한다."""
         manual_states = {
             str(key): int(value)
             for key, value in payload.get(
@@ -147,6 +153,7 @@ class Stage2Config(SerializableMixin):
     )
 
     def __post_init__(self) -> None:
+        """입력값의 유효성을 검증한다."""
         missing = {
             "supply_contract",
             "treasury_stock",
@@ -160,6 +167,7 @@ class Stage2Config(SerializableMixin):
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "Stage2Config":
+        """딕셔너리 payload로 객체를 생성한다."""
         score_weights = {
             str(key): float(value)
             for key, value in payload.get(
@@ -203,11 +211,13 @@ class RuntimePolicyConfig(SerializableMixin):
     max_runtime_minutes_warning: int = 5
 
     def __post_init__(self) -> None:
+        """입력값의 유효성을 검증한다."""
         if self.normal_mode not in {"live", "degraded"}:
             raise ValueError("Runtime normal_mode must be 'live' or 'degraded'.")
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "RuntimePolicyConfig":
+        """딕셔너리 payload로 객체를 생성한다."""
         return cls(
             retries=int(payload.get("retries", 3)),
             scheduler_enabled=bool(payload.get("scheduler_enabled", True)),
@@ -248,6 +258,7 @@ class AppConfig(SerializableMixin):
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "AppConfig":
+        """딕셔너리 payload로 객체를 생성한다."""
         return cls(
             config_version=str(payload.get("config_version", "mvp-1")),
             environment=str(payload.get("environment", "local")),

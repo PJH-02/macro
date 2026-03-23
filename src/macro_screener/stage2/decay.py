@@ -23,6 +23,7 @@ HALF_LIVES = {
 
 
 def decayed_score(block_name: str, trading_days_elapsed: int) -> float:
+    """감쇠 점수를 계산한다."""
     weight = BLOCK_WEIGHTS[block_name]
     if weight == 0.0:
         return 0.0

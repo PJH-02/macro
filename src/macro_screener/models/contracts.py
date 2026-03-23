@@ -36,6 +36,7 @@ class ScheduledWindowKey(SerializableMixin):
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "ScheduledWindowKey":
+        """딕셔너리 payload로 객체를 생성한다."""
         return cls(
             trading_date=parse_date(payload["trading_date"]),
             run_type=RunType(payload["run_type"]),
@@ -56,6 +57,7 @@ class ChannelState(SerializableMixin):
     warning_flags: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
+        """입력값의 유효성을 검증한다."""
         if self.channel not in {"G", "IC", "FC", "ED", "FX"}:
             raise ValueError(f"Unsupported channel: {self.channel}")
         if self.state not in {-1, 0, 1}:
@@ -67,10 +69,12 @@ class ChannelState(SerializableMixin):
 
     @property
     def source(self) -> str:
+        """공개용 소스 이름을 반환한다."""
         return self.source_name
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "ChannelState":
+        """딕셔너리 payload로 객체를 생성한다."""
         effective_at_raw = payload.get("effective_at", payload.get("as_of_timestamp"))
         if effective_at_raw is None:
             raise ValueError("ChannelState requires effective_at or as_of_timestamp")
@@ -113,10 +117,12 @@ class IndustryScore(SerializableMixin):
     )
 
     def tie_breaker_key(self) -> tuple[float, float, str]:
+        """tie breaker key을 처리한다."""
         return (abs(self.negative_penalty), -self.positive_contribution, self.industry_code)
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "IndustryScore":
+        """딕셔너리 payload로 객체를 생성한다."""
         return cls(
             industry_code=str(payload["industry_code"]),
             industry_name=str(payload["industry_name"]),
@@ -150,6 +156,7 @@ class RunMetadata(SerializableMixin):
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "RunMetadata":
+        """딕셔너리 payload로 객체를 생성한다."""
         window_payload = payload.get("scheduled_window_key")
         return cls(
             run_id=str(payload["run_id"]),
@@ -176,6 +183,7 @@ class Stage1Result(SerializableMixin):
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "Stage1Result":
+        """딕셔너리 payload로 객체를 생성한다."""
         return cls(
             run_id=str(payload["run_id"]),
             run_type=RunType(payload["run_type"]),
@@ -201,6 +209,7 @@ class CalendarContext(SerializableMixin):
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "CalendarContext":
+        """딕셔너리 payload로 객체를 생성한다."""
         previous = payload.get("previous_trading_date")
         next_value = payload.get("next_trading_date")
         return cls(
@@ -223,6 +232,7 @@ class ScoringContext(SerializableMixin):
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "ScoringContext":
+        """딕셔너리 payload로 객체를 생성한다."""
         config_payload = payload.get("config", {})
         if not isinstance(config_payload, dict):
             raise ValueError("ScoringContext config must be a mapping")
@@ -252,10 +262,12 @@ class StockScore(SerializableMixin):
     risk_flags: list[str] = field(default_factory=list)
 
     def tie_breaker_key(self) -> tuple[float, float, str]:
+        """tie breaker key을 처리한다."""
         return (-self.raw_dart_score, -self.raw_industry_score, self.stock_code)
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "StockScore":
+        """딕셔너리 payload로 객체를 생성한다."""
         return cls(
             stock_code=str(payload["stock_code"]),
             stock_name=str(payload["stock_name"]),
@@ -288,6 +300,7 @@ class Snapshot(SerializableMixin):
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "Snapshot":
+        """딕셔너리 payload로 객체를 생성한다."""
         published = payload.get("published_at")
         return cls(
             run_id=str(payload["run_id"]),

@@ -45,6 +45,7 @@ def build_manual_context(
     input_cutoff: str | datetime | None = None,
     published_at: str | datetime | None = None,
 ) -> dict[str, str]:
+    """수동 실행 컨텍스트를 구성한다."""
     as_of_dt = parse_datetime(as_of_timestamp) if as_of_timestamp is not None else datetime.now(KST)
     cutoff_dt = parse_datetime(input_cutoff) if input_cutoff is not None else as_of_dt
     published_dt = parse_datetime(published_at) if published_at is not None else as_of_dt
@@ -67,6 +68,7 @@ def build_demo_snapshot(
     published_at: str = DEFAULT_DEMO_AS_OF,
     channel_states: dict[str, int] | None = None,
 ) -> Snapshot:
+    """데모용 스냅샷을 구성한다."""
     context = build_manual_context(
         run_id=run_id,
         run_type=run_type,
@@ -103,20 +105,24 @@ def build_demo_snapshot(
 
 
 def _resolve_config(config_path: str | Path | None) -> AppConfig:
+    """설정 파일을 불러온다."""
     return load_config(config_path)
 
 
 def _repo_relative(path_text: str) -> Path:
+    """저장소 기준 경로로 변환한다."""
     path = Path(path_text)
     return path if path.is_absolute() else Path.cwd() / path
 
 
 def _scheduled_window_key_text(context: Mapping[str, Any]) -> str | None:
+    """스케줄 윈도우 키 문자열을 꺼낸다."""
     value = context.get("scheduled_window_key_text")
     return None if value is None else str(value)
 
 
 def _scheduled_window_key(context: Mapping[str, Any]) -> ScheduledWindowKey | None:
+    """스케줄 윈도우 키 객체를 복원한다."""
     payload = context.get("scheduled_window_key")
     if not isinstance(payload, Mapping):
         return None
@@ -132,6 +138,7 @@ def _resolve_macro_states(
     channel_states: dict[str, int] | None,
     use_demo_inputs: bool,
 ) -> Any:
+    """매크로 상태을 결정한다"""
     if channel_states is not None:
         merged_states = {**config.stage1.manual_channel_states, **channel_states}
         return ManualMacroDataSource(
@@ -144,22 +151,45 @@ def _resolve_macro_states(
             source_name="demo_manual",
         ).fetch_channel_states()
     if _is_production_live_mode(config=config, mode=mode, use_demo_inputs=use_demo_inputs):
-        try:
-            return load_live_macro_data_source(
-                as_of_timestamp=str(context["as_of_timestamp"]),
-                input_cutoff=str(context["input_cutoff"]),
-                ecos_api_key_env=config.runtime.ecos_api_key_env,
-                fred_api_key_env=config.runtime.fred_api_key_env,
-                source_name="ecos_fred_live",
-                source_version=config.config_version,
-            ).fetch_channel_states()
-        except Exception as exc:
-            if config.runtime.reuse_last_known_channel_states:
-                try:
-                    return PersistedMacroDataSource(store).fetch_channel_states()
-                except Exception:
-                    raise exc from None
-            raise
+        return _load_production_live_macro_states(
+            config=config,
+            store=store,
+            context=context,
+        )
+    return _load_configured_or_persisted_macro_states(config=config, store=store)
+
+
+def _load_production_live_macro_states(
+    *,
+    config: AppConfig,
+    store: Any,
+    context: Mapping[str, Any],
+) -> Any:
+    """운영 실시간 모드의 매크로 상태를 불러온다."""
+    try:
+        return load_live_macro_data_source(
+            as_of_timestamp=str(context["as_of_timestamp"]),
+            input_cutoff=str(context["input_cutoff"]),
+            ecos_api_key_env=config.runtime.ecos_api_key_env,
+            fred_api_key_env=config.runtime.fred_api_key_env,
+            source_name="ecos_fred_live",
+            source_version=config.config_version,
+        ).fetch_channel_states()
+    except Exception as exc:
+        if config.runtime.reuse_last_known_channel_states:
+            try:
+                return PersistedMacroDataSource(store).fetch_channel_states()
+            except Exception:
+                raise exc from None
+        raise
+
+
+def _load_configured_or_persisted_macro_states(
+    *,
+    config: AppConfig,
+    store: Any,
+) -> Any:
+    """설정값 또는 저장된 매크로 상태를 불러온다."""
     try:
         return ManualMacroDataSource(
             config.stage1.manual_channel_states,
@@ -177,6 +207,7 @@ def _is_production_live_mode(
     mode: RunMode,
     use_demo_inputs: bool,
 ) -> bool:
+    """운영 실시간 모드 여부를 판단한다."""
     if use_demo_inputs or mode == RunMode.BACKTEST:
         return False
     return (
@@ -193,6 +224,7 @@ def _enforce_macro_source_policy(
     channel_states: dict[str, int] | None,
     use_demo_inputs: bool,
 ) -> None:
+    """매크로 소스 정책을 강제한다."""
     if not _is_production_live_mode(config=config, mode=mode, use_demo_inputs=use_demo_inputs):
         return
     manual_like_sources = {"manual", "manual_config", "manual_override", "demo_manual"}
@@ -213,6 +245,7 @@ def _enforce_krx_source_policy(
     stock_source: str,
     use_demo_inputs: bool,
 ) -> None:
+    """KRX 소스 정책을 강제한다."""
     if not _is_production_live_mode(config=config, mode=mode, use_demo_inputs=use_demo_inputs):
         return
     if stock_source != "live":
@@ -226,6 +259,7 @@ def _enforce_dart_source_policy(
     disclosure_source: str,
     use_demo_inputs: bool,
 ) -> None:
+    """DART 소스 정책을 강제한다."""
     if not _is_production_live_mode(config=config, mode=mode, use_demo_inputs=use_demo_inputs):
         return
     if disclosure_source in {"demo", "file"}:
@@ -242,6 +276,7 @@ def _load_stage1_rows_and_rank_tables(
     dict[str, dict[str, list[str]]] | None,
     dict[str, float] | None,
 ]:
+    """1단계 업종 행과 순위표를 불러온다."""
     artifact_path = _repo_relative(config.stage1.rank_table_artifact_path)
     industry_master_path = _repo_relative(config.universe.industry_master_path)
     if artifact_path.exists() and industry_master_path.exists():
@@ -275,6 +310,7 @@ def _load_disclosures(
     input_cutoff: str,
     use_demo_inputs: bool,
 ) -> DARTLoadResult:
+    """공시 데이터를 불러온다."""
     if use_demo_inputs:
         return DARTLoadResult(
             disclosures=DARTClient(use_demo_fallback=True).load_demo_disclosures(),
@@ -311,6 +347,7 @@ def _should_enforce_live_runtime_policy(
     config: AppConfig,
     use_demo_inputs: bool,
 ) -> bool:
+    """실시간 런타임 정책 강제 여부를 판단한다."""
     return (
         not use_demo_inputs
         and mode in {RunMode.MANUAL, RunMode.SCHEDULED}
@@ -326,6 +363,7 @@ def _dart_runtime_status(
     disclosure_result: DARTLoadResult,
     warnings: list[str],
 ) -> SnapshotStatus | None:
+    """DART 런타임 결과 상태를 판단한다."""
     if not _should_enforce_live_runtime_policy(
         mode=mode,
         config=config,
@@ -355,6 +393,7 @@ def _channel_state_metadata_kwargs(
     config: AppConfig,
     macro_result: Any,
 ) -> dict[str, Any]:
+    """채널 상태 메타데이터 인자를 구성한다."""
     warning_map = macro_result.warning_flags_by_channel or None
     kwargs: dict[str, Any] = {
         "input_cutoff": macro_result.input_cutoff or parse_datetime(str(context["input_cutoff"])),
@@ -377,6 +416,7 @@ def _compute_stage1_result_compat(
     sector_rank_tables: dict[str, dict[str, list[str]]] | None = None,
     channel_weights: dict[str, float] | None = None,
 ) -> Any:
+    """호환 경로의 1단계 결과를 계산한다."""
     kwargs: dict[str, Any] = {
         "channel_states": channel_states,
         "exposures": exposures,
@@ -409,6 +449,7 @@ def _channel_state_snapshot_metadata(
     config: AppConfig,
     macro_result: Any,
 ) -> dict[str, Any]:
+    """채널 상태 스냅샷 메타데이터를 구성한다."""
     metadata = {
         "source_name": macro_result.source_name,
         "source_version": macro_result.source_version or config.config_version,
@@ -436,6 +477,7 @@ def _load_krx_stock_universe(
     use_demo_inputs: bool,
     krx_client: KRXClient,
 ) -> KRXLoadResult:
+    """KRX 종목 유니버스를 불러온다."""
     if use_demo_inputs:
         return KRXLoadResult(
             rows=krx_client.load_demo_stocks(),
@@ -475,6 +517,7 @@ def run_pipeline_context(
     channel_states: dict[str, int] | None = None,
     use_demo_inputs: bool = False,
 ) -> dict[str, Any]:
+    """파이프라인 컨텍스트 실행을 수행한다."""
     output_root = Path(output_dir)
     config = _resolve_config(config_path)
     bootstrap = bootstrap_runtime(config, output_root)
@@ -663,6 +706,7 @@ def run_manual(
     channel_states: dict[str, int] | None = None,
     config_path: str | Path | None = None,
 ) -> dict[str, Any]:
+    """수동 파이프라인 실행을 수행한다."""
     context = build_manual_context(
         run_id=run_id,
         run_type=run_type,
@@ -688,6 +732,7 @@ def run_demo(
     input_cutoff: str = DEFAULT_DEMO_INPUT_CUTOFF,
     published_at: str = DEFAULT_DEMO_AS_OF,
 ) -> dict[str, Any]:
+    """데모 파이프라인 실행을 수행한다."""
     context = build_manual_context(
         run_id=run_id,
         run_type=run_type,
@@ -712,6 +757,7 @@ def run_scheduled(
     attempted_at: str | datetime | None = None,
     config_path: str | Path | None = None,
 ) -> dict[str, Any]:
+    """스케줄 파이프라인 실행을 수행한다."""
     context = build_scheduled_context(trading_date, run_type, attempted_at=attempted_at)
     return run_pipeline_context(
         output_dir,
@@ -729,6 +775,7 @@ def run_scheduled_stub(
     attempted_at: str | datetime | None = None,
     config_path: str | Path | None = None,
 ) -> dict[str, Any]:
+    """스케줄 스텁 실행을 수행한다."""
     return run_scheduled(
         output_dir,
         trading_date=trading_date,

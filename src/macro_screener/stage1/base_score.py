@@ -2,6 +2,7 @@ from __future__ import annotations
 
 
 def rank_to_score(rank: int, total: int) -> float:
+    """순위를 점수로 변환한다."""
     if total <= 0:
         raise ValueError("total ranked industries must be positive")
     if rank < 1 or rank > total:
@@ -26,6 +27,7 @@ def channel_contribution_map(
     *,
     channels: tuple[str, ...] = ("G", "IC", "FC", "ED", "FX"),
 ) -> dict[str, float]:
+    """채널별 기여도 맵을 만든다."""
     return {
         channel: float(exposures.get(channel, 0) * channel_states.get(channel, 0))
         for channel in channels
@@ -38,6 +40,7 @@ def sum_contributions(
     *,
     channels: tuple[str, ...] = ("G", "IC", "FC", "ED", "FX"),
 ) -> tuple[float, float, float]:
+    """기여도 합계를 계산한다."""
     contribution_map = channel_contribution_map(
         exposures,
         channel_states,
@@ -59,6 +62,7 @@ def sum_contributions(
 def summarize_weighted_contributions(
     contributions: dict[str, float],
 ) -> tuple[float, float, float]:
+    """가중 기여도를 요약한다."""
     base_score = sum(contributions.values())
     negative_penalty = sum(abs(value) for value in contributions.values() if value < 0)
     positive_contribution = sum(value for value in contributions.values() if value > 0)

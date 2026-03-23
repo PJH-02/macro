@@ -20,6 +20,7 @@ TITLE_PATTERNS = (
 
 
 def classify_disclosure(event_code: str | None, title: str) -> str:
+    """공시 제목과 이벤트를 분류한다."""
     if event_code and event_code in EVENT_CODE_MAP:
         return EVENT_CODE_MAP[event_code]
     normalized = title.strip().lower()

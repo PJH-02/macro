@@ -11,6 +11,7 @@ DEFAULT_TIMEZONE = ZoneInfo("Asia/Seoul")
 
 
 def scheduled_window_key(trading_date: str, run_type: str) -> str:
+    """스케줄 윈도우 키를 만든다."""
     return f"{trading_date}:{run_type}"
 
 
@@ -20,6 +21,7 @@ def build_scheduled_context(
     *,
     attempted_at: str | datetime | None = None,
 ) -> dict[str, str | dict[str, str]]:
+    """스케줄 실행 컨텍스트를 구성한다."""
     if run_type not in SCHEDULED_RUN_TIMES:
         raise ValueError(f"unsupported run type: {run_type}")
     trade_day = date.fromisoformat(trading_date)

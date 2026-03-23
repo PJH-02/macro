@@ -25,6 +25,7 @@ DEFAULT_AS_OF = "2026-03-21T08:30:00+09:00"
 
 
 def load_stage1_artifact(path: str | Path) -> dict[str, Any]:
+    """stage1 산출물을 불러온다"""
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("stage1 artifact must be a mapping")
@@ -34,6 +35,7 @@ def load_stage1_artifact(path: str | Path) -> dict[str, Any]:
 def _build_rank_lookup(
     sector_rank_tables: dict[str, dict[str, list[str]]],
 ) -> dict[str, dict[str, dict[str, int]]]:
+    """순위 lookup을 구성한다"""
     lookup: dict[str, dict[str, dict[str, int]]] = {}
     for channel in CHANNELS:
         channel_tables = sector_rank_tables.get(channel)
@@ -57,6 +59,7 @@ def _weighted_ranked_contributions(
     rank_lookup: dict[str, dict[str, dict[str, int]]],
     channel_weights: dict[str, float],
 ) -> dict[str, float]:
+    """가중 ranked 기여도을 처리한다."""
     weighted: dict[str, float] = {channel: 0.0 for channel in CHANNELS}
     for channel in CHANNELS:
         state = channel_states[channel]
@@ -92,6 +95,7 @@ def compute_stage1_result(
     sector_rank_tables: dict[str, dict[str, list[str]]] | None = None,
     channel_weights: dict[str, float] | None = None,
 ) -> Stage1Result:
+    """1단계 점수 결과를 계산한다."""
     overlay_map = resolve_overlay_adjustments(overlay_adjustments)
     missing_channels = [
         channel for channel in CHANNELS if channel not in channel_states

@@ -1,0 +1,16 @@
+{
+  "provider": "ecos",
+  "service": "StatisticSearch",
+  "series": [
+    {
+      "table_code": "901Y009",
+      "item_code": "0",
+      "frequency": "M",
+      "unit": "2015=100",
+      "observation_date": "2026-02",
+      "release_date": "2026-03-15",
+      "retrieval_timestamp": "2026-03-22T00:02:00Z",
+      "transformation_method": "yoy"
+    }
+  ]
+}

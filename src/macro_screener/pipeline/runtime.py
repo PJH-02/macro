@@ -14,6 +14,7 @@ class BootstrapResult:
 
 
 def bootstrap_runtime(config: AppConfig, base_path: Path) -> BootstrapResult:
+    """런타임 디렉터리와 저장소를 초기화한다."""
     directories = (
         config.paths.resolve(config.paths.data_dir, base_path),
         config.paths.resolve(config.paths.log_dir, base_path),

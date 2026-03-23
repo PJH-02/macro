@@ -31,11 +31,14 @@ class MacroLoadResult:
 
     @property
     def source(self) -> str:
+        """공개용 소스 이름을 반환한다."""
         return self.source_name
 
 
 class MacroDataSource(Protocol):
-    def fetch_channel_states(self) -> MacroLoadResult: ...
+    def fetch_channel_states(self) -> MacroLoadResult:
+        """채널 상태를 계산하거나 불러온다."""
+        ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -54,6 +57,7 @@ class MacroSeriesSignal:
     fallback_used: bool = False
 
     def __post_init__(self) -> None:
+        """입력값의 유효성을 검증한다."""
         if self.channel not in CHANNELS:
             raise ValueError(f"unsupported macro signal channel: {self.channel}")
         if self.state not in {-1, 0, 1}:
@@ -72,6 +76,7 @@ class MacroSeriesClassifierSpec:
     degraded_fallback_only: bool = False
 
     def __post_init__(self) -> None:
+        """입력값의 유효성을 검증한다."""
         if self.channel not in CHANNELS:
             raise ValueError(f"unsupported classifier channel: {self.channel}")
         if self.positive_when not in {"higher", "lower"}:
@@ -197,6 +202,7 @@ class LiveMacroDataSource:
         source_name: str = "live_macro",
         source_version: str | None = None,
     ) -> "LiveMacroDataSource":
+        """고정 시리즈 신호 묶음으로 데이터 소스를 만든다."""
         return cls(
             channel_signals=build_fixed_channel_signal_map(
                 series_signals,
@@ -207,6 +213,7 @@ class LiveMacroDataSource:
         )
 
     def fetch_channel_states(self) -> MacroLoadResult:
+        """채널 상태를 계산하거나 불러온다."""
         channel_states: dict[str, int] = {}
         confidence_by_channel: dict[str, float] = {}
         warning_flags_by_channel: dict[str, list[str]] = {}
@@ -260,6 +267,7 @@ class ManualMacroDataSource:
     source_name: str = "manual"
 
     def fetch_channel_states(self) -> MacroLoadResult:
+        """채널 상태를 계산하거나 불러온다."""
         missing = [channel for channel in CHANNELS if channel not in self.channel_states]
         if missing:
             raise ValueError(f"missing channel states: {', '.join(missing)}")
@@ -277,6 +285,7 @@ class PersistedMacroDataSource:
     store: SnapshotRegistry
 
     def fetch_channel_states(self) -> MacroLoadResult:
+        """채널 상태를 계산하거나 불러온다."""
         snapshot = self.store.load_last_channel_state_snapshot()
         if snapshot is None:
             raise ValueError("no persisted macro channel states available")
@@ -325,6 +334,7 @@ class PersistedMacroDataSource:
 
 
 def last_known_channel_states(store: SnapshotRegistry) -> list[ChannelState] | None:
+    """마지막으로 저장된 채널 상태를 반환한다."""
     return store.load_last_channel_states()
 
 
@@ -334,6 +344,7 @@ def build_ecos_request_contract(
     item_codes: Sequence[str],
     frequency: str,
 ) -> dict[str, Any]:
+    """ECOS 요청 계약 페이로드를 구성한다."""
     return {
         "provider": "ecos",
         "service": "StatisticSearch",
@@ -349,6 +360,7 @@ def build_kosis_request_contract(
     item_id: str,
     frequency: str,
 ) -> dict[str, Any]:
+    """KOSIS 요청 계약 페이로드를 구성한다."""
     return {
         "provider": "kosis",
         "service": "statistical_data",
@@ -365,6 +377,7 @@ def build_fred_request_contract(
     vintage_mode: str = "current",
     adapter: str = "fred",
 ) -> dict[str, Any]:
+    """FRED 요청 계약 페이로드를 구성한다."""
     return {
         "provider": "us_macro",
         "adapter": adapter,
@@ -384,6 +397,7 @@ def signal_from_ecos_response(
     warning_flags: Sequence[str] = (),
     fallback_used: bool = False,
 ) -> MacroSeriesSignal:
+    """ECOS 응답에서 시그널을 만든다."""
     series = _extract_series_record(payload, series_index=series_index, expected_provider="ecos")
     item_code = str(series.get("item_code") or "").strip()
     series_id = (
@@ -415,6 +429,7 @@ def signal_from_kosis_response(
     warning_flags: Sequence[str] = (),
     fallback_used: bool = False,
 ) -> MacroSeriesSignal:
+    """KOSIS 응답에서 시그널을 만든다."""
     series = _extract_series_record(payload, series_index=series_index, expected_provider="kosis")
     series_id = f"{series['table_id']}:{series['item_id']}"
     return _build_signal_from_series_record(
@@ -443,6 +458,7 @@ def signal_from_fred_response(
     warning_flags: Sequence[str] = (),
     fallback_used: bool = False,
 ) -> MacroSeriesSignal:
+    """FRED 응답에서 시그널을 만든다."""
     series = _extract_series_record(
         payload,
         series_index=series_index,
@@ -471,6 +487,7 @@ def combine_channel_signal_states(
     *,
     neutral_band: float,
 ) -> tuple[int, float]:
+    """채널별 신호 상태를 하나의 상태로 결합한다."""
     if not signals:
         raise ValueError("cannot combine an empty macro signal set")
     combined_score = sum(signal.state for signal in signals) / len(signals)
@@ -487,6 +504,7 @@ def _extract_series_record(
     series_index: int,
     expected_provider: str,
 ) -> Mapping[str, Any]:
+    """시계열 레코드 하나를 추출한다."""
     provider = str(payload.get("provider") or "").strip()
     if provider != expected_provider:
         raise ValueError(f"expected {expected_provider} payload, got {provider}")
@@ -517,6 +535,7 @@ def _build_signal_from_series_record(
     warning_flags: Sequence[str],
     fallback_used: bool,
 ) -> MacroSeriesSignal:
+    """시계열 레코드로 시그널 객체를 만든다."""
     as_of_timestamp = _parse_series_timestamp(observation_date)
     input_cutoff = _parse_series_timestamp(release_date)
     retrieval = _parse_series_timestamp(retrieval_timestamp)
@@ -537,6 +556,7 @@ def _build_signal_from_series_record(
 
 
 def classify_macro_series_value(series_id: str, value: float) -> int:
+    """매크로 시계열 값을 채널 상태로 분류한다."""
     spec = FIXED_SERIES_CLASSIFIER_SPECS.get(series_id)
     if spec is None:
         raise KeyError(f"unknown macro series classifier spec: {series_id}")
@@ -562,6 +582,7 @@ def classify_signal_from_provider_payload(
     warning_flags: Sequence[str] = (),
     fallback_used: bool = False,
 ) -> MacroSeriesSignal:
+    """제공자 페이로드를 고정 규칙으로 분류한다."""
     spec = FIXED_SERIES_CLASSIFIER_SPECS.get(series_id)
     if spec is None:
         raise KeyError(f"unknown macro series classifier spec: {series_id}")
@@ -612,6 +633,7 @@ def build_live_macro_data_source_from_provider_payloads(
     confidence_by_series: Mapping[str, float] | None = None,
     warning_flags_by_series: Mapping[str, Sequence[str]] | None = None,
 ) -> LiveMacroDataSource:
+    """제공자 페이로드 묶음으로 실시간 매크로 데이터 소스를 만든다."""
     series_signals: dict[str, MacroSeriesSignal] = {}
     confidence_map = confidence_by_series or {}
     warning_map = warning_flags_by_series or {}
@@ -635,6 +657,7 @@ def build_fixed_channel_signal_map(
     *,
     degraded_mode: bool = False,
 ) -> dict[str, tuple[MacroSeriesSignal, MacroSeriesSignal]]:
+    """고정 채널 기준으로 시그널 맵을 구성한다."""
     channel_signals: dict[str, tuple[MacroSeriesSignal, MacroSeriesSignal]] = {}
     for channel, roster in FIXED_CHANNEL_SERIES_ROSTER.items():
         korea_signal = _require_series_signal(series_signals, roster.korea_series_id)
@@ -655,6 +678,7 @@ def build_fixed_channel_signal_map(
 
 
 def _parse_series_timestamp(value: str) -> datetime:
+    """시계열 타임스탬프를 파싱한다."""
     text = value.strip()
     if len(text) == 7:
         text = f"{text}-01T00:00:00"
@@ -664,6 +688,7 @@ def _parse_series_timestamp(value: str) -> datetime:
 
 
 def _dedupe_flags(flags: Sequence[str] | Any) -> list[str]:
+    """경고 플래그 중복을 제거한다."""
     return list(dict.fromkeys(str(flag) for flag in flags if str(flag).strip()))
 
 
@@ -672,6 +697,7 @@ def _extract_series_numeric_value(
     *,
     series_index: int,
 ) -> float:
+    """시계열 숫자 값을 추출한다."""
     provider = str(payload.get("provider") or "").strip()
     record = _extract_series_record(
         payload,
@@ -691,6 +717,7 @@ def _require_series_signal(
     series_signals: Mapping[str, MacroSeriesSignal],
     series_id: str,
 ) -> MacroSeriesSignal:
+    """필수 시계열 시그널을 확인한다."""
     signal = series_signals.get(series_id)
     if signal is None:
         raise ValueError(f"missing required macro series signal: {series_id}")
@@ -702,6 +729,7 @@ def _mark_degraded_fallback_signal(
     *,
     primary_series_id: str,
 ) -> MacroSeriesSignal:
+    """저하 모드 대체 시그널로 표시한다."""
     return replace(
         signal,
         warning_flags=tuple(
@@ -786,6 +814,226 @@ FRED_RUNTIME_SERIES_SPECS: dict[str, dict[str, Any]] = {
     },
 }
 
+ECOS_YOY_RUNTIME_SERIES_IDS: tuple[str, ...] = (
+    "kr_ipi_yoy_3mma",
+    "kr_cpi_yoy_3mma",
+    "kr_exports_us_yoy_3mma",
+)
+FRED_YOY_RUNTIME_SERIES_IDS: tuple[str, ...] = ("us_ipi_yoy_3mma", "us_cpi_yoy_3mma")
+
+
+def _load_ecos_runtime_payloads(
+    *,
+    as_of_timestamp: datetime,
+    release_date: datetime,
+    retrieval_timestamp: str,
+    api_key: str,
+) -> dict[str, dict[str, Any]]:
+    """ECOS 런타임 페이로드 묶음을 구성한다."""
+    series_payloads: dict[str, dict[str, Any]] = {}
+
+    for logical_series_id in ECOS_YOY_RUNTIME_SERIES_IDS:
+        spec = ECOS_RUNTIME_SERIES_SPECS[logical_series_id]
+        value, observation_date = _compute_ecos_yoy_3mma(
+            table_code=str(spec["table_code"]),
+            item_codes=tuple(str(item) for item in spec["item_codes"]),
+            as_of_timestamp=as_of_timestamp,
+            api_key=api_key,
+        )
+        series_payloads[logical_series_id] = _build_ecos_runtime_payload(
+            table_code=str(spec["table_code"]),
+            item_codes=tuple(str(item) for item in spec["item_codes"]),
+            observation_date=observation_date,
+            release_date=release_date,
+            retrieval_timestamp=retrieval_timestamp,
+            transformation_method=str(spec["transformation_method"]),
+            value=value,
+        )
+
+    kr_credit_value, kr_credit_as_of = _compute_ecos_credit_spread_z36(
+        as_of_timestamp=as_of_timestamp,
+        api_key=api_key,
+    )
+    series_payloads["kr_credit_spread_z36"] = _build_ecos_runtime_payload(
+        table_code="721Y001",
+        item_codes=("7020000", "5020000"),
+        observation_date=kr_credit_as_of,
+        release_date=release_date,
+        retrieval_timestamp=retrieval_timestamp,
+        transformation_method="zscore36_3mma",
+        value=kr_credit_value,
+    )
+
+    fx_spec = ECOS_RUNTIME_SERIES_SPECS["usdkrw_3m_log_return"]
+    kr_fx_value, kr_fx_as_of = _compute_ecos_log_return_3m(
+        table_code=str(fx_spec["table_code"]),
+        item_codes=tuple(str(item) for item in fx_spec["item_codes"]),
+        as_of_timestamp=as_of_timestamp,
+        api_key=api_key,
+    )
+    series_payloads["usdkrw_3m_log_return"] = _build_ecos_runtime_payload(
+        table_code=str(fx_spec["table_code"]),
+        item_codes=tuple(str(item) for item in fx_spec["item_codes"]),
+        observation_date=kr_fx_as_of,
+        release_date=release_date,
+        retrieval_timestamp=retrieval_timestamp,
+        transformation_method=str(fx_spec["transformation_method"]),
+        value=kr_fx_value,
+    )
+
+    return series_payloads
+
+
+def _load_fred_yoy_runtime_payloads(
+    *,
+    as_of_timestamp: datetime,
+    release_date: datetime,
+    retrieval_timestamp: str,
+    api_key: str,
+) -> dict[str, dict[str, Any]]:
+    """FRED 성장형 런타임 페이로드를 구성한다."""
+    series_payloads: dict[str, dict[str, Any]] = {}
+
+    for logical_series_id in FRED_YOY_RUNTIME_SERIES_IDS:
+        spec = FRED_RUNTIME_SERIES_SPECS[logical_series_id]
+        value, observation_date = _compute_fred_yoy_3mma(
+            source_series_id=str(spec["source_series_id"]),
+            as_of_timestamp=as_of_timestamp,
+            api_key=api_key,
+        )
+        series_payloads[logical_series_id] = _build_fred_runtime_payload(
+            source_series_id=str(spec["source_series_id"]),
+            adapter=str(spec["adapter"]),
+            official_source=str(spec["official_source"]),
+            observation_date=observation_date,
+            release_date=release_date,
+            retrieval_timestamp=retrieval_timestamp,
+            transformation_method=str(spec["transformation_method"]),
+            value=value,
+        )
+
+    return series_payloads
+
+
+def _load_fred_external_demand_runtime_payload(
+    *,
+    as_of_timestamp: datetime,
+    release_date: datetime,
+    retrieval_timestamp: str,
+    api_key: str,
+) -> tuple[dict[str, dict[str, Any]], dict[str, float], dict[str, Sequence[str]], bool]:
+    """FRED 외수 채널 런타임 페이로드와 대체 경로를 구성한다."""
+    try:
+        us_imports_value, us_imports_as_of = _compute_fred_yoy_3obs_mean(
+            source_series_id="A255RO1Q156NBEA",
+            as_of_timestamp=as_of_timestamp,
+            api_key=api_key,
+        )
+        return (
+            {
+                "us_real_imports_goods_yoy_3mma": _build_fred_runtime_payload(
+                    source_series_id="A255RO1Q156NBEA",
+                    adapter="fred",
+                    official_source="BEA via FRED",
+                    observation_date=us_imports_as_of,
+                    release_date=release_date,
+                    retrieval_timestamp=retrieval_timestamp,
+                    transformation_method="yoy_3obs_mean",
+                    value=us_imports_value,
+                )
+            },
+            {},
+            {},
+            False,
+        )
+    except Exception as exc:
+        us_pce_value, us_pce_as_of = _compute_fred_yoy_3mma(
+            source_series_id="DGDSRX1",
+            as_of_timestamp=as_of_timestamp,
+            api_key=api_key,
+        )
+        return (
+            {
+                "us_real_pce_goods_yoy_3mma": _build_fred_runtime_payload(
+                    source_series_id="DGDSRX1",
+                    adapter="fred",
+                    official_source="BEA via FRED",
+                    observation_date=us_pce_as_of,
+                    release_date=release_date,
+                    retrieval_timestamp=retrieval_timestamp,
+                    transformation_method="yoy_3mma",
+                    value=us_pce_value,
+                )
+            },
+            {"us_real_pce_goods_yoy_3mma": 0.6},
+            {
+                "us_real_pce_goods_yoy_3mma": (
+                    f"us_real_imports_goods_live_fetch_failed:{exc.__class__.__name__}",
+                )
+            },
+            True,
+        )
+
+
+def _load_fred_runtime_payloads(
+    *,
+    as_of_timestamp: datetime,
+    release_date: datetime,
+    retrieval_timestamp: str,
+    api_key: str,
+) -> tuple[dict[str, dict[str, Any]], dict[str, float], dict[str, Sequence[str]], bool]:
+    """FRED 런타임 페이로드 묶음을 구성한다."""
+    series_payloads = _load_fred_yoy_runtime_payloads(
+        as_of_timestamp=as_of_timestamp,
+        release_date=release_date,
+        retrieval_timestamp=retrieval_timestamp,
+        api_key=api_key,
+    )
+
+    us_credit_value, us_credit_as_of = _compute_fred_zscore36(
+        source_series_id="BAA10YM",
+        as_of_timestamp=as_of_timestamp,
+        api_key=api_key,
+    )
+    series_payloads["us_credit_spread_z36"] = _build_fred_runtime_payload(
+        source_series_id="BAA10YM",
+        adapter="fred",
+        official_source="Moody's/Federal Reserve via FRED",
+        observation_date=us_credit_as_of,
+        release_date=release_date,
+        retrieval_timestamp=retrieval_timestamp,
+        transformation_method="zscore36_3mma",
+        value=us_credit_value,
+    )
+
+    external_demand_payloads, confidence_by_series, warning_flags_by_series, degraded_mode = (
+        _load_fred_external_demand_runtime_payload(
+            as_of_timestamp=as_of_timestamp,
+            release_date=release_date,
+            retrieval_timestamp=retrieval_timestamp,
+            api_key=api_key,
+        )
+    )
+    series_payloads.update(external_demand_payloads)
+
+    broad_usd_value, broad_usd_as_of = _compute_fred_log_return_3m(
+        source_series_id="TWEXBGSMTH",
+        as_of_timestamp=as_of_timestamp,
+        api_key=api_key,
+    )
+    series_payloads["broad_usd_3m_log_return"] = _build_fred_runtime_payload(
+        source_series_id="TWEXBGSMTH",
+        adapter="fred",
+        official_source="Federal Reserve via FRED",
+        observation_date=broad_usd_as_of,
+        release_date=release_date,
+        retrieval_timestamp=retrieval_timestamp,
+        transformation_method="log_return_3m",
+        value=broad_usd_value,
+    )
+
+    return series_payloads, confidence_by_series, warning_flags_by_series, degraded_mode
+
 
 def load_live_macro_data_source(
     *,
@@ -796,154 +1044,28 @@ def load_live_macro_data_source(
     source_name: str = "ecos_fred_live",
     source_version: str | None = None,
 ) -> LiveMacroDataSource:
+    """실시간 매크로 데이터 소스를 구성한다."""
     as_of_dt = parse_datetime(as_of_timestamp)
     cutoff_dt = parse_datetime(input_cutoff)
     retrieval_timestamp = datetime.now(UTC).isoformat()
     ecos_api_key = _require_api_key(ecos_api_key_env)
     fred_api_key = _require_api_key(fred_api_key_env)
 
-    series_payloads: dict[str, dict[str, Any]] = {}
-    confidence_by_series: dict[str, float] = {}
-    warning_flags_by_series: dict[str, Sequence[str]] = {}
-    degraded_mode = False
-
-    for logical_series_id in ("kr_ipi_yoy_3mma", "kr_cpi_yoy_3mma", "kr_exports_us_yoy_3mma"):
-        spec = ECOS_RUNTIME_SERIES_SPECS[logical_series_id]
-        value, observation_date = _compute_ecos_yoy_3mma(
-            table_code=str(spec["table_code"]),
-            item_codes=tuple(str(item) for item in spec["item_codes"]),
-            as_of_timestamp=as_of_dt,
-            api_key=ecos_api_key,
-        )
-        series_payloads[logical_series_id] = _build_ecos_runtime_payload(
-            table_code=str(spec["table_code"]),
-            item_codes=tuple(str(item) for item in spec["item_codes"]),
-            observation_date=observation_date,
-            release_date=cutoff_dt,
-            retrieval_timestamp=retrieval_timestamp,
-            transformation_method=str(spec["transformation_method"]),
-            value=value,
-        )
-
-    kr_credit_value, kr_credit_as_of = _compute_ecos_credit_spread_z36(
+    series_payloads = _load_ecos_runtime_payloads(
         as_of_timestamp=as_of_dt,
+        release_date=cutoff_dt,
+        retrieval_timestamp=retrieval_timestamp,
         api_key=ecos_api_key,
     )
-    series_payloads["kr_credit_spread_z36"] = _build_ecos_runtime_payload(
-        table_code="721Y001",
-        item_codes=("7020000", "5020000"),
-        observation_date=kr_credit_as_of,
-        release_date=cutoff_dt,
-        retrieval_timestamp=retrieval_timestamp,
-        transformation_method="zscore36_3mma",
-        value=kr_credit_value,
-    )
-
-    kr_fx_value, kr_fx_as_of = _compute_ecos_log_return_3m(
-        table_code=str(ECOS_RUNTIME_SERIES_SPECS["usdkrw_3m_log_return"]["table_code"]),
-        item_codes=tuple(
-            str(item) for item in ECOS_RUNTIME_SERIES_SPECS["usdkrw_3m_log_return"]["item_codes"]
-        ),
-        as_of_timestamp=as_of_dt,
-        api_key=ecos_api_key,
-    )
-    series_payloads["usdkrw_3m_log_return"] = _build_ecos_runtime_payload(
-        table_code="731Y006",
-        item_codes=("0000003",),
-        observation_date=kr_fx_as_of,
-        release_date=cutoff_dt,
-        retrieval_timestamp=retrieval_timestamp,
-        transformation_method="log_return_3m",
-        value=kr_fx_value,
-    )
-
-    for logical_series_id in ("us_ipi_yoy_3mma", "us_cpi_yoy_3mma"):
-        spec = FRED_RUNTIME_SERIES_SPECS[logical_series_id]
-        value, observation_date = _compute_fred_yoy_3mma(
-            source_series_id=str(spec["source_series_id"]),
+    fred_payloads, confidence_by_series, warning_flags_by_series, degraded_mode = (
+        _load_fred_runtime_payloads(
             as_of_timestamp=as_of_dt,
-            api_key=fred_api_key,
-        )
-        series_payloads[logical_series_id] = _build_fred_runtime_payload(
-            source_series_id=str(spec["source_series_id"]),
-            adapter=str(spec["adapter"]),
-            official_source=str(spec["official_source"]),
-            observation_date=observation_date,
             release_date=cutoff_dt,
             retrieval_timestamp=retrieval_timestamp,
-            transformation_method=str(spec["transformation_method"]),
-            value=value,
-        )
-
-    us_credit_value, us_credit_as_of = _compute_fred_zscore36(
-        source_series_id="BAA10YM",
-        as_of_timestamp=as_of_dt,
-        api_key=fred_api_key,
-    )
-    series_payloads["us_credit_spread_z36"] = _build_fred_runtime_payload(
-        source_series_id="BAA10YM",
-        adapter="fred",
-        official_source="Moody's/Federal Reserve via FRED",
-        observation_date=us_credit_as_of,
-        release_date=cutoff_dt,
-        retrieval_timestamp=retrieval_timestamp,
-        transformation_method="zscore36_3mma",
-        value=us_credit_value,
-    )
-
-    try:
-        us_imports_value, us_imports_as_of = _compute_fred_yoy_3obs_mean(
-            source_series_id="A255RO1Q156NBEA",
-            as_of_timestamp=as_of_dt,
             api_key=fred_api_key,
         )
-        series_payloads["us_real_imports_goods_yoy_3mma"] = _build_fred_runtime_payload(
-            source_series_id="A255RO1Q156NBEA",
-            adapter="fred",
-            official_source="BEA via FRED",
-            observation_date=us_imports_as_of,
-            release_date=cutoff_dt,
-            retrieval_timestamp=retrieval_timestamp,
-            transformation_method="yoy_3obs_mean",
-            value=us_imports_value,
-        )
-    except Exception as exc:
-        degraded_mode = True
-        warning_flags_by_series["us_real_pce_goods_yoy_3mma"] = (
-            f"us_real_imports_goods_live_fetch_failed:{exc.__class__.__name__}",
-        )
-        confidence_by_series["us_real_pce_goods_yoy_3mma"] = 0.6
-        us_pce_value, us_pce_as_of = _compute_fred_yoy_3mma(
-            source_series_id="DGDSRX1",
-            as_of_timestamp=as_of_dt,
-            api_key=fred_api_key,
-        )
-        series_payloads["us_real_pce_goods_yoy_3mma"] = _build_fred_runtime_payload(
-            source_series_id="DGDSRX1",
-            adapter="fred",
-            official_source="BEA via FRED",
-            observation_date=us_pce_as_of,
-            release_date=cutoff_dt,
-            retrieval_timestamp=retrieval_timestamp,
-            transformation_method="yoy_3mma",
-            value=us_pce_value,
-        )
-
-    broad_usd_value, broad_usd_as_of = _compute_fred_log_return_3m(
-        source_series_id="TWEXBGSMTH",
-        as_of_timestamp=as_of_dt,
-        api_key=fred_api_key,
     )
-    series_payloads["broad_usd_3m_log_return"] = _build_fred_runtime_payload(
-        source_series_id="TWEXBGSMTH",
-        adapter="fred",
-        official_source="Federal Reserve via FRED",
-        observation_date=broad_usd_as_of,
-        release_date=cutoff_dt,
-        retrieval_timestamp=retrieval_timestamp,
-        transformation_method="log_return_3m",
-        value=broad_usd_value,
-    )
+    series_payloads.update(fred_payloads)
 
     return build_live_macro_data_source_from_provider_payloads(
         series_payloads,
@@ -956,6 +1078,7 @@ def load_live_macro_data_source(
 
 
 def _require_api_key(env_name: str) -> str:
+    """필수 API 키를 확인한다."""
     api_key = os.getenv(env_name, "").strip()
     if not api_key:
         raise RuntimeError(f"Missing macro provider auth key env: {env_name}")
@@ -972,6 +1095,7 @@ def _build_ecos_runtime_payload(
     transformation_method: str,
     value: float,
 ) -> dict[str, Any]:
+    """ECOS 런타임 페이로드를 구성한다."""
     return {
         "provider": "ecos",
         "service": "StatisticSearch",
@@ -1000,6 +1124,7 @@ def _build_fred_runtime_payload(
     transformation_method: str,
     value: float,
 ) -> dict[str, Any]:
+    """FRED 런타임 페이로드를 구성한다."""
     return {
         "provider": "us_macro",
         "adapter": adapter,
@@ -1024,6 +1149,7 @@ def _compute_ecos_yoy_3mma(
     as_of_timestamp: datetime,
     api_key: str,
 ) -> tuple[float, datetime]:
+    """ECOS 전년동기 이동평균 값을 계산한다."""
     rows = _fetch_ecos_rows(
         table_code=table_code,
         item_codes=item_codes,
@@ -1044,6 +1170,7 @@ def _compute_ecos_log_return_3m(
     as_of_timestamp: datetime,
     api_key: str,
 ) -> tuple[float, datetime]:
+    """ECOS 3개월 로그수익률을 계산한다."""
     rows = _fetch_ecos_rows(
         table_code=table_code,
         item_codes=item_codes,
@@ -1062,6 +1189,7 @@ def _compute_ecos_credit_spread_z36(
     as_of_timestamp: datetime,
     api_key: str,
 ) -> tuple[float, datetime]:
+    """ECOS 신용스프레드 Z-점수를 계산한다."""
     corp_rows = _fetch_ecos_rows(
         table_code="721Y001",
         item_codes=("7020000",),
@@ -1091,6 +1219,7 @@ def _compute_fred_yoy_3mma(
     as_of_timestamp: datetime,
     api_key: str,
 ) -> tuple[float, datetime]:
+    """FRED 전년동기 이동평균 값을 계산한다."""
     observations = _fetch_fred_observations(
         source_series_id=source_series_id,
         observation_start=_format_date(_shift_months(as_of_timestamp, -20)),
@@ -1108,6 +1237,7 @@ def _compute_fred_log_return_3m(
     as_of_timestamp: datetime,
     api_key: str,
 ) -> tuple[float, datetime]:
+    """FRED 3개월 로그수익률을 계산한다."""
     observations = _fetch_fred_observations(
         source_series_id=source_series_id,
         observation_start=_format_date(_shift_months(as_of_timestamp, -6)),
@@ -1125,6 +1255,7 @@ def _compute_fred_zscore36(
     as_of_timestamp: datetime,
     api_key: str,
 ) -> tuple[float, datetime]:
+    """FRED 36기간 Z-점수를 계산한다."""
     observations = _fetch_fred_observations(
         source_series_id=source_series_id,
         observation_start=_format_date(_shift_months(as_of_timestamp, -48)),
@@ -1142,6 +1273,7 @@ def _compute_fred_yoy_3obs_mean(
     as_of_timestamp: datetime,
     api_key: str,
 ) -> tuple[float, datetime]:
+    """FRED 3개 관측치 평균 기반 값을 계산한다."""
     observations = _fetch_fred_observations(
         source_series_id=source_series_id,
         observation_start=_format_date(_shift_months(as_of_timestamp, -36)),
@@ -1162,6 +1294,7 @@ def _fetch_ecos_rows(
     end_period: str,
     api_key: str,
 ) -> list[Mapping[str, Any]]:
+    """ECOS 행 데이터를 조회한다."""
     path_parts = [
         ECOS_API_BASE_URL,
         api_key,
@@ -1193,6 +1326,7 @@ def _fetch_fred_observations(
     observation_end: str,
     api_key: str,
 ) -> list[Mapping[str, Any]]:
+    """FRED 관측치를 조회한다."""
     params = {
         "series_id": source_series_id,
         "api_key": api_key,
@@ -1212,6 +1346,7 @@ def _fetch_fred_observations(
 
 
 def _ecos_rows_to_points(rows: Sequence[Mapping[str, Any]]) -> list[tuple[datetime, float]]:
+    """ECOS 행을 시계열 포인트로 변환한다."""
     points: list[tuple[datetime, float]] = []
     for row in rows:
         raw_value = row.get("DATA_VALUE")
@@ -1226,6 +1361,7 @@ def _ecos_rows_to_points(rows: Sequence[Mapping[str, Any]]) -> list[tuple[dateti
 def _fred_observations_to_points(
     observations: Sequence[Mapping[str, Any]],
 ) -> list[tuple[datetime, float]]:
+    """FRED 관측치를 시계열 포인트로 변환한다."""
     points: list[tuple[datetime, float]] = []
     for observation in observations:
         raw_value = observation.get("value")
@@ -1245,6 +1381,7 @@ def _latest_yoy_moving_average(
     lag_periods: int,
     window_size: int,
 ) -> float:
+    """최신 전년동기 이동평균 값을 계산한다."""
     if len(points) <= lag_periods:
         raise ValueError("not enough observations to compute YoY")
     yoy_values: list[float] = []
@@ -1260,6 +1397,7 @@ def _latest_yoy_moving_average(
 
 
 def _latest_average(points: Sequence[tuple[datetime, float]], *, window_size: int) -> float:
+    """최신 평균 값을 계산한다."""
     if len(points) < window_size:
         raise ValueError("not enough observations to compute rolling average")
     values = [point[1] for point in points[-window_size:]]
@@ -1271,6 +1409,7 @@ def _latest_log_return(
     *,
     lookback_periods: int,
 ) -> float:
+    """최신 로그수익률을 계산한다."""
     if len(points) <= lookback_periods:
         raise ValueError("not enough observations to compute log return")
     start_value = points[-(lookback_periods + 1)][1]
@@ -1286,6 +1425,7 @@ def _latest_zscore(
     lookback_periods: int,
     smooth_window: int,
 ) -> float:
+    """최신 Z-점수를 계산한다."""
     if len(points) < lookback_periods:
         raise ValueError("not enough observations to compute z-score")
     smoothed_values = _rolling_mean([point[1] for point in points], smooth_window)
@@ -1301,6 +1441,7 @@ def _latest_zscore(
 
 
 def _rolling_mean(values: Sequence[float], window_size: int) -> list[float]:
+    """이동평균 시계열을 계산한다."""
     if window_size <= 0:
         raise ValueError("window_size must be positive")
     if len(values) < window_size:
@@ -1316,6 +1457,7 @@ def _subtract_series(
     left_points: Sequence[tuple[datetime, float]],
     right_points: Sequence[tuple[datetime, float]],
 ) -> list[tuple[datetime, float]]:
+    """두 시계열의 차이를 계산한다."""
     right_by_date = {point[0]: point[1] for point in right_points}
     spread_points = [
         (left_dt, left_value - right_by_date[left_dt])
@@ -1328,6 +1470,7 @@ def _subtract_series(
 
 
 def _shift_months(value: datetime, months: int) -> datetime:
+    """날짜를 월 단위로 이동한다."""
     month_index = (value.year * 12 + (value.month - 1)) + months
     year = month_index // 12
     month = (month_index % 12) + 1
@@ -1335,14 +1478,17 @@ def _shift_months(value: datetime, months: int) -> datetime:
 
 
 def _format_month(value: datetime) -> str:
+    """날짜를 YYYY-MM 문자열로 변환한다."""
     return value.strftime("%Y%m")
 
 
 def _format_date(value: datetime) -> str:
+    """날짜를 YYYY-MM-DD 문자열로 변환한다."""
     return value.date().isoformat()
 
 
 def _parse_ecos_time(value: str) -> datetime:
+    """ECOS 시계열 시점을 파싱한다."""
     text = value.strip()
     if len(text) == 6:
         return parse_datetime(f"{text[:4]}-{text[4:6]}-01T00:00:00")

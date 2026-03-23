@@ -20,6 +20,7 @@ def build_backtest_plan(
     run_type: str = DEFAULT_BACKTEST_RUN_TYPE,
     batch_id: str | None = None,
 ) -> list[dict[str, str]]:
+    """백테스트 실행 계획을 구성한다."""
     batch_token = batch_id or f"backtest-{start_date}-{end_date}-{run_type}"
     plans: list[dict[str, str]] = []
     for trading_date in iter_trading_dates(start_date, end_date):
@@ -51,6 +52,7 @@ def build_backtest_stub_plan(
     end_date: str,
     run_type: str = DEFAULT_BACKTEST_RUN_TYPE,
 ) -> list[dict[str, str]]:
+    """백테스트 스텁 실행 계획을 구성한다."""
     return build_backtest_plan(start_date=start_date, end_date=end_date, run_type=run_type)
 
 
@@ -62,6 +64,7 @@ def run_backtest(
     run_type: str = DEFAULT_BACKTEST_RUN_TYPE,
     config_path: str | Path | None = None,
 ) -> dict[str, Any]:
+    """백테스트를 실행한다."""
     plan = build_backtest_plan(start_date=start_date, end_date=end_date, run_type=run_type)
     backtest_root = build_backtest_output_dir(
         output_dir, start_date=start_date, end_date=end_date, run_type=run_type
@@ -98,6 +101,7 @@ def run_backtest_stub(
     run_type: str = DEFAULT_BACKTEST_RUN_TYPE,
     config_path: str | Path | None = None,
 ) -> dict[str, Any]:
+    """백테스트 스텁을 실행한다."""
     return run_backtest(
         output_dir,
         start_date=start_date,

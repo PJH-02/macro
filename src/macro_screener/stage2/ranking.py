@@ -20,6 +20,7 @@ def compute_stock_scores(
     lambda_weight: float = DEFAULT_LAMBDA,
     unknown_ratio_warning_threshold: float = DEFAULT_UNKNOWN_RATIO_WARNING_THRESHOLD,
 ) -> tuple[list[StockScore], list[str]]:
+    """종목 점수를 계산한다."""
     industry_score_map = {
         score.industry_code: score.final_score for score in stage1_result.industry_scores
     }

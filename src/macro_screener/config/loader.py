@@ -12,6 +12,7 @@ from macro_screener.config.types import AppConfig
 
 
 def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    """deep merge을 처리한다."""
     merged = deepcopy(base)
     for key, value in override.items():
         current = merged.get(key)
@@ -23,16 +24,19 @@ def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]
 
 
 def default_config_path(base_path: Path | None = None) -> Path:
+    """default 설정 경로을 처리한다."""
     root = base_path or Path.cwd()
     return root / "config" / "default.yaml"
 
 
 def default_env_path(base_path: Path | None = None) -> Path:
+    """default 환경 경로을 처리한다."""
     root = base_path or Path.cwd()
     return root / ".env"
 
 
 def load_env_file(path: Path | str | None = None, *, override: bool = False) -> None:
+    """환경 파일을 불러온다"""
     env_path = Path(path) if path is not None else default_env_path()
     if not env_path.exists():
         return
@@ -57,6 +61,7 @@ def load_env_file(path: Path | str | None = None, *, override: bool = False) -> 
 
 
 def load_config(path: Path | str | None = None) -> AppConfig:
+    """설정을 불러온다"""
     load_env_file()
     config_path = Path(path) if path is not None else default_config_path()
     loaded: dict[str, Any] = {}

@@ -19,6 +19,7 @@ def build_channel_state_records(
     fallback_mode: str | None = None,
     warning_flags_by_channel: dict[str, list[str]] | None = None,
 ) -> list[ChannelState]:
+    """채널 상태 레코드를 만든다."""
     missing = [channel for channel in CHANNELS if channel not in channel_states]
     if missing:
         raise ValueError(f"missing channel states: {', '.join(missing)}")

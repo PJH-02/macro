@@ -67,6 +67,7 @@ class DARTDisclosureCursor:
     rcept_no: str | None = None
 
     def to_dict(self) -> dict[str, str]:
+        """객체를 직렬화 가능한 딕셔너리로 변환한다."""
         payload = {
             "accepted_at": self.accepted_at,
             "input_cutoff": self.input_cutoff,
@@ -78,6 +79,7 @@ class DARTDisclosureCursor:
         return payload
 
     def sort_key(self) -> tuple[str, str]:
+        """정렬용 키를 반환한다."""
         return (self.accepted_at, self.rcept_no or "")
 
 
@@ -91,6 +93,7 @@ class DARTClient:
     allow_local_file_inputs: bool = True
 
     def load_demo_disclosures(self) -> list[dict[str, Any]]:
+        """데모 공시 데이터를 불러온다."""
         return [dict(item) for item in DEFAULT_DISCLOSURES]
 
     def load_disclosures(
@@ -102,6 +105,7 @@ class DARTClient:
         cache_path: Path | None = None,
         allow_stale: bool = True,
     ) -> DARTLoadResult:
+        """공시 데이터를 불러온다."""
         cutoff = parse_datetime(input_cutoff)
         if self.disclosures_path.exists() and self.allow_local_file_inputs:
             local_payload = self._load_local_file(self.disclosures_path)
@@ -206,6 +210,7 @@ class DARTClient:
         cursor: DARTDisclosureCursor | None,
         retries: int,
     ) -> tuple[list[dict[str, Any]], DARTDisclosureCursor | None]:
+        """실시간 공시 데이터를 조회한다."""
         start_date = self._watermark_start_date(cursor, input_cutoff)
         params = {
             "crtfc_key": api_key,
@@ -241,6 +246,7 @@ class DARTClient:
         cursor: DARTDisclosureCursor | None,
         input_cutoff: datetime,
     ) -> datetime:
+        """워터마크 기준 시작일을 계산한다."""
         if cursor is None:
             return input_cutoff - timedelta(days=30)
         try:
@@ -250,6 +256,7 @@ class DARTClient:
 
     @staticmethod
     def _normalize_live_item(item: dict[str, Any], input_cutoff: datetime) -> dict[str, Any] | None:
+        """실시간 공시 항목을 정규화한다."""
         stock_code = str(item.get("stock_code") or "").strip()
         if not stock_code:
             return None
@@ -272,6 +279,7 @@ class DARTClient:
 
     @staticmethod
     def _load_local_file(path: Path) -> list[dict[str, Any]]:
+        """로컬 공시 파일을 불러온다."""
         if path.suffix.lower() == ".jsonl":
             return [
                 json.loads(line)
@@ -287,6 +295,7 @@ class DARTClient:
     def _filter_by_cutoff(
         disclosures: list[dict[str, Any]], cutoff: datetime
     ) -> list[dict[str, Any]]:
+        """입력 시점 기준으로 공시를 거른다."""
         filtered: list[dict[str, Any]] = []
         for disclosure in disclosures:
             accepted_at = disclosure.get("accepted_at")
@@ -303,6 +312,7 @@ class DARTClient:
         disclosures: list[dict[str, Any]],
         cutoff: datetime,
     ) -> list[dict[str, Any]]:
+        """노출 가능한 공시만 남긴다."""
         return cls._filter_by_cutoff(disclosures, cutoff)
 
     @classmethod
@@ -311,6 +321,7 @@ class DARTClient:
         disclosures: list[dict[str, Any]],
         cursor: DARTDisclosureCursor | None,
     ) -> list[dict[str, Any]]:
+        """커서 이후 공시만 남긴다."""
         if cursor is None:
             return [dict(item) for item in disclosures]
         filtered: list[dict[str, Any]] = []
@@ -332,6 +343,7 @@ class DARTClient:
         input_cutoff: datetime,
         current: DARTDisclosureCursor | None,
     ) -> DARTDisclosureCursor:
+        """다음 커서를 계산한다."""
         cursor_candidates = [cls._cursor_for_cutoff(input_cutoff)]
         if current is not None:
             cursor_candidates.append(current)
@@ -343,6 +355,7 @@ class DARTClient:
 
     @staticmethod
     def _cursor_for_cutoff(input_cutoff: datetime) -> DARTDisclosureCursor:
+        """컷오프 기준 커서를 만든다."""
         cutoff_text = input_cutoff.isoformat()
         return DARTDisclosureCursor(accepted_at=cutoff_text, input_cutoff=cutoff_text)
 
@@ -351,6 +364,7 @@ class DARTClient:
         disclosure: Mapping[str, Any],
         input_cutoff: str,
     ) -> DARTDisclosureCursor | None:
+        """공시에서 커서를 만든다."""
         accepted_at = disclosure.get("accepted_at")
         if accepted_at is None:
             return None
@@ -374,6 +388,7 @@ class DARTClient:
         cls,
         value: Mapping[str, Any] | str | None,
     ) -> DARTDisclosureCursor | None:
+        """입력값을 커서 객체로 정규화한다."""
         if value is None:
             return None
         if isinstance(value, Mapping):
@@ -395,6 +410,7 @@ class DARTClient:
 
     @staticmethod
     def _cursor_from_payload(payload: Mapping[str, Any]) -> DARTDisclosureCursor | None:
+        """페이로드에서 커서를 복원한다."""
         accepted_at = payload.get("accepted_at") or payload.get("input_cutoff")
         if accepted_at is None:
             return None
@@ -408,6 +424,7 @@ class DARTClient:
 
     @staticmethod
     def _cursor_to_text(cursor: DARTDisclosureCursor) -> str:
+        """커서를 텍스트로 직렬화한다."""
         return json.dumps(cursor.to_dict(), ensure_ascii=False, sort_keys=True)
 
     @staticmethod
@@ -418,6 +435,7 @@ class DARTClient:
         *,
         source: str,
     ) -> None:
+        """공시 캐시를 기록한다."""
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         cache_path.write_text(
             json.dumps(
@@ -431,6 +449,7 @@ class DARTClient:
 
     @staticmethod
     def _load_cache(cache_path: Path) -> tuple[list[dict[str, Any]], str | None]:
+        """공시 캐시를 불러온다."""
         payload = json.loads(cache_path.read_text(encoding="utf-8"))
         disclosures = [dict(item) for item in payload.get("disclosures", [])]
         watermark = payload.get("watermark")

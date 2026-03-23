@@ -4,6 +4,7 @@ import math
 
 
 def zscore(values: list[float]) -> list[float]:
+    """표준점수 시퀀스를 계산한다."""
     if not values:
         return []
     mean = sum(values) / len(values)

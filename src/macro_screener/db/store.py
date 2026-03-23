@@ -24,20 +24,24 @@ class SnapshotRegistry:
 
     @classmethod
     def for_config(cls, config: AppConfig, base_path: Path) -> "SnapshotRegistry":
+        """for 설정을 처리한다."""
         return cls(sqlite_path=config.paths.resolve(config.paths.sqlite_path, base_path))
 
     def connect(self) -> sqlite3.Connection:
+        """저장소 연결을 연다."""
         self.sqlite_path.parent.mkdir(parents=True, exist_ok=True)
         connection = sqlite3.connect(self.sqlite_path)
         connection.row_factory = sqlite3.Row
         return connection
 
     def initialize(self) -> None:
+        """저장소 또는 런타임 초기화를 수행한다."""
         with self.connect() as connection:
             self._ensure_schema(connection)
             connection.commit()
 
     def _ensure_schema(self, connection: sqlite3.Connection) -> None:
+        """필수 저장소 스키마를 보장한다."""
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS schema_meta (
@@ -126,6 +130,7 @@ class SnapshotRegistry:
         column_name: str,
         definition: str,
     ) -> None:
+        """필수 컬럼 존재를 보장한다."""
         rows = connection.execute(f"PRAGMA table_info({table_name})").fetchall()
         if any(str(row["name"]) == column_name for row in rows):
             return
@@ -134,6 +139,7 @@ class SnapshotRegistry:
         )
 
     def write_snapshot(self, snapshot: Snapshot, *, snapshot_path: str | None = None) -> None:
+        """스냅샷을 저장한다."""
         payload_json = json.dumps(snapshot.to_dict(), ensure_ascii=False, sort_keys=True)
         created_at = datetime.now(timezone.utc).isoformat()
         with self.connect() as connection:
@@ -171,6 +177,7 @@ class SnapshotRegistry:
             connection.commit()
 
     def published_snapshot_for_window(self, scheduled_window_key: str) -> dict[str, Any] | None:
+        """스케줄 윈도우의 발행 스냅샷을 조회한다."""
         with self.connect() as connection:
             self._ensure_schema(connection)
             row = connection.execute(
@@ -191,6 +198,7 @@ class SnapshotRegistry:
         published_at: datetime,
         snapshot_path: str | None = None,
     ) -> None:
+        """발행 이력을 등록한다."""
         with self.connect() as connection:
             self._ensure_schema(connection)
             try:
@@ -212,6 +220,7 @@ class SnapshotRegistry:
                 ) from exc
 
     def get_watermark(self, *, source_name: str, resource_key: str) -> str | None:
+        """워터마크 값을 조회한다."""
         with self.connect() as connection:
             self._ensure_schema(connection)
             row = connection.execute(
@@ -231,6 +240,7 @@ class SnapshotRegistry:
         resource_key: str,
         watermark_value: str,
     ) -> None:
+        """워터마크 값을 갱신하거나 저장한다."""
         updated_at = datetime.now(timezone.utc).isoformat()
         with self.connect() as connection:
             self._ensure_schema(connection)
@@ -256,6 +266,7 @@ class SnapshotRegistry:
         source_name: str,
         resource_key: str,
     ) -> dict[str, Any] | None:
+        """워터마크 페이로드를 조회한다."""
         watermark_value = self.get_watermark(source_name=source_name, resource_key=resource_key)
         if watermark_value is None:
             return None
@@ -272,6 +283,7 @@ class SnapshotRegistry:
         resource_key: str,
         payload: Mapping[str, Any],
     ) -> None:
+        """워터마크 페이로드를 갱신하거나 저장한다."""
         self.upsert_watermark(
             source_name=source_name,
             resource_key=resource_key,
@@ -286,6 +298,7 @@ class SnapshotRegistry:
         source: str | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> None:
+        """채널 상태 스냅샷을 저장한다."""
         if not channel_states:
             return
         payload_json = json.dumps([state.to_dict() for state in channel_states], ensure_ascii=False)
@@ -322,6 +335,7 @@ class SnapshotRegistry:
 
     @staticmethod
     def _channel_state_source(state: ChannelState) -> str:
+        """채널 상태 소스을 처리한다."""
         source_name = getattr(state, "source_name", None)
         if source_name is not None:
             return str(source_name)
@@ -335,6 +349,7 @@ class SnapshotRegistry:
         source: str | None,
         metadata: Mapping[str, Any] | None,
     ) -> dict[str, Any]:
+        """채널 상태 메타데이터을 구성한다"""
         first_state = channel_states[0]
         warning_flags: list[str] = []
         confidence_by_channel: dict[str, float] = {}
@@ -366,6 +381,7 @@ class SnapshotRegistry:
 
     @staticmethod
     def _datetime_attr(state: ChannelState, attr_name: str) -> str | None:
+        """datetime 속성을 처리한다."""
         value = getattr(state, attr_name, None)
         if value is None:
             return None
@@ -374,6 +390,7 @@ class SnapshotRegistry:
         return str(value)
 
     def load_last_channel_state_snapshot(self) -> dict[str, Any] | None:
+        """마지막 채널 상태 스냅샷을 불러온다."""
         with self.connect() as connection:
             self._ensure_schema(connection)
             row = connection.execute(
@@ -400,6 +417,7 @@ class SnapshotRegistry:
         }
 
     def load_last_channel_states(self) -> list[ChannelState] | None:
+        """마지막 채널 상태 목록을 불러온다."""
         snapshot = self.load_last_channel_state_snapshot()
         if snapshot is None:
             return None

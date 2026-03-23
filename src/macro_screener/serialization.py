@@ -16,6 +16,7 @@ T = TypeVar("T")
 
 class SerializableMixin:
     def to_dict(self) -> dict[str, SerializableValue]:
+        """객체를 직렬화 가능한 딕셔너리로 변환한다."""
         data = _serialize(self)
         if not isinstance(data, dict):
             raise TypeError("SerializableMixin.to_dict() requires a dataclass-like object")
@@ -23,6 +24,7 @@ class SerializableMixin:
 
 
 def _serialize(value: Any) -> SerializableValue:
+    """직렬화을 처리한다."""
     if is_dataclass(value):
         return {field.name: _serialize(getattr(value, field.name)) for field in fields(value)}
     if isinstance(value, Enum):
@@ -41,12 +43,14 @@ def _serialize(value: Any) -> SerializableValue:
 
 
 def parse_datetime(value: str | datetime) -> datetime:
+    """datetime을 파싱한다"""
     if isinstance(value, datetime):
         return value
     return datetime.fromisoformat(value)
 
 
 def parse_date(value: str | date) -> date:
+    """날짜을 파싱한다"""
     if isinstance(value, date):
         return value
     return date.fromisoformat(value)

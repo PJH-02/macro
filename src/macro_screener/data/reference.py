@@ -142,10 +142,12 @@ PROFILE_RULES: dict[str, dict[str, dict[str, float]]] = {
 
 
 def _iso_utc_now() -> str:
+    """현재 UTC 시각 문자열을 반환한다."""
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def _canonical_path_text(path: Path) -> str:
+    """표준 경로 텍스트을 처리한다."""
     try:
         return path.resolve().relative_to(Path.cwd().resolve()).as_posix()
     except ValueError:
@@ -153,6 +155,7 @@ def _canonical_path_text(path: Path) -> str:
 
 
 def _normalize_slug_part(value: str) -> str:
+    """slug part을 정규화한다"""
     normalized = unicodedata.normalize("NFKC", value).strip().lower()
     normalized = normalized.replace("·", " ")
     normalized = re.sub(r"[>/]+", " ", normalized)
@@ -163,15 +166,18 @@ def _normalize_slug_part(value: str) -> str:
 
 
 def industry_code_slug(parts: Sequence[str]) -> str:
+    """업종 코드 slug을 처리한다."""
     return "__".join(_normalize_slug_part(part) for part in parts)
 
 
 def classification_version(classification_path: Path) -> str:
+    """분류 버전 식별자를 계산한다."""
     digest = hashlib.sha256(classification_path.read_bytes()).hexdigest()
     return f"stock-classification-sha256:{digest[:12]}"
 
 
 def _read_classification_rows(classification_path: Path) -> list[dict[str, str]]:
+    """read 분류 행을 처리한다."""
     with classification_path.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
         return [{key: str(value or "").strip() for key, value in row.items()} for row in reader]
@@ -182,6 +188,7 @@ def build_industry_master_records(
     *,
     generated_at: str | None = None,
 ) -> list[dict[str, str]]:
+    """업종 마스터 레코드를 구성한다."""
     rows = _read_classification_rows(classification_path)
     source_version = classification_version(classification_path)
     generated_at_value = generated_at or _iso_utc_now()
@@ -221,6 +228,7 @@ def build_industry_master_records(
 
 
 def write_industry_master_csv(classification_path: Path, output_path: Path) -> list[dict[str, str]]:
+    """업종 마스터 CSV를 기록한다."""
     records = build_industry_master_records(classification_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8", newline="") as handle:
@@ -231,6 +239,7 @@ def write_industry_master_csv(classification_path: Path, output_path: Path) -> l
 
 
 def load_industry_master_records(industry_master_path: Path) -> list[dict[str, str]]:
+    """업종 마스터 레코드를 불러온다."""
     with industry_master_path.open("r", encoding="utf-8", newline="") as handle:
         return [
             {key: str(value or "").strip() for key, value in row.items()}
@@ -239,6 +248,7 @@ def load_industry_master_records(industry_master_path: Path) -> list[dict[str, s
 
 
 def _profile_text(industry: dict[str, str]) -> str:
+    """프로필 텍스트을 처리한다."""
     return " ".join(
         [
             industry.get("industry_name", ""),
@@ -250,6 +260,7 @@ def _profile_text(industry: dict[str, str]) -> str:
 
 
 def _profile_score(industry: dict[str, str], rules: dict[str, float]) -> float:
+    """프로필 점수을 처리한다."""
     text = _profile_text(industry)
     return sum(weight for keyword, weight in rules.items() if keyword and keyword in text)
 
@@ -260,6 +271,7 @@ def _rank_industries(
     channel: str,
     regime: str,
 ) -> list[str]:
+    """업종 후보를 점수 기준으로 정렬한다."""
     rules = PROFILE_RULES[channel][regime]
     ranked = sorted(
         industries,
@@ -275,6 +287,7 @@ def _rank_industries(
 
 
 def load_stage1_artifact(path: Path) -> dict[str, Any]:
+    """stage1 산출물을 불러온다"""
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("stage1 artifact must be a mapping")
@@ -285,6 +298,7 @@ def build_provisional_stage1_artifact(
     *,
     generated_at: str | None = None,
 ) -> dict[str, Any]:
+    """임시 1단계 산출물을 구성한다."""
     industries = load_industry_master_records(industry_master_path)
     if not industries:
         raise ValueError("industry master must contain at least one industry")
@@ -313,6 +327,7 @@ def build_provisional_stage1_artifact(
 
 
 def write_stage1_artifact_json(industry_master_path: Path, output_path: Path) -> dict[str, Any]:
+    """1단계 산출물 JSON을 기록한다."""
     artifact = build_provisional_stage1_artifact(industry_master_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
