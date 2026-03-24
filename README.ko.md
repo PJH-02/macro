@@ -206,7 +206,7 @@ flowchart TD
 | `KRX` | 시장/유니버스 소스 | 승인된 마스터 다운로드 기반 보통주 유니버스 + 로컬 taxonomy join | active runtime provider |
 | `DART` | 공시 소스 | Stage 2 공시 이벤트 | active runtime provider |
 | `ECOS` | 한국 매크로/통계 소스 | 산업생산 / CPI / 신용스프레드 / 환율 / 국가별 수출입 시계열 | active runtime provider path |
-| `KOSIS` | 한국 매크로/통계 소스 | contract fixture 및 향후 direct runtime 경로 | partial / planned runtime path |
+| `KOSIS` | 한국 매크로/통계 소스 | KOSIS series identifier가 설정된 경우 Korea external-demand live path에 참여 | conditional runtime provider |
 | `FRED` | 미국 매크로 소스 | 미국 산업생산 / CPI / 신용스프레드 / 재화수입 / broad USD | active runtime provider path |
 | `ALFRED` | 미국 역사 버전 소스 | vintage-aware historical validation 예정 경로 | planned / partial runtime path |
 | `BIS` | 참고 / 향후 확장 | 현재 런타임에서는 직접 수집하지 않음 | not an MVP runtime provider |
@@ -232,16 +232,17 @@ flowchart TD
 - `manual`, `scheduled`, `demo`, `backtest` 실행 경로가 존재
 - immutable snapshot 발행
 - SQLite 운영/감사 저장소 존재
-- runner가 실제로 provisional Stage 1 artifact를 읽는 경로 존재
-- production live mode에서 ECOS/FRED 공식 시계열로 Stage 1 macro input을 실제 계산 가능
-- production live mode에서 승인된 KIS/KRX 마스터 다운로드 기반 live stock universe를 만든 뒤 로컬 taxonomy authority와 join 가능
+- runner가 `manual-run` / `scheduled-run` 모두에서 provisional Stage 1 artifact를 실제로 읽음
+- `manual-run` / `scheduled-run` 이 동일한 live-provider 파이프라인으로 macro / disclosure / stock universe 를 읽음
+- live macro 경로는 ECOS/FRED를 직접 사용하며, 설정이 있으면 Korea external-demand 데이터에 KOSIS를 우선 사용할 수 있음
+- 승인된 KIS/KRX 마스터 다운로드 기반 live stock universe를 만든 뒤 로컬 taxonomy authority와 join 가능
 - `DART_API_KEY`가 있으면 DART live 모드가 동작하고, stale-cache degraded 경로가 명시적으로 남음
 
 아직 의도적으로 provisional 인 부분:
 - Stage 1 artifact는 **provisional** 이며, 최종 review된 research artifact는 아님
-- KOSIS direct runtime parameterization은 아직 primary live path가 아님
+- KOSIS runtime 참여는 Korea external-demand series identifier가 설정된 경우에 활성화되며, 없으면 명시적으로 fallback 됨
 - ALFRED/vintage retrieval은 아직 primary historical runtime path가 아님
-- 일부 fallback-heavy/manual compatibility 경로는 여전히 코드에 존재
+- 명시적 manual/fallback 매크로 경로는 diagnostics / degraded 실행용으로 남아 있지만, ordinary `manual-run`의 기본 동작은 아님
 - 실환경 provider credential/connectivity는 README만으로 보장되지 않음
 
 ## 현재 코드의 데이터 경계
@@ -251,7 +252,7 @@ flowchart TD
 | 모듈 | 역할 |
 |---|---|
 | `src/macro_screener/pipeline/runner.py` | 매크로 상태, Stage 1, Stage 2, publishing까지 총괄하는 메인 런타임 |
-| `src/macro_screener/data/macro_client.py` | 매크로 소스 추상화, manual path, persisted fallback reload |
+| `src/macro_screener/data/macro_client.py` | live macro 소스 추상화, optional KOSIS 참여, explicit fallback reload |
 | `src/macro_screener/data/reference.py` | derived industry master 및 provisional Stage 1 artifact 생성 |
 | `src/macro_screener/data/krx_client.py` | 종목 유니버스, KRX 시장 맥락, stock-to-industry 매핑 |
 | `src/macro_screener/data/dart_client.py` | DART 공시 수집과 cursor/watermark 처리 |
@@ -301,6 +302,8 @@ python3 -m macro_screener.cli manual-run \
   --run-id manual-prod-run
 ```
 
+`manual-run`은 이제 standard live-provider 파이프라인을 **수동으로 트리거**하는 명령입니다. 명시적으로 manual baseline 경로를 고르지 않는 한, `scheduled-run`과 같은 live data 경로를 사용합니다.
+
 ### 2) 스케줄 방식 실행
 
 ```bash
@@ -309,6 +312,8 @@ python3 -m macro_screener.cli scheduled-run \
   --trading-date 2026-03-23 \
   --run-type pre_open
 ```
+
+`scheduled-run`은 그 동일한 live-provider 파이프라인을 **스케줄로 트리거**하는 명령입니다. 같은 입력 시점을 맞추면 `manual-run`과 `scheduled-run`은 같은 provider 데이터를 소비하고 같은 구조의 결과를 발행하는 것이 목표입니다.
 
 ### 3) 백테스트 / 리플레이
 
@@ -319,7 +324,15 @@ python3 -m macro_screener.cli backtest-run \
   --end-date 2026-03-23
 ```
 
-엄격한 production-live 동작을 원하면 다음 설정을 사용하면 됩니다.
+ordinary live-provider path 대신 explicit zero-baseline/fallback 경로가 필요하면 다음처럼 실행할 수 있습니다.
+
+```bash
+python3 -m macro_screener.cli manual-run \
+  --output-dir ./out \
+  --macro-source manual
+```
+
+엄격한 live-provider 동작을 원하면 다음 설정을 사용하면 됩니다.
 
 ```yaml
 environment: "production"
@@ -328,6 +341,7 @@ runtime:
 ```
 
 이 모드에서는:
+- `manual-run`과 `scheduled-run`이 모두 기본적으로 live-provider 경로를 사용하고,
 - manual macro default를 정상 기본 경로로 허용하지 않고,
 - non-live KRX source를 거부하며,
 - demo/file DART fallback으로 fake success가 나는 것을 막습니다.
@@ -371,6 +385,7 @@ Stage 2가 계산한 최종 종목 랭킹입니다.
 
 사용 파일:
 - `screened_stock_list.csv` ← 운영자 입장에서 가장 보기 쉬운 파일
+- `screened_stocks_by_score.json` ← 종목 최종 점수 순 flat view
 - `stock_scores.parquet`
 
 업종별로 종목이 어떻게 묶였는지 보고 싶다면:
@@ -394,6 +409,7 @@ Stage 2가 계산한 최종 종목 랭킹입니다.
 - stock parquet
 - industry CSV
 - final screened stock CSV
+- 종목 점수 순 screened stocks JSON
 - 업종별 screened stocks JSON
 - snapshot JSON
 - latest pointer JSON

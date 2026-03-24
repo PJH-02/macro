@@ -18,12 +18,22 @@ TITLE_PATTERNS = (
     ("governance_risk", ("횡령", "배임", "불성실공시")),
 )
 
+IGNORED_TITLE_PATTERNS = (
+    "사업보고서",
+    "반기보고서",
+    "분기보고서",
+    "감사보고서",
+    "첨부추가",
+)
+
 
 def classify_disclosure(event_code: str | None, title: str) -> str:
     """공시 제목과 이벤트를 분류한다."""
     if event_code and event_code in EVENT_CODE_MAP:
         return EVENT_CODE_MAP[event_code]
     normalized = title.strip().lower()
+    if any(pattern.lower() in normalized for pattern in IGNORED_TITLE_PATTERNS):
+        return "ignored"
     for block_name, patterns in TITLE_PATTERNS:
         if any(pattern.lower() in normalized for pattern in patterns):
             return block_name

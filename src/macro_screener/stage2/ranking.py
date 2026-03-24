@@ -28,8 +28,10 @@ def compute_stock_scores(
     unknown_count = 0
     total_events = 0
     for disclosure in disclosures:
-        total_events += 1
         block_name = classify_disclosure(disclosure.get("event_code"), disclosure.get("title", ""))
+        if block_name == "ignored":
+            continue
+        total_events += 1
         if block_name == "neutral":
             unknown_count += 1
         grouped_events[str(disclosure["stock_code"])].append(

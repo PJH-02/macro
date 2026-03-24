@@ -7,6 +7,7 @@ from typing import Any, Mapping
 from zoneinfo import ZoneInfo
 
 from macro_screener.config import AppConfig, load_config
+from macro_screener.config.loader import resolve_repo_path
 from macro_screener.data.dart_client import DARTClient, DARTLoadResult
 from macro_screener.data.krx_client import KRXClient, KRXLoadResult
 from macro_screener.data.macro_client import (
@@ -34,7 +35,6 @@ DEFAULT_DEMO_AS_OF = "2026-03-21T08:30:00+09:00"
 DEFAULT_DEMO_INPUT_CUTOFF = "2026-03-20T18:00:00+09:00"
 DEFAULT_CONFIG_VERSION = "mvp-1"
 KST = ZoneInfo("Asia/Seoul")
-PRODUCTION_ENVIRONMENTS = {"prod", "production"}
 
 
 def build_manual_context(
@@ -111,8 +111,7 @@ def _resolve_config(config_path: str | Path | None) -> AppConfig:
 
 def _repo_relative(path_text: str) -> Path:
     """저장소 기준 경로로 변환한다."""
-    path = Path(path_text)
-    return path if path.is_absolute() else Path.cwd() / path
+    return resolve_repo_path(path_text)
 
 
 def _scheduled_window_key_text(context: Mapping[str, Any]) -> str | None:
@@ -136,6 +135,7 @@ def _resolve_macro_states(
     context: Mapping[str, Any],
     mode: RunMode,
     channel_states: dict[str, int] | None,
+    macro_source: str | None,
     use_demo_inputs: bool,
 ) -> Any:
     """매크로 상태을 결정한다"""
@@ -150,7 +150,13 @@ def _resolve_macro_states(
             DEFAULT_CHANNEL_STATES,
             source_name="demo_manual",
         ).fetch_channel_states()
-    if _is_production_live_mode(config=config, mode=mode, use_demo_inputs=use_demo_inputs):
+    if macro_source == "manual":
+        return _load_configured_or_persisted_macro_states(config=config, store=store)
+    if _should_use_live_provider_pipeline(
+        config=config,
+        mode=mode,
+        use_demo_inputs=use_demo_inputs,
+    ):
         return _load_production_live_macro_states(
             config=config,
             store=store,
@@ -172,6 +178,8 @@ def _load_production_live_macro_states(
             input_cutoff=str(context["input_cutoff"]),
             ecos_api_key_env=config.runtime.ecos_api_key_env,
             fred_api_key_env=config.runtime.fred_api_key_env,
+            kosis_api_key_env=config.runtime.kosis_api_key_env,
+            kosis_exports_us_user_stats_id=config.runtime.kosis_exports_us_user_stats_id,
             source_name="ecos_fred_live",
             source_version=config.config_version,
         ).fetch_channel_states()
@@ -201,18 +209,17 @@ def _load_configured_or_persisted_macro_states(
         raise
 
 
-def _is_production_live_mode(
+def _should_use_live_provider_pipeline(
     *,
     config: AppConfig,
     mode: RunMode,
     use_demo_inputs: bool,
 ) -> bool:
-    """운영 실시간 모드 여부를 판단한다."""
-    if use_demo_inputs or mode == RunMode.BACKTEST:
-        return False
-    return (
-        config.environment.lower() in PRODUCTION_ENVIRONMENTS
-        and config.runtime.normal_mode == "live"
+    """실행이 live-provider 파이프라인을 사용해야 하는지 판단한다."""
+    return _should_enforce_live_runtime_policy(
+        mode=mode,
+        config=config,
+        use_demo_inputs=use_demo_inputs,
     )
 
 
@@ -222,14 +229,20 @@ def _enforce_macro_source_policy(
     mode: RunMode,
     macro_result: Any,
     channel_states: dict[str, int] | None,
+    macro_source: str | None,
     use_demo_inputs: bool,
 ) -> None:
     """매크로 소스 정책을 강제한다."""
-    if not _is_production_live_mode(config=config, mode=mode, use_demo_inputs=use_demo_inputs):
+    if not _should_use_live_provider_pipeline(
+        config=config,
+        mode=mode,
+        use_demo_inputs=use_demo_inputs,
+    ):
         return
     manual_like_sources = {"manual", "manual_config", "manual_override", "demo_manual"}
     if (
-        channel_states is not None or macro_result.source_name in manual_like_sources
+        macro_source != "manual"
+        and (channel_states is not None or macro_result.source_name in manual_like_sources)
     ) and not config.runtime.allow_manual_macro_states_in_live_mode:
         raise RuntimeError(
             f"manual_macro_source_forbidden_in_production_live_mode:{macro_result.source_name}"
@@ -246,7 +259,11 @@ def _enforce_krx_source_policy(
     use_demo_inputs: bool,
 ) -> None:
     """KRX 소스 정책을 강제한다."""
-    if not _is_production_live_mode(config=config, mode=mode, use_demo_inputs=use_demo_inputs):
+    if not _should_use_live_provider_pipeline(
+        config=config,
+        mode=mode,
+        use_demo_inputs=use_demo_inputs,
+    ):
         return
     if stock_source != "live":
         raise RuntimeError(f"krx_live_source_required_in_production_live_mode:{stock_source}")
@@ -260,7 +277,11 @@ def _enforce_dart_source_policy(
     use_demo_inputs: bool,
 ) -> None:
     """DART 소스 정책을 강제한다."""
-    if not _is_production_live_mode(config=config, mode=mode, use_demo_inputs=use_demo_inputs):
+    if not _should_use_live_provider_pipeline(
+        config=config,
+        mode=mode,
+        use_demo_inputs=use_demo_inputs,
+    ):
         return
     if disclosure_source in {"demo", "file"}:
         raise RuntimeError(
@@ -515,6 +536,7 @@ def run_pipeline_context(
     mode: RunMode,
     config_path: str | Path | None = None,
     channel_states: dict[str, int] | None = None,
+    macro_source: str | None = None,
     use_demo_inputs: bool = False,
 ) -> dict[str, Any]:
     """파이프라인 컨텍스트 실행을 수행한다."""
@@ -546,6 +568,7 @@ def run_pipeline_context(
         context=context,
         mode=mode,
         channel_states=channel_states,
+        macro_source=macro_source,
         use_demo_inputs=use_demo_inputs,
     )
     _enforce_macro_source_policy(
@@ -553,6 +576,7 @@ def run_pipeline_context(
         mode=mode,
         macro_result=macro_result,
         channel_states=channel_states,
+        macro_source=macro_source,
         use_demo_inputs=use_demo_inputs,
     )
     warnings = list(macro_result.warnings)
@@ -704,6 +728,7 @@ def run_manual(
     input_cutoff: str | datetime | None = None,
     published_at: str | datetime | None = None,
     channel_states: dict[str, int] | None = None,
+    macro_source: str | None = None,
     config_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """수동 파이프라인 실행을 수행한다."""
@@ -720,6 +745,7 @@ def run_manual(
         mode=RunMode.MANUAL,
         config_path=config_path,
         channel_states=channel_states,
+        macro_source=macro_source,
     )
 
 
@@ -755,6 +781,8 @@ def run_scheduled(
     trading_date: str,
     run_type: str,
     attempted_at: str | datetime | None = None,
+    channel_states: dict[str, int] | None = None,
+    macro_source: str | None = None,
     config_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """스케줄 파이프라인 실행을 수행한다."""
@@ -764,6 +792,8 @@ def run_scheduled(
         context=context,
         mode=RunMode.SCHEDULED,
         config_path=config_path,
+        channel_states=channel_states,
+        macro_source=macro_source,
     )
 
 

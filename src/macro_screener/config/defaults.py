@@ -54,6 +54,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "ecos_api_key_env": "ECOS_API_KEY",
         "fred_api_key_env": "FRED_API_KEY",
         "kosis_api_key_env": "KOSIS_API_KEY",
+        "kosis_exports_us_user_stats_id": None,
         "krx_api_key_env": "KRX_API_KEY",
         "allow_manual_macro_states_in_live_mode": False,
         "allow_local_file_inputs_in_live_mode": False,

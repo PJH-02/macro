@@ -201,6 +201,7 @@ class RuntimePolicyConfig(SerializableMixin):
     ecos_api_key_env: str = "ECOS_API_KEY"
     fred_api_key_env: str = "FRED_API_KEY"
     kosis_api_key_env: str = "KOSIS_API_KEY"
+    kosis_exports_us_user_stats_id: str | None = None
     krx_api_key_env: str = "KRX_API_KEY"
     allow_manual_macro_states_in_live_mode: bool = False
     allow_local_file_inputs_in_live_mode: bool = False
@@ -226,6 +227,11 @@ class RuntimePolicyConfig(SerializableMixin):
             ecos_api_key_env=str(payload.get("ecos_api_key_env", "ECOS_API_KEY")),
             fred_api_key_env=str(payload.get("fred_api_key_env", "FRED_API_KEY")),
             kosis_api_key_env=str(payload.get("kosis_api_key_env", "KOSIS_API_KEY")),
+            kosis_exports_us_user_stats_id=(
+                None
+                if payload.get("kosis_exports_us_user_stats_id") in (None, "")
+                else str(payload.get("kosis_exports_us_user_stats_id"))
+            ),
             krx_api_key_env=str(payload.get("krx_api_key_env", "KRX_API_KEY")),
             allow_manual_macro_states_in_live_mode=bool(
                 payload.get("allow_manual_macro_states_in_live_mode", False)

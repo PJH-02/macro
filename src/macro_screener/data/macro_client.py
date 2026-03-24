@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 import os
 from dataclasses import dataclass, field, replace
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any, Mapping, Protocol, Sequence
 
 import httpx
@@ -14,7 +14,7 @@ from macro_screener.models import ChannelState
 from macro_screener.serialization import parse_datetime
 
 CHANNELS: tuple[str, ...] = ("G", "IC", "FC", "ED", "FX")
-DEFAULT_CHANNEL_STATES: dict[str, int] = {"G": 1, "IC": -1, "FC": 0, "ED": 1, "FX": 1}
+DEFAULT_CHANNEL_STATES: dict[str, int] = {"G": 0, "IC": 0, "FC": 0, "ED": 0, "FX": 0}
 
 
 @dataclass(frozen=True, slots=True)
@@ -743,6 +743,7 @@ def _mark_degraded_fallback_signal(
 
 ECOS_API_BASE_URL = "https://ecos.bok.or.kr/api/StatisticSearch"
 FRED_OBSERVATIONS_API_URL = "https://api.stlouisfed.org/fred/series/observations"
+KOSIS_STATISTICS_DATA_API_URL = "https://kosis.kr/openapi/statisticsData.do"
 
 ECOS_RUNTIME_SERIES_SPECS: dict[str, dict[str, Any]] = {
     "kr_ipi_yoy_3mma": {
@@ -882,6 +883,37 @@ def _load_ecos_runtime_payloads(
     )
 
     return series_payloads
+
+
+def _load_kosis_runtime_payloads(
+    *,
+    as_of_timestamp: datetime,
+    release_date: datetime,
+    retrieval_timestamp: str,
+    api_key: str,
+    exports_us_user_stats_id: str,
+) -> tuple[dict[str, dict[str, Any]], dict[str, float], dict[str, Sequence[str]], bool]:
+    """KOSIS 런타임 페이로드를 구성한다."""
+    value, observation_date = _compute_kosis_yoy_3mma(
+        user_stats_id=exports_us_user_stats_id,
+        as_of_timestamp=as_of_timestamp,
+        api_key=api_key,
+    )
+    return (
+        {
+            "kr_exports_us_yoy_3mma": _build_kosis_runtime_payload(
+                user_stats_id=exports_us_user_stats_id,
+                observation_date=observation_date,
+                release_date=release_date,
+                retrieval_timestamp=retrieval_timestamp,
+                transformation_method="yoy_3mma",
+                value=value,
+            )
+        },
+        {},
+        {},
+        False,
+    )
 
 
 def _load_fred_yoy_runtime_payloads(
@@ -1041,13 +1073,15 @@ def load_live_macro_data_source(
     input_cutoff: str | datetime,
     ecos_api_key_env: str = "ECOS_API_KEY",
     fred_api_key_env: str = "FRED_API_KEY",
+    kosis_api_key_env: str = "KOSIS_API_KEY",
+    kosis_exports_us_user_stats_id: str | None = None,
     source_name: str = "ecos_fred_live",
     source_version: str | None = None,
 ) -> LiveMacroDataSource:
     """실시간 매크로 데이터 소스를 구성한다."""
     as_of_dt = parse_datetime(as_of_timestamp)
     cutoff_dt = parse_datetime(input_cutoff)
-    retrieval_timestamp = datetime.now(UTC).isoformat()
+    retrieval_timestamp = datetime.now(timezone.utc).isoformat()
     ecos_api_key = _require_api_key(ecos_api_key_env)
     fred_api_key = _require_api_key(fred_api_key_env)
 
@@ -1057,7 +1091,39 @@ def load_live_macro_data_source(
         retrieval_timestamp=retrieval_timestamp,
         api_key=ecos_api_key,
     )
-    fred_payloads, confidence_by_series, warning_flags_by_series, degraded_mode = (
+
+    confidence_by_series: dict[str, float] = {}
+    warning_flags_by_series: dict[str, Sequence[str]] = {}
+    degraded_mode = False
+
+    if kosis_exports_us_user_stats_id:
+        kosis_api_key = _require_api_key(kosis_api_key_env)
+        try:
+            (
+                kosis_payloads,
+                kosis_confidence,
+                kosis_warning_flags,
+                kosis_degraded_mode,
+            ) = _load_kosis_runtime_payloads(
+                as_of_timestamp=as_of_dt,
+                release_date=cutoff_dt,
+                retrieval_timestamp=retrieval_timestamp,
+                api_key=kosis_api_key,
+                exports_us_user_stats_id=kosis_exports_us_user_stats_id,
+            )
+            series_payloads.update(kosis_payloads)
+            confidence_by_series.update(kosis_confidence)
+            warning_flags_by_series.update(kosis_warning_flags)
+            degraded_mode = degraded_mode or kosis_degraded_mode
+        except Exception as exc:
+            confidence_by_series["kr_exports_us_yoy_3mma"] = 0.7
+            warning_flags_by_series["kr_exports_us_yoy_3mma"] = (
+                f"kosis_exports_us_live_fetch_failed:{exc.__class__.__name__}",
+                "kr_exports_us_yoy_3mma_fallback_to_ecos",
+            )
+            degraded_mode = True
+
+    fred_payloads, fred_confidence_by_series, fred_warning_flags_by_series, fred_degraded_mode = (
         _load_fred_runtime_payloads(
             as_of_timestamp=as_of_dt,
             release_date=cutoff_dt,
@@ -1066,6 +1132,9 @@ def load_live_macro_data_source(
         )
     )
     series_payloads.update(fred_payloads)
+    confidence_by_series.update(fred_confidence_by_series)
+    warning_flags_by_series.update(fred_warning_flags_by_series)
+    degraded_mode = degraded_mode or fred_degraded_mode
 
     return build_live_macro_data_source_from_provider_payloads(
         series_payloads,
@@ -1133,6 +1202,33 @@ def _build_fred_runtime_payload(
             {
                 "series_id": source_series_id,
                 "observation_date": observation_date.date().isoformat(),
+                "release_date": release_date.date().isoformat(),
+                "retrieval_timestamp": retrieval_timestamp,
+                "transformation_method": transformation_method,
+                "value": f"{value:.6f}",
+            }
+        ],
+    }
+
+
+def _build_kosis_runtime_payload(
+    *,
+    user_stats_id: str,
+    observation_date: datetime,
+    release_date: datetime,
+    retrieval_timestamp: str,
+    transformation_method: str,
+    value: float,
+) -> dict[str, Any]:
+    """KOSIS 런타임 페이로드를 구성한다."""
+    return {
+        "provider": "kosis",
+        "service": "statistical_data",
+        "series": [
+            {
+                "table_id": user_stats_id,
+                "item_id": "value",
+                "observation_date": observation_date.strftime("%Y-%m"),
                 "release_date": release_date.date().isoformat(),
                 "retrieval_timestamp": retrieval_timestamp,
                 "transformation_method": transformation_method,
@@ -1285,6 +1381,24 @@ def _compute_fred_yoy_3obs_mean(
     return value, points[-1][0]
 
 
+def _compute_kosis_yoy_3mma(
+    *,
+    user_stats_id: str,
+    as_of_timestamp: datetime,
+    api_key: str,
+) -> tuple[float, datetime]:
+    """KOSIS 전년동기 이동평균 값을 계산한다."""
+    observations = _fetch_kosis_observations(
+        user_stats_id=user_stats_id,
+        start_period=_format_month(_shift_months(as_of_timestamp, -20)),
+        end_period=_format_month(as_of_timestamp),
+        api_key=api_key,
+    )
+    points = _kosis_observations_to_points(observations)
+    value = _latest_yoy_moving_average(points, lag_periods=12, window_size=3)
+    return value, points[-1][0]
+
+
 def _fetch_ecos_rows(
     *,
     table_code: str,
@@ -1345,6 +1459,33 @@ def _fetch_fred_observations(
     return [dict(item) for item in observations if isinstance(item, Mapping)]
 
 
+def _fetch_kosis_observations(
+    *,
+    user_stats_id: str,
+    start_period: str,
+    end_period: str,
+    api_key: str,
+) -> list[Mapping[str, Any]]:
+    """KOSIS 관측치를 조회한다."""
+    params = {
+        "method": "getList",
+        "apiKey": api_key,
+        "format": "json",
+        "jsonVD": "Y",
+        "userStatsId": user_stats_id,
+        "prdSe": "M",
+        "startPrdDe": start_period,
+        "endPrdDe": end_period,
+    }
+    with httpx.Client(timeout=20.0) as client:
+        response = client.get(KOSIS_STATISTICS_DATA_API_URL, params=params)
+        response.raise_for_status()
+        payload = response.json()
+    if not isinstance(payload, list) or not payload:
+        raise ValueError(f"KOSIS series returned no observations: {user_stats_id}")
+    return [dict(item) for item in payload if isinstance(item, Mapping)]
+
+
 def _ecos_rows_to_points(rows: Sequence[Mapping[str, Any]]) -> list[tuple[datetime, float]]:
     """ECOS 행을 시계열 포인트로 변환한다."""
     points: list[tuple[datetime, float]] = []
@@ -1372,6 +1513,39 @@ def _fred_observations_to_points(
         )
     if not points:
         raise ValueError("FRED observations contained no numeric values")
+    return sorted(points, key=lambda item: item[0])
+
+
+def _kosis_observations_to_points(
+    observations: Sequence[Mapping[str, Any]],
+) -> list[tuple[datetime, float]]:
+    """KOSIS 관측치를 시계열 포인트로 변환한다."""
+    points: list[tuple[datetime, float]] = []
+    for observation in observations:
+        raw_period = (
+            observation.get("PRD_DE")
+            or observation.get("prdDe")
+            or observation.get("prd_de")
+            or observation.get("TIME")
+        )
+        raw_value = (
+            observation.get("DT")
+            or observation.get("dt")
+            or observation.get("DATA_VALUE")
+            or observation.get("value")
+        )
+        if raw_period in (None, "") or raw_value in (None, "", "."):
+            continue
+        period_text = str(raw_period).strip()
+        if len(period_text) == 6:
+            timestamp = parse_datetime(f"{period_text[:4]}-{period_text[4:6]}-01T00:00:00")
+        elif len(period_text) == 7 and "-" in period_text:
+            timestamp = parse_datetime(f"{period_text}-01T00:00:00")
+        else:
+            timestamp = parse_datetime(period_text)
+        points.append((timestamp, float(str(raw_value).replace(",", ""))))
+    if not points:
+        raise ValueError("KOSIS observations contained no numeric values")
     return sorted(points, key=lambda item: item[0])
 
 

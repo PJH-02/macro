@@ -17,6 +17,11 @@ def ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
 
+def _sorted_stock_rows(snapshot: Snapshot) -> list[dict[str, Any]]:
+    """종목 점수 순 정렬 행을 반환한다."""
+    return [stock.to_dict() for stock in snapshot.stock_scores]
+
+
 def _build_screened_stocks_by_industry(snapshot: Snapshot) -> list[dict[str, Any]]:
     """업종별 선별 종목 목록을 구성한다."""
     industry_lookup = {
@@ -64,6 +69,11 @@ def _build_screened_stocks_by_industry(snapshot: Snapshot) -> list[dict[str, Any
     return ranked_groups
 
 
+def _build_screened_stocks_by_score(snapshot: Snapshot) -> list[dict[str, Any]]:
+    """종목 점수 순 선별 종목 목록을 구성한다."""
+    return _sorted_stock_rows(snapshot)
+
+
 def _snapshot_artifact_paths(snapshot_root: Path) -> dict[str, Path]:
     """스냅샷 산출물 경로 묶음을 만든다."""
     return {
@@ -71,6 +81,7 @@ def _snapshot_artifact_paths(snapshot_root: Path) -> dict[str, Path]:
         "stock_parquet": snapshot_root / "stock_scores.parquet",
         "industry_csv": snapshot_root / "industry_scores.csv",
         "screened_stock_csv": snapshot_root / "screened_stock_list.csv",
+        "screened_stocks_by_score_json": snapshot_root / "screened_stocks_by_score.json",
         "screened_stocks_by_industry_json": snapshot_root / "screened_stocks_by_industry.json",
         "snapshot_json": snapshot_root / "snapshot.json",
     }
@@ -107,12 +118,22 @@ def publish_snapshot(
     latest_path = config.paths.resolve(config.paths.latest_snapshot_pointer, output_dir)
 
     industry_frame = pd.DataFrame([score.to_dict() for score in snapshot.industry_scores])
-    stock_frame = pd.DataFrame([score.to_dict() for score in snapshot.stock_scores])
+    stock_rows = _sorted_stock_rows(snapshot)
+    stock_frame = pd.DataFrame(stock_rows)
 
     industry_frame.to_parquet(artifact_paths["industry_parquet"], index=False)
     stock_frame.to_parquet(artifact_paths["stock_parquet"], index=False)
     industry_frame.to_csv(artifact_paths["industry_csv"], index=False, encoding="utf-8-sig")
     stock_frame.to_csv(artifact_paths["screened_stock_csv"], index=False, encoding="utf-8-sig")
+    artifact_paths["screened_stocks_by_score_json"].write_text(
+        json.dumps(
+            _build_screened_stocks_by_score(snapshot),
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
     artifact_paths["screened_stocks_by_industry_json"].write_text(
         json.dumps(
             _build_screened_stocks_by_industry(snapshot),

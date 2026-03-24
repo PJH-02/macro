@@ -11,6 +11,24 @@ from macro_screener.config.defaults import DEFAULT_CONFIG
 from macro_screener.config.types import AppConfig
 
 
+def repo_root(start_path: Path | None = None) -> Path:
+    """저장소 루트를 반환한다."""
+    anchor = start_path or Path(__file__).resolve()
+    for candidate in (anchor, *anchor.parents):
+        if (candidate / "pyproject.toml").exists():
+            return candidate
+    raise FileNotFoundError("Could not locate repository root from pyproject.toml")
+
+
+def resolve_repo_path(path: Path | str, *, base_path: Path | None = None) -> Path:
+    """저장소 기준 경로를 절대 경로로 변환한다."""
+    resolved = Path(path)
+    if resolved.is_absolute():
+        return resolved
+    anchor = base_path if base_path is not None else repo_root()
+    return anchor / resolved
+
+
 def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     """deep merge을 처리한다."""
     merged = deepcopy(base)
@@ -25,14 +43,12 @@ def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]
 
 def default_config_path(base_path: Path | None = None) -> Path:
     """default 설정 경로을 처리한다."""
-    root = base_path or Path.cwd()
-    return root / "config" / "default.yaml"
+    return resolve_repo_path("config/default.yaml", base_path=base_path)
 
 
 def default_env_path(base_path: Path | None = None) -> Path:
     """default 환경 경로을 처리한다."""
-    root = base_path or Path.cwd()
-    return root / ".env"
+    return resolve_repo_path(".env", base_path=base_path)
 
 
 def load_env_file(path: Path | str | None = None, *, override: bool = False) -> None:

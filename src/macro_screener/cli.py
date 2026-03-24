@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Callable, Mapping
 
 from .config import load_config
+from .config.loader import repo_root
 from .mvp import (
     DEFAULT_BACKTEST_RUN_TYPE,
     DEFAULT_DEMO_AS_OF,
@@ -20,6 +21,7 @@ from .mvp import (
 )
 
 CLICommandHandler = Callable[[argparse.Namespace], Any]
+DEFAULT_CLI_OUTPUT_DIR = repo_root() / "src"
 
 
 def _parse_channel_overrides(values: list[str]) -> dict[str, int]:
@@ -89,6 +91,7 @@ def _snapshot_artifacts(result: Mapping[str, Any]) -> dict[str, Any]:
     preferred_keys = (
         "snapshot_json",
         "screened_stock_csv",
+        "screened_stocks_by_score_json",
         "screened_stocks_by_industry_json",
         "industry_csv",
         "industry_parquet",
@@ -150,6 +153,7 @@ def _handle_manual_run(args: argparse.Namespace) -> dict[str, Any]:
         input_cutoff=args.input_cutoff,
         published_at=args.published_at,
         channel_states=channel_states,
+        macro_source=args.macro_source,
     )
 
 
@@ -167,11 +171,14 @@ def _handle_demo_run(args: argparse.Namespace) -> dict[str, Any]:
 
 def _handle_scheduled_run(args: argparse.Namespace) -> dict[str, Any]:
     """handle 스케줄 실행을 처리한다."""
+    channel_states = _parse_channel_overrides(args.channel_state) if args.channel_state else None
     return run_scheduled(
         args.output_dir,
         trading_date=args.trading_date,
         run_type=args.run_type,
         attempted_at=args.attempted_at,
+        channel_states=channel_states,
+        macro_source=args.macro_source,
         config_path=args.config,
     )
 
@@ -229,13 +236,19 @@ def build_parser() -> argparse.ArgumentParser:
         "manual-run",
         help="run the manual pipeline and print a concise summary plus full JSON result",
     )
-    manual.add_argument("--output-dir", required=True)
+    manual.add_argument("--output-dir", type=Path, default=DEFAULT_CLI_OUTPUT_DIR)
     manual.add_argument("--config", type=Path, default=None)
     manual.add_argument("--run-id", default=None)
     manual.add_argument("--run-type", default=DEFAULT_DEMO_RUN_TYPE)
     manual.add_argument("--as-of", default=None)
     manual.add_argument("--input-cutoff", default=None)
     manual.add_argument("--published-at", default=None)
+    manual.add_argument(
+        "--macro-source",
+        choices=("live", "manual"),
+        default="live",
+        help="select the macro-state source for this run",
+    )
     manual.add_argument(
         "--channel-state",
         action="append",
@@ -248,7 +261,7 @@ def build_parser() -> argparse.ArgumentParser:
         "demo-run",
         help="run the deterministic demo pipeline and print a concise summary plus full JSON",
     )
-    demo.add_argument("--output-dir", required=True)
+    demo.add_argument("--output-dir", type=Path, default=DEFAULT_CLI_OUTPUT_DIR)
     demo.add_argument("--run-id", default=DEFAULT_DEMO_RUN_ID)
     demo.add_argument("--run-type", default=DEFAULT_DEMO_RUN_TYPE)
     demo.add_argument("--as-of", default=DEFAULT_DEMO_AS_OF)
@@ -259,17 +272,30 @@ def build_parser() -> argparse.ArgumentParser:
         "scheduled-run",
         help="run the scheduled pipeline and print a concise summary plus full JSON result",
     )
-    scheduled.add_argument("--output-dir", required=True)
+    scheduled.add_argument("--output-dir", type=Path, default=DEFAULT_CLI_OUTPUT_DIR)
     scheduled.add_argument("--config", type=Path, default=None)
     scheduled.add_argument("--trading-date", required=True)
     scheduled.add_argument("--run-type", choices=("pre_open", "post_close"), required=True)
     scheduled.add_argument("--attempted-at", default=None)
+    scheduled.add_argument(
+        "--macro-source",
+        choices=("live", "manual"),
+        default="live",
+        help="select the macro-state source for this run",
+    )
+    scheduled.add_argument(
+        "--channel-state",
+        action="append",
+        default=[],
+        metavar="CHANNEL=VALUE",
+        help="manual channel override, repeatable (e.g. G=1)",
+    )
 
     backtest = subparsers.add_parser(
         "backtest-run",
         help="run the PIT-safe backtest pipeline and print a concise summary plus full JSON",
     )
-    backtest.add_argument("--output-dir", required=True)
+    backtest.add_argument("--output-dir", type=Path, default=DEFAULT_CLI_OUTPUT_DIR)
     backtest.add_argument("--config", type=Path, default=None)
     backtest.add_argument("--start-date", required=True)
     backtest.add_argument("--end-date", required=True)
@@ -283,7 +309,7 @@ def build_parser() -> argparse.ArgumentParser:
         "backtest-stub",
         help="run the deterministic backtest wrapper and print a concise summary plus full JSON",
     )
-    backtest_stub.add_argument("--output-dir", required=True)
+    backtest_stub.add_argument("--output-dir", type=Path, default=DEFAULT_CLI_OUTPUT_DIR)
     backtest_stub.add_argument("--config", type=Path, default=None)
     backtest_stub.add_argument("--start-date", required=True)
     backtest_stub.add_argument("--end-date", required=True)

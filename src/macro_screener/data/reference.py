@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
+from macro_screener.config.loader import repo_root
+
 CHANNELS: tuple[str, ...] = ("G", "IC", "FC", "ED", "FX")
 INDUSTRY_MASTER_FIELDS: tuple[str, ...] = (
     "industry_code",
@@ -149,7 +151,7 @@ def _iso_utc_now() -> str:
 def _canonical_path_text(path: Path) -> str:
     """표준 경로 텍스트을 처리한다."""
     try:
-        return path.resolve().relative_to(Path.cwd().resolve()).as_posix()
+        return path.resolve().relative_to(repo_root()).as_posix()
     except ValueError:
         return path.as_posix()
 

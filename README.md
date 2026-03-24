@@ -206,7 +206,7 @@ Stock ranking tie-breakers are still explicit and deterministic.
 | `KRX` | market/universe source | common-stock universe via sanctioned master download, then local taxonomy join | active runtime provider |
 | `DART` | disclosure source | filings / disclosure events for Stage 2 | active runtime provider |
 | `ECOS` | Korea macro/statistical source | Korea activity / CPI / credit spread / FX / country-export series | active runtime provider path |
-| `KOSIS` | Korea macro/statistical source | contract fixtures and future direct runtime path; not the primary live path today | partial / planned runtime path |
+| `KOSIS` | Korea macro/statistical source | optional Korea external-demand live path when a KOSIS series identifier is configured | conditional runtime provider |
 | `FRED` | US macro source | current US activity / CPI / credit spread / goods-demand / broad USD series | active runtime provider path |
 | `ALFRED` | US historical macro source | intended vintage-aware historical validation path | planned / partial runtime path |
 | `BIS` | reference / future source | not used in the current runtime path | not an MVP runtime provider |
@@ -232,16 +232,17 @@ What is production-like today:
 - batch execution paths exist for `manual`, `scheduled`, `demo`, and `backtest`
 - immutable snapshots are published
 - SQLite acts as an operational / audit store
-- the runtime now uses the provisional Stage 1 artifact in the live runner path
-- production live mode can now fetch Stage 1 macro inputs from official ECOS/FRED sources
-- production live mode can now build a live Korean stock universe from the sanctioned KIS/KRX master-download workflow and join it to the local taxonomy authority
-- DART live mode is used when `DART_API_KEY` is present, with stale-cache degradation kept explicit
+- the runtime now uses the provisional Stage 1 artifact in both `manual-run` and `scheduled-run`
+- `manual-run` and `scheduled-run` now share the same live-provider pipeline for macro, disclosure, and stock-universe loading
+- the live macro path now uses ECOS/FRED directly and can optionally prefer KOSIS for Korea external-demand data when configured
+- the live Korean stock universe still uses the sanctioned KIS/KRX master-download workflow joined to the local taxonomy authority
+- DART live mode stays explicit, with stale-cache degradation kept visible in warnings/metadata
 
 What is still intentionally provisional:
 - the Stage 1 artifact is **provisional**, not a final reviewed research artifact
-- KOSIS direct runtime parameterization is not the primary live path yet
+- KOSIS runtime participation for Korea external-demand data depends on a configured KOSIS series identifier and falls back explicitly when unavailable
 - ALFRED/vintage retrieval is not yet the primary implemented historical path
-- some fallback-heavy/manual compatibility paths still exist in the runtime
+- an explicit manual/fallback macro path still exists for diagnostics or degraded execution, but it is no longer the default behavior of ordinary `manual-run`
 - live provider credentials / connectivity are not proven by this README alone
 
 ## Data boundaries in the code today
@@ -251,7 +252,7 @@ If you want to read the repository from the code downward, the most important mo
 | Module | Responsibility |
 |---|---|
 | `src/macro_screener/pipeline/runner.py` | main runtime orchestration: macro states, Stage 1, Stage 2, publishing |
-| `src/macro_screener/data/macro_client.py` | macro source abstraction, manual path, persisted fallback reload |
+| `src/macro_screener/data/macro_client.py` | live macro source abstraction, optional KOSIS participation, explicit fallback reload |
 | `src/macro_screener/data/reference.py` | derived industry master and provisional Stage 1 artifact generation |
 | `src/macro_screener/data/krx_client.py` | stock universe loading, KRX market context, stock-to-industry mapping |
 | `src/macro_screener/data/dart_client.py` | disclosure ingestion, cursor / watermark logic |
@@ -301,6 +302,8 @@ python3 -m macro_screener.cli manual-run \
   --run-id manual-prod-run
 ```
 
+`manual-run` is now the **manual trigger** of the standard live-provider pipeline. Unless you explicitly switch the macro source to the manual baseline path, it uses the same live data path as `scheduled-run`.
+
 ### 2) Scheduled-style run
 
 ```bash
@@ -309,6 +312,8 @@ python3 -m macro_screener.cli scheduled-run \
   --trading-date 2026-03-23 \
   --run-type pre_open
 ```
+
+`scheduled-run` is the **scheduled trigger** of that same live-provider pipeline. For the same effective input window, `manual-run` and `scheduled-run` are intended to consume the same provider data and publish the same result structure.
 
 ### 3) Backtest / replay
 
@@ -319,7 +324,15 @@ python3 -m macro_screener.cli backtest-run \
   --end-date 2026-03-23
 ```
 
-If you want strict production-live behavior, use a config that sets:
+If you need the explicit zero-baseline/fallback path instead of the ordinary live-provider path, use:
+
+```bash
+python3 -m macro_screener.cli manual-run \
+  --output-dir ./out \
+  --macro-source manual
+```
+
+If you want strict live-provider behavior, use a config that sets:
 
 ```yaml
 environment: "production"
@@ -328,6 +341,7 @@ runtime:
 ```
 
 In that mode:
+- `manual-run` and `scheduled-run` both stay on the live-provider path by default,
 - manual macro defaults are not allowed as the normal source of truth,
 - non-live KRX sources are rejected,
 - and fake DART success via demo/file fallback is rejected.
@@ -371,6 +385,7 @@ It is the final ranked stock table from Stage 2.
 
 Use:
 - `screened_stock_list.csv` ← easiest operator-facing file
+- `screened_stocks_by_score.json` ← flat stock-score-sorted view
 - `stock_scores.parquet`
 
 If you want to see the stock list grouped by industry, use:
@@ -393,6 +408,7 @@ A published run writes:
 - stock parquet
 - industry CSV
 - final screened stock CSV
+- screened-stocks-by-score JSON
 - screened-stocks-by-industry JSON
 - snapshot JSON
 - latest pointer JSON

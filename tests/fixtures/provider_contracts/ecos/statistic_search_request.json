@@ -1,7 +1,0 @@
-{
-  "provider": "ecos",
-  "service": "StatisticSearch",
-  "table_code": "901Y009",
-  "item_codes": ["0"],
-  "frequency": "M"
-}
