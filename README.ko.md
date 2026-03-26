@@ -10,6 +10,17 @@
 - `doc/plan.md`
 - `doc/open-questions.md`
 
+**AI/저장소 인수인계용 context 세트**로는 다음 3개를 우선 권장합니다.
+- `doc/program-context.md`
+- `doc/repository-orientation.md`
+- `doc/code-context.md`
+
+이 3개는 가능한 한 self-contained 하게 작성되어 있으며, 다음을 짧은 패키지로 설명하는 것이 목적입니다.
+- 시스템이 무엇을 하는지
+- 런타임이 어떻게 동작하는지
+- 코드와 상태가 어디에 있는지
+- 디버깅/확장을 어디서부터 시작해야 하는지
+
 ## 프로그램이 하는 일
 
 이 저장소는 **배치형 한국 주식 스크리너**를 구현합니다.

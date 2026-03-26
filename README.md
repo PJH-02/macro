@@ -10,6 +10,17 @@ The final human-facing doc set is:
 - `doc/plan.md`
 - `doc/open-questions.md`
 
+For **AI/repository-ingestion context**, the preferred self-contained context set is:
+- `doc/program-context.md`
+- `doc/repository-orientation.md`
+- `doc/code-context.md`
+
+Those three are intended to be the shortest package that still explains:
+- what the system does,
+- how the runtime behaves,
+- where code and state live,
+- and how to start debugging or extending the codebase.
+
 ## What the program does
 
 This repository implements a **batch screener** for Korean equities.
