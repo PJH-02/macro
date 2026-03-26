@@ -77,7 +77,7 @@ class Stage1Config(SerializableMixin):
     manual_channel_states: dict[str, int] = field(
         default_factory=lambda: {"G": 0, "IC": 0, "FC": 0, "ED": 0, "FX": 0}
     )
-    rank_table_artifact_path: str = "config/stage1_sector_rank_tables.v1.json"
+    rank_table_artifact_path: str = "config/macro_sector_exposure.v2.json"
     channel_weights: dict[str, float] = field(
         default_factory=lambda: {"G": 1.0, "IC": 1.0, "FC": 1.0, "ED": 1.0, "FX": 1.0}
     )
@@ -129,7 +129,7 @@ class Stage1Config(SerializableMixin):
             ),
             manual_channel_states=manual_states,
             rank_table_artifact_path=str(
-                payload.get("rank_table_artifact_path", "config/stage1_sector_rank_tables.v1.json")
+                payload.get("rank_table_artifact_path", "config/macro_sector_exposure.v2.json")
             ),
             channel_weights=channel_weights,
             neutral_bands=neutral_bands,
@@ -138,9 +138,6 @@ class Stage1Config(SerializableMixin):
 
 @dataclass(frozen=True, slots=True)
 class Stage2Config(SerializableMixin):
-    score_weights: dict[str, float] = field(
-        default_factory=lambda: {"dart": 1.0, "industry": 0.35, "financial": 0.0}
-    )
     decay_half_lives: dict[str, int] = field(
         default_factory=lambda: {
             "supply_contract": 20,
@@ -168,13 +165,6 @@ class Stage2Config(SerializableMixin):
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "Stage2Config":
         """딕셔너리 payload로 객체를 생성한다."""
-        score_weights = {
-            str(key): float(value)
-            for key, value in payload.get(
-                "score_weights",
-                {"dart": 1.0, "industry": 0.35, "financial": 0.0},
-            ).items()
-        }
         decay_half_lives = {
             str(key): int(value)
             for key, value in payload.get(
@@ -189,7 +179,7 @@ class Stage2Config(SerializableMixin):
                 },
             ).items()
         }
-        return cls(score_weights=score_weights, decay_half_lives=decay_half_lives)
+        return cls(decay_half_lives=decay_half_lives)
 
 
 @dataclass(frozen=True, slots=True)
@@ -266,7 +256,7 @@ class AppConfig(SerializableMixin):
     def from_dict(cls, payload: dict[str, Any]) -> "AppConfig":
         """딕셔너리 payload로 객체를 생성한다."""
         return cls(
-            config_version=str(payload.get("config_version", "mvp-1")),
+            config_version=str(payload.get("config_version", "sector-v2")),
             environment=str(payload.get("environment", "local")),
             paths=PathConfig.from_dict(dict(payload.get("paths", {}))),
             schedule=ScheduleConfig.from_dict(dict(payload.get("schedule", {}))),

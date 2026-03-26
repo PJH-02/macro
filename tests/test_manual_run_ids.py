@@ -56,7 +56,7 @@ def _stage1_result(
                 rank=1,
             )
         ],
-        config_version="mvp-1",
+        config_version="sector-v2",
     )
 
 

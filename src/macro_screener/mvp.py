@@ -30,7 +30,6 @@ from macro_screener.pipeline import (
 from macro_screener.stage1 import DEFAULT_OVERLAYS, compute_stage1_result
 from macro_screener.stage2 import (
     BLOCK_WEIGHTS,
-    DEFAULT_LAMBDA,
     HALF_LIVES,
     classify_disclosure,
     compute_stock_scores,
@@ -48,8 +47,7 @@ __all__ = [
     "DEFAULT_CHANNEL_STATES",
     "DEFAULT_DISCLOSURES",
     "DEFAULT_EXPOSURES",
-    "DEFAULT_LAMBDA",
-    "DEFAULT_OVERLAYS",
+        "DEFAULT_OVERLAYS",
     "DEFAULT_STOCKS",
     "HALF_LIVES",
     "SCHEDULED_RUN_TIMES",

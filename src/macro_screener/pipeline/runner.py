@@ -35,7 +35,7 @@ DEFAULT_DEMO_RUN_ID = "manual-demo-20260321T083000KST"
 DEFAULT_DEMO_RUN_TYPE = RunType.MANUAL.value
 DEFAULT_DEMO_AS_OF = "2026-03-21T08:30:00+09:00"
 DEFAULT_DEMO_INPUT_CUTOFF = "2026-03-20T18:00:00+09:00"
-DEFAULT_CONFIG_VERSION = "mvp-1"
+DEFAULT_CONFIG_VERSION = "sector-v2"
 KST = ZoneInfo("Asia/Seoul")
 
 
@@ -305,26 +305,10 @@ def _load_stage1_rows_and_rank_tables(
     dict[str, dict[str, list[str]]] | None,
     dict[str, float] | None,
 ]:
-    """1단계 업종 행과 순위표를 불러온다."""
-    artifact_path = _repo_relative(config.stage1.rank_table_artifact_path)
-    industry_master_path = _repo_relative(config.universe.industry_master_path)
-    if artifact_path.exists() and industry_master_path.exists():
-        artifact = load_stage1_artifact(artifact_path)
-        industry_rows = load_industry_master_records(industry_master_path)
-        rows = [
-            {
-                "industry_code": row["industry_code"],
-                "industry_name": row["industry_name"],
-                "exposures": {},
-            }
-            for row in industry_rows
-        ]
-        sector_rank_tables = artifact.get("sector_rank_tables")
-        channel_weights = artifact.get("channel_weights")
-        if isinstance(sector_rank_tables, dict) and isinstance(channel_weights, dict):
-            return rows, sector_rank_tables, {str(k): float(v) for k, v in channel_weights.items()}
+    """Load grouped-sector exposure rows for Stage 1 direct multiplication."""
     exposure_result = KRXClient(
         stock_classification_path=_repo_relative(config.universe.stock_classification_path),
+        exposure_matrix_path=_repo_relative(config.stage1.rank_table_artifact_path),
         use_demo_fallback=True,
     ).load_exposures_result()
     return exposure_result.rows, None, None
@@ -656,8 +640,8 @@ def run_pipeline_context(
     if dart_status is not None:
         stage2_status = dart_status
     stocks = stock_result.rows
-    known_industries = {score.industry_code for score in stage1_result.industry_scores}
-    if stocks and not any(str(stock["industry_code"]) in known_industries for stock in stocks):
+    known_sector_codes = {score.industry_code for score in stage1_result.industry_scores}
+    if stocks and not any(str(stock["industry_code"]) in known_sector_codes for stock in stocks):
         if use_demo_inputs:
             stocks = krx_client.load_demo_stocks()
             warnings.append("stock_universe_unmapped_using_demo_stocks")
@@ -671,7 +655,6 @@ def run_pipeline_context(
             stage1_result=stage1_result,
             stocks=stocks,
             disclosures=disclosure_result.disclosures,
-            lambda_weight=config.stage2.score_weights["industry"],
             unknown_ratio_warning_threshold=config.runtime.unknown_dart_ratio_warning_threshold,
         )
         warnings.extend(stage2_warnings)

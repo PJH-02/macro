@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 DEFAULT_CONFIG: dict[str, Any] = {
-    "config_version": "mvp-1",
+    "config_version": "sector-v2",
     "environment": "local",
     "paths": {
         "data_dir": "data",
@@ -31,12 +31,11 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "ED": 0,
             "FX": 0,
         },
-        "rank_table_artifact_path": "config/stage1_sector_rank_tables.v1.json",
+        "rank_table_artifact_path": "config/macro_sector_exposure.v2.json",
         "channel_weights": {"G": 1.0, "IC": 1.0, "FC": 1.0, "ED": 1.0, "FX": 1.0},
         "neutral_bands": {"G": 0.25, "IC": 0.25, "FC": 0.25, "ED": 0.25, "FX": 0.5},
     },
     "stage2": {
-        "score_weights": {"dart": 1.0, "industry": 0.35, "financial": 0.0},
         "decay_half_lives": {
             "supply_contract": 20,
             "treasury_stock": 10,

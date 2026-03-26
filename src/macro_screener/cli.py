@@ -41,13 +41,13 @@ def _snapshot_summary(result: Mapping[str, Any]) -> dict[str, Any]:
     warnings = result.get("warnings", [])
     if not isinstance(snapshot, Mapping):
         return {}
-    industry_scores = snapshot.get("industry_scores", [])
+    sector_scores = snapshot.get("industry_scores", [])
     stock_scores = snapshot.get("stock_scores", [])
     return {
         "run_id": snapshot.get("run_id"),
         "run_type": snapshot.get("run_type"),
         "status": snapshot.get("status"),
-        "industry_count": len(industry_scores) if isinstance(industry_scores, list) else 0,
+        "industry_count": len(sector_scores) if isinstance(sector_scores, list) else 0,
         "stock_count": len(stock_scores) if isinstance(stock_scores, list) else 0,
         "warning_count": len(warnings) if isinstance(warnings, list) else 0,
     }

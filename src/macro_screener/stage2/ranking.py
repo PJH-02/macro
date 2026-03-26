@@ -8,7 +8,6 @@ from macro_screener.stage2.classifier import classify_disclosure
 from macro_screener.stage2.decay import decayed_score
 from macro_screener.stage2.normalize import zscore
 
-DEFAULT_LAMBDA = 0.35
 DEFAULT_UNKNOWN_RATIO_WARNING_THRESHOLD = 0.2
 
 
@@ -17,13 +16,10 @@ def compute_stock_scores(
     stage1_result: Stage1Result,
     stocks: list[dict[str, Any]],
     disclosures: list[dict[str, Any]],
-    lambda_weight: float = DEFAULT_LAMBDA,
     unknown_ratio_warning_threshold: float = DEFAULT_UNKNOWN_RATIO_WARNING_THRESHOLD,
 ) -> tuple[list[StockScore], list[str]]:
-    """종목 점수를 계산한다."""
-    industry_score_map = {
-        score.industry_code: score.final_score for score in stage1_result.industry_scores
-    }
+    """Compute full-universe stock scores as stage2 individual score + stage1 sector score."""
+    sector_score_map = {score.industry_code: score.final_score for score in stage1_result.industry_scores}
     grouped_events: dict[str, list[dict[str, Any]]] = defaultdict(list)
     unknown_count = 0
     total_events = 0
@@ -34,14 +30,12 @@ def compute_stock_scores(
         total_events += 1
         if block_name == "neutral":
             unknown_count += 1
-        grouped_events[str(disclosure["stock_code"])].append(
-            {**disclosure, "block_name": block_name}
-        )
+        grouped_events[str(disclosure["stock_code"])].append({**disclosure, "block_name": block_name})
 
     stock_rows: list[dict[str, Any]] = []
     for stock in stocks:
-        if str(stock["industry_code"]) not in industry_score_map:
-            continue
+        sector_code = str(stock["industry_code"])
+        stage1_sector_score = round(float(sector_score_map.get(sector_code, 0.0)), 6)
         block_scores: dict[str, float] = defaultdict(float)
         risk_flags: set[str] = set()
         raw_dart_score = 0.0
@@ -50,48 +44,41 @@ def compute_stock_scores(
             contribution = decayed_score(block_name, int(event.get("trading_days_elapsed", 0)))
             block_scores[block_name] += contribution
             raw_dart_score += contribution
-            if block_name in {
-                "dilutive_financing",
-                "correction_cancellation_withdrawal",
-                "governance_risk",
-            }:
+            if block_name in {"dilutive_financing", "correction_cancellation_withdrawal", "governance_risk"}:
                 risk_flags.add(block_name)
         stock_rows.append(
             {
                 "stock_code": str(stock["stock_code"]),
                 "stock_name": str(stock["stock_name"]),
-                "industry_code": str(stock["industry_code"]),
+                "industry_code": sector_code,
                 "raw_dart_score": round(raw_dart_score, 6),
-                "raw_industry_score": round(float(industry_score_map[stock["industry_code"]]), 6),
+                "raw_industry_score": stage1_sector_score,
                 "risk_flags": sorted(risk_flags),
-                "block_scores": {
-                    key: round(value, 6) for key, value in sorted(block_scores.items())
-                },
+                "block_scores": {key: round(value, 6) for key, value in sorted(block_scores.items())},
             }
         )
 
-    dart_scores = [row["raw_dart_score"] for row in stock_rows]
-    industry_scores = [row["raw_industry_score"] for row in stock_rows]
-    normalized_dart_scores = zscore(dart_scores)
-    normalized_industry_scores = zscore(industry_scores)
-
+    normalized_dart_scores = zscore([row["raw_dart_score"] for row in stock_rows])
+    normalized_industry_scores = zscore([row["raw_industry_score"] for row in stock_rows])
     scored_rows: list[dict[str, Any]] = []
-    for row, normalized_dart, normalized_industry in zip(
-        stock_rows, normalized_dart_scores, normalized_industry_scores, strict=True
-    ):
+    for row, normalized_dart, normalized_industry in zip(stock_rows, normalized_dart_scores, normalized_industry_scores, strict=True):
+        stage2_individual_stock_score = round(normalized_dart, 6)
+        stage1_sector_score = round(float(row["raw_industry_score"]), 6)
         scored_rows.append(
             {
                 **row,
                 "normalized_dart_score": normalized_dart,
                 "normalized_industry_score": normalized_industry,
-                "final_score": round(normalized_dart + lambda_weight * normalized_industry, 6),
+                "stage2_individual_stock_score": stage2_individual_stock_score,
+                "stage1_sector_score": stage1_sector_score,
+                "final_score": round(stage2_individual_stock_score + stage1_sector_score, 6),
             }
         )
     scored_rows.sort(
         key=lambda score: (
             -score["final_score"],
-            -score["raw_dart_score"],
-            -score["raw_industry_score"],
+            -score["stage2_individual_stock_score"],
+            -score["stage1_sector_score"],
             score["stock_code"],
         )
     )
@@ -110,6 +97,8 @@ def compute_stock_scores(
             normalized_financial_score=0.0,
             block_scores=row["block_scores"],
             risk_flags=row["risk_flags"],
+            stage2_individual_stock_score=row["stage2_individual_stock_score"],
+            stage1_sector_score=row["stage1_sector_score"],
         )
         for index, row in enumerate(scored_rows, start=1)
     ]

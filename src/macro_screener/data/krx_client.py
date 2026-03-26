@@ -6,36 +6,35 @@ import os
 import tempfile
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
+
+CHANNELS: tuple[str, ...] = ("G", "IC", "FC", "ED", "FX")
+
+STOCK_CODE_SECTOR_OVERRIDES: dict[str, str] = {
+    "0088M0": "헬스케어/바이오",  # 메쥬
+    "408470": "소프트웨어/인터넷/게임",  # 한패스
+}
 from pathlib import Path
 from typing import Any
 
 import pandas as pd  # type: ignore[import-untyped]
 
-from macro_screener.data.reference import industry_code_slug
+from macro_screener.data.reference import (
+    GROUPED_SECTOR_EXPOSURE_MATRIX,
+    grouped_sector_code,
+    industry_code_slug,
+    map_classification_row_to_grouped_sector,
+)
 
 DEFAULT_EXPOSURES: list[dict[str, Any]] = [
-    {
-        "industry_code": "AUTO",
-        "industry_name": "Automobiles",
-        "exposures": {"G": 1, "IC": -1, "FC": -1, "ED": 1, "FX": 0},
-    },
-    {
-        "industry_code": "SHIP",
-        "industry_name": "Shipbuilding",
-        "exposures": {"G": 1, "IC": -1, "FC": 0, "ED": 1, "FX": 1},
-    },
-    {
-        "industry_code": "PHARMA",
-        "industry_name": "Pharmaceuticals",
-        "exposures": {"G": 0, "IC": -1, "FC": 0, "ED": 0, "FX": -1},
-    },
+    {"industry_code": grouped_sector_code(sector), "industry_name": sector, "exposures": {channel: float(GROUPED_SECTOR_EXPOSURE_MATRIX[channel][sector]) for channel in GROUPED_SECTOR_EXPOSURE_MATRIX}}
+    for sector in sorted({sector for matrix in GROUPED_SECTOR_EXPOSURE_MATRIX.values() for sector in matrix})
 ]
 
 DEFAULT_STOCKS: list[dict[str, Any]] = [
-    {"stock_code": "000270", "stock_name": "Kia", "industry_code": "AUTO"},
-    {"stock_code": "005380", "stock_name": "Hyundai Motor", "industry_code": "AUTO"},
-    {"stock_code": "009540", "stock_name": "HD Korea Shipbuilding", "industry_code": "SHIP"},
-    {"stock_code": "000100", "stock_name": "Yuhan", "industry_code": "PHARMA"},
+    {"stock_code": "000270", "stock_name": "Kia", "industry_code": grouped_sector_code("자동차/부품"), "industry_name": "자동차/부품"},
+    {"stock_code": "005380", "stock_name": "Hyundai Motor", "industry_code": grouped_sector_code("자동차/부품"), "industry_name": "자동차/부품"},
+    {"stock_code": "009540", "stock_name": "HD Korea Shipbuilding", "industry_code": grouped_sector_code("조선"), "industry_name": "조선"},
+    {"stock_code": "000100", "stock_name": "Yuhan", "industry_code": grouped_sector_code("헬스케어/바이오"), "industry_name": "헬스케어/바이오"},
 ]
 
 NON_COMMON_STOCK_KEYWORDS = ("ETF", "ETN", "REIT", "리츠", "SPAC", "스팩")
@@ -53,7 +52,7 @@ class KRXLoadResult:
 @dataclass(frozen=True, slots=True)
 class KRXClient:
     stock_classification_path: Path | None = None
-    exposure_matrix_path: Path = Path("data/industry_exposures.json")
+    exposure_matrix_path: Path = Path("config/macro_sector_exposure.v2.json")
     ohlcv_path: Path = Path("data/ohlcv.csv")
     api_key_env: str = "KRX_API_KEY"
     use_demo_fallback: bool = True
@@ -98,25 +97,31 @@ class KRXClient:
 
     def load_exposures_result(self) -> KRXLoadResult:
         """노출도 로드 결과를 불러온다."""
-        if self.exposure_matrix_path.exists():
-            payload = json.loads(self.exposure_matrix_path.read_text(encoding="utf-8"))
-            if isinstance(payload, list):
-                return KRXLoadResult(
-                    rows=[dict(item) for item in payload],
-                    source="file",
-                    warnings=[],
-                )
-        if self.use_demo_fallback:
-            return KRXLoadResult(
-                rows=self.load_demo_exposures(),
-                source="demo",
-                warnings=["krx_exposure_matrix_missing_using_demo_fallback"],
-            )
-        return KRXLoadResult(
-            rows=[],
-            source="unavailable",
-            warnings=["krx_exposure_matrix_missing"],
-        )
+        if not self.exposure_matrix_path.exists():
+            return KRXLoadResult(rows=[], source="unavailable", warnings=["krx_exposure_matrix_missing"])
+        payload = json.loads(self.exposure_matrix_path.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict) or not isinstance(payload.get("sector_exposure"), dict):
+            return KRXLoadResult(rows=[], source="unavailable", warnings=["krx_exposure_matrix_invalid"])
+        matrix = {
+            str(channel): {str(sector): int(value) for sector, value in sectors.items()}
+            for channel, sectors in payload["sector_exposure"].items()
+            if isinstance(sectors, dict)
+        }
+        if set(matrix) != set(CHANNELS):
+            return KRXLoadResult(rows=[], source="unavailable", warnings=["krx_exposure_matrix_incomplete_channels"])
+        sectors = sorted({sector for channel_map in matrix.values() for sector in channel_map})
+        expected = sorted({sector for channel_map in GROUPED_SECTOR_EXPOSURE_MATRIX.values() for sector in channel_map})
+        if sectors != expected:
+            return KRXLoadResult(rows=[], source="unavailable", warnings=["krx_exposure_matrix_incomplete_sectors"])
+        rows = [
+            {
+                "industry_code": grouped_sector_code(sector),
+                "industry_name": sector,
+                "exposures": {channel: float(matrix[channel][sector]) for channel in CHANNELS},
+            }
+            for sector in sectors
+        ]
+        return KRXLoadResult(rows=rows, source="file", warnings=[])
 
     def load_stock_classification(self) -> pd.DataFrame:
         """종목 분류표를 불러온다."""
@@ -187,8 +192,14 @@ class KRXClient:
             stock_code = str(live_row["stock_code"]).zfill(6)
             taxonomy_row = taxonomy_by_code.get(stock_code)
             if taxonomy_row is None:
-                missing_taxonomy += 1
-                continue
+                override_sector = STOCK_CODE_SECTOR_OVERRIDES.get(stock_code)
+                if override_sector is None:
+                    missing_taxonomy += 1
+                    continue
+                taxonomy_row = {
+                    "industry_code": grouped_sector_code(override_sector),
+                    "industry_name": override_sector,
+                }
             stock_name = str(live_row.get("stock_name") or taxonomy_row["stock_name"]).strip()
             security_type = str(
                 live_row.get("security_type") or taxonomy_row.get("security_type", "")
@@ -209,6 +220,7 @@ class KRXClient:
                     "stock_code": stock_code,
                     "stock_name": stock_name,
                     "industry_code": str(taxonomy_row["industry_code"]),
+                    "industry_name": str(taxonomy_row.get("industry_name") or taxonomy_row["industry_code"]),
                 }
             )
 
@@ -259,6 +271,7 @@ class KRXClient:
                 "stock_code": str(row["stock_code"]),
                 "stock_name": str(row["stock_name"]),
                 "industry_code": str(row["industry_code"]),
+                "industry_name": str(row.get("industry_name") or row["industry_code"]),
             }
             for row in classification_rows
         ]
@@ -320,15 +333,16 @@ class KRXClient:
             sector_l1 = self._first_value(row, "sector_l1", "대분류")
             sector_l2 = self._first_value(row, "sector_l2", "중분류")
             sector_l3 = self._first_value(row, "sector_l3", "소분류")
-            if sector_l1 and sector_l2 and sector_l3:
-                industry_code = industry_code_slug((sector_l1, sector_l2, sector_l3))
-            else:
-                industry_code = self._first_value(
-                    row, "industry_code", "industry", "소분류", "중분류", "대분류"
-                )
+            grouped_sector = map_classification_row_to_grouped_sector({
+                "소분류": sector_l3,
+                "sector_l3": sector_l3,
+            })
             security_type = self._first_value(row, "security_type", "증권구분", "종목구분")
-            if not stock_code or not stock_name or not industry_code:
+            if not stock_code or not stock_name:
                 continue
+            if not grouped_sector:
+                raise ValueError(f"unmapped_grouped_sector:{stock_code}:{sector_l1}/{sector_l2}/{sector_l3}")
+            industry_code = grouped_sector_code(grouped_sector)
             if (
                 not include_non_common
                 and self._is_non_common_equity(stock_name=stock_name, security_type=security_type)
@@ -339,6 +353,7 @@ class KRXClient:
                     "stock_code": stock_code.zfill(6),
                     "stock_name": stock_name,
                     "industry_code": industry_code,
+                    "industry_name": grouped_sector,
                     "security_type": security_type,
                 }
             )

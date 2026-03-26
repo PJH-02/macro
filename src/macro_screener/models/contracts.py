@@ -180,6 +180,7 @@ class Stage1Result(SerializableMixin):
     industry_scores: list[IndustryScore]
     config_version: str
     warnings: list[str] = field(default_factory=list)
+    channel_scores: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "Stage1Result":
@@ -196,6 +197,7 @@ class Stage1Result(SerializableMixin):
             ],
             config_version=str(payload["config_version"]),
             warnings=[str(item) for item in payload.get("warnings", [])],
+            channel_scores={str(key): value for key, value in payload.get("channel_scores", {}).items()},
         )
 
 
@@ -260,6 +262,8 @@ class StockScore(SerializableMixin):
     normalized_financial_score: float = 0.0
     block_scores: dict[str, float] = field(default_factory=dict)
     risk_flags: list[str] = field(default_factory=list)
+    stage2_individual_stock_score: float = 0.0
+    stage1_sector_score: float = 0.0
 
     def tie_breaker_key(self) -> tuple[float, float, str]:
         """tie breaker key을 처리한다."""
@@ -283,6 +287,8 @@ class StockScore(SerializableMixin):
                 str(key): float(value) for key, value in payload.get("block_scores", {}).items()
             },
             risk_flags=[str(item) for item in payload.get("risk_flags", [])],
+            stage2_individual_stock_score=float(payload.get("stage2_individual_stock_score", payload.get("normalized_dart_score", 0.0))),
+            stage1_sector_score=float(payload.get("stage1_sector_score", payload.get("raw_industry_score", 0.0))),
         )
 
 

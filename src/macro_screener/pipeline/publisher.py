@@ -23,8 +23,8 @@ def _sorted_stock_rows(snapshot: Snapshot) -> list[dict[str, Any]]:
 
 
 def _build_screened_stocks_by_industry(snapshot: Snapshot) -> list[dict[str, Any]]:
-    """업종별 선별 종목 목록을 구성한다."""
-    industry_lookup = {
+    """섹터별 선별 종목 목록을 구성한다. (legacy filename kept)"""
+    sector_lookup = {
         score.industry_code: {
             "industry_code": score.industry_code,
             "industry_name": score.industry_name,
@@ -35,7 +35,7 @@ def _build_screened_stocks_by_industry(snapshot: Snapshot) -> list[dict[str, Any
     }
     grouped: dict[str, dict[str, Any]] = {}
     for stock in snapshot.stock_scores:
-        industry_info = industry_lookup.get(
+        industry_info = sector_lookup.get(
             stock.industry_code,
             {
                 "industry_code": stock.industry_code,
