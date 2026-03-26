@@ -4,12 +4,6 @@
 
 **매크로 국면 기반 2단계 한국 주식 스크리너**를 위한 최소 실행 가능 MVP입니다.
 
-최종 사용자용 문서 세트는 다음과 같습니다.
-- `doc/strategy.md`
-- `doc/prd.md`
-- `doc/plan.md`
-- `doc/open-questions.md`
-
 **AI/저장소 인수인계용 context 세트**로는 다음 3개를 우선 권장합니다.
 - `doc/program-context.md`
 - `doc/repository-orientation.md`

@@ -4,12 +4,6 @@
 
 A minimal, runnable MVP for a **macro regime-based two-stage Korean equity screener**.
 
-The final human-facing doc set is:
-- `doc/strategy.md`
-- `doc/prd.md`
-- `doc/plan.md`
-- `doc/open-questions.md`
-
 For **AI/repository-ingestion context**, the preferred self-contained context set is:
 - `doc/program-context.md`
 - `doc/repository-orientation.md`
