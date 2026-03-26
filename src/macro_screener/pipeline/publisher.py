@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 import pandas as pd  # type: ignore[import-untyped]
 
@@ -74,6 +74,24 @@ def _build_screened_stocks_by_score(snapshot: Snapshot) -> list[dict[str, Any]]:
     return _sorted_stock_rows(snapshot)
 
 
+def _normalize_value_for_parquet(value: Any) -> Any:
+    """Parquet 직렬화가 어려운 중첩 값을 안정적으로 변환한다."""
+    if isinstance(value, Mapping):
+        return json.dumps(dict(value), ensure_ascii=False, sort_keys=True)
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        return json.dumps(list(value), ensure_ascii=False, sort_keys=True)
+    return value
+
+
+def _frame_for_parquet(rows: list[dict[str, Any]]) -> pd.DataFrame:
+    """Parquet 저장 전 중첩 컬럼을 평탄화한다."""
+    normalized_rows = [
+        {key: _normalize_value_for_parquet(value) for key, value in row.items()}
+        for row in rows
+    ]
+    return pd.DataFrame(normalized_rows)
+
+
 def _snapshot_artifact_paths(snapshot_root: Path) -> dict[str, Path]:
     """스냅샷 산출물 경로 묶음을 만든다."""
     return {
@@ -117,12 +135,15 @@ def publish_snapshot(
     artifact_paths = _snapshot_artifact_paths(snapshot_root)
     latest_path = config.paths.resolve(config.paths.latest_snapshot_pointer, output_dir)
 
-    industry_frame = pd.DataFrame([score.to_dict() for score in snapshot.industry_scores])
     stock_rows = _sorted_stock_rows(snapshot)
+    industry_rows = [score.to_dict() for score in snapshot.industry_scores]
+    industry_frame = pd.DataFrame(industry_rows)
     stock_frame = pd.DataFrame(stock_rows)
+    industry_parquet_frame = _frame_for_parquet(industry_rows)
+    stock_parquet_frame = _frame_for_parquet(stock_rows)
 
-    industry_frame.to_parquet(artifact_paths["industry_parquet"], index=False)
-    stock_frame.to_parquet(artifact_paths["stock_parquet"], index=False)
+    industry_parquet_frame.to_parquet(artifact_paths["industry_parquet"], index=False)
+    stock_parquet_frame.to_parquet(artifact_paths["stock_parquet"], index=False)
     industry_frame.to_csv(artifact_paths["industry_csv"], index=False, encoding="utf-8-sig")
     stock_frame.to_csv(artifact_paths["screened_stock_csv"], index=False, encoding="utf-8-sig")
     artifact_paths["screened_stocks_by_score_json"].write_text(

@@ -204,7 +204,7 @@ flowchart TD
 | Provider | 현재 역할 | 현재 쓰는 데이터 | 런타임 상태 |
 |---|---|---|---|
 | `KRX` | 시장/유니버스 소스 | 승인된 마스터 다운로드 기반 보통주 유니버스 + 로컬 taxonomy join | active runtime provider |
-| `DART` | 공시 소스 | Stage 2 공시 이벤트 | active runtime provider |
+| `DART` | 공시 소스 | Stage 2 공시 이벤트(유가증권+코스닥) | active runtime provider |
 | `ECOS` | 한국 매크로/통계 소스 | 산업생산 / CPI / 신용스프레드 / 환율 / 국가별 수출입 시계열 | active runtime provider path |
 | `KOSIS` | 한국 매크로/통계 소스 | KOSIS series identifier가 설정된 경우 Korea external-demand live path에 참여 | conditional runtime provider |
 | `FRED` | 미국 매크로 소스 | 미국 산업생산 / CPI / 신용스프레드 / 재화수입 / broad USD | active runtime provider path |
@@ -216,6 +216,19 @@ flowchart TD
 즉 “현재 BIS/OECD/IMF에서 무엇을 수집하느냐?”에 대한 답은:
 - **현재 MVP active runtime path에서는 없음**
 - reference / future-extension / secondary-validation 용도만 남아 있습니다.
+
+### 현재 DART 런타임 동작
+
+현재 live DART 경로는 다음과 같이 동작합니다.
+- disclosure API를 **페이지네이션** 하며 page 1만 보고 끝내지 않고,
+- **당일 공시도 현재 run cutoff 시점에서 visible** 하게 처리하고,
+- `accepted_at`, `input_cutoff`, `rcept_dt`, `rcept_no` 를 포함한 **구조화된 cursor** 를 저장하며,
+- 예전 cutoff-only watermark 상태에서 과도한 과거 disclosure replay가 발생하지 않도록 제한합니다.
+
+즉, 일반적인 `manual-run`은 이제:
+- 과거 잘못된 DART watermark 상태에서도 회복 가능하고,
+- partial parquet-only 출력이 아니라 complete snapshot 발행을 목표로 하며,
+- run 시점에 실제로 visible 한 disclosure 창에 더 가깝게 DART cache를 유지합니다.
 
 ## 현재 구현 상태
 
@@ -237,6 +250,8 @@ flowchart TD
 - live macro 경로는 ECOS/FRED를 직접 사용하며, 설정이 있으면 Korea external-demand 데이터에 KOSIS를 우선 사용할 수 있음
 - 승인된 KIS/KRX 마스터 다운로드 기반 live stock universe를 만든 뒤 로컬 taxonomy authority와 join 가능
 - `DART_API_KEY`가 있으면 DART live 모드가 동작하고, stale-cache degraded 경로가 명시적으로 남음
+- DART live ingestion은 이제 페이지네이션을 수행하고 `rcept_dt` / `rcept_no` 를 포함한 실제 cursor를 저장함
+- 종목 row에 `block_scores={}` 같은 빈 nested field가 있어도 snapshot 산출물을 끝까지 발행할 수 있음
 
 아직 의도적으로 provisional 인 부분:
 - Stage 1 artifact는 **provisional** 이며, 최종 review된 research artifact는 아님
@@ -297,18 +312,21 @@ flowchart TD
 ### 1) 수동 실행
 
 ```bash
-python3 -m macro_screener.cli manual-run \
-  --output-dir ./out \
-  --run-id manual-prod-run
+./.venv/Scripts/python.exe -m macro_screener manual-run
 ```
 
 `manual-run`은 이제 standard live-provider 파이프라인을 **수동으로 트리거**하는 명령입니다. 명시적으로 manual baseline 경로를 고르지 않는 한, `scheduled-run`과 같은 live data 경로를 사용합니다.
 
+현재 기본 동작의 중요한 점:
+- **repo root에서 실행**
+- 기본 output root는 `src`
+- 따라서 snapshot은 `src/data/snapshots/...` 아래에 생성
+- top-level `macro_screener/` 패키지가 있어서 `src` 안으로 들어가지 않고 실행 가능
+
 ### 2) 스케줄 방식 실행
 
 ```bash
-python3 -m macro_screener.cli scheduled-run \
-  --output-dir ./out \
+./.venv/Scripts/python.exe -m macro_screener scheduled-run \
   --trading-date 2026-03-23 \
   --run-type pre_open
 ```
@@ -318,8 +336,7 @@ python3 -m macro_screener.cli scheduled-run \
 ### 3) 백테스트 / 리플레이
 
 ```bash
-python3 -m macro_screener.cli backtest-run \
-  --output-dir ./out \
+./.venv/Scripts/python.exe -m macro_screener backtest-run \
   --start-date 2026-03-20 \
   --end-date 2026-03-23
 ```
@@ -327,9 +344,14 @@ python3 -m macro_screener.cli backtest-run \
 ordinary live-provider path 대신 explicit zero-baseline/fallback 경로가 필요하면 다음처럼 실행할 수 있습니다.
 
 ```bash
-python3 -m macro_screener.cli manual-run \
-  --output-dir ./out \
+./.venv/Scripts/python.exe -m macro_screener manual-run \
   --macro-source manual
+```
+
+실제 적용되는 runtime config를 확인하려면:
+
+```bash
+./.venv/Scripts/python.exe -m macro_screener show-config
 ```
 
 엄격한 live-provider 동작을 원하면 다음 설정을 사용하면 됩니다.
@@ -414,6 +436,16 @@ Stage 2가 계산한 최종 종목 랭킹입니다.
 - snapshot JSON
 - latest pointer JSON
 - snapshots / published windows / watermarks / channel-state snapshots 를 위한 SQLite 레코드
+
+현재 검증된 runtime 기준으로 성공한 `manual-run`은 다음을 생성합니다.
+- `industry_scores.csv`
+- `industry_scores.parquet`
+- `screened_stock_list.csv`
+- `screened_stocks_by_score.json`
+- `screened_stocks_by_industry.json`
+- `snapshot.json`
+- `stock_scores.parquet`
+- `src/data/snapshots/latest.json`
 
 상태 의미:
 - `published` = 정상 발행

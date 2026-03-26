@@ -217,6 +217,19 @@ So if a new user asks “which data is currently gathered via BIS, OECD, IMF?”
 - **none in the active MVP runtime path**
 - they remain reference / future-extension / secondary-validation sources only.
 
+### Current DART runtime behavior
+
+The current live DART path now behaves as follows:
+- it paginates across the disclosure API instead of assuming page 1 is sufficient,
+- it treats same-day disclosures as visible at the current run cutoff,
+- it persists a structured cursor (`accepted_at`, `input_cutoff`, `rcept_dt`, `rcept_no`),
+- and it avoids replaying oversized historical disclosure windows when recovering from older cutoff-only watermark states.
+
+This means a normal `manual-run` now:
+- can recover from older malformed DART watermark states,
+- should publish a complete snapshot instead of leaving partial parquet-only output,
+- and should keep the DART cache closer to the actual visible disclosure window for the run.
+
 ## Current implementation status
 
 The codebase is no longer just a skeleton. The current repository state now includes:
@@ -237,6 +250,8 @@ What is production-like today:
 - the live macro path now uses ECOS/FRED directly and can optionally prefer KOSIS for Korea external-demand data when configured
 - the live Korean stock universe still uses the sanctioned KIS/KRX master-download workflow joined to the local taxonomy authority
 - DART live mode stays explicit, with stale-cache degradation kept visible in warnings/metadata
+- DART live ingestion now paginates and stores a real cursor with `rcept_dt` / `rcept_no`
+- the publisher now writes complete snapshot artifacts even when stock rows contain empty nested fields such as `block_scores={}`
 
 What is still intentionally provisional:
 - the Stage 1 artifact is **provisional**, not a final reviewed research artifact
@@ -297,18 +312,21 @@ Typical commands:
 ### 1) Manual run
 
 ```bash
-python3 -m macro_screener.cli manual-run \
-  --output-dir ./out \
-  --run-id manual-prod-run
+./.venv/Scripts/python.exe -m macro_screener manual-run
 ```
 
 `manual-run` is now the **manual trigger** of the standard live-provider pipeline. Unless you explicitly switch the macro source to the manual baseline path, it uses the same live data path as `scheduled-run`.
 
+Important current default:
+- you run from the **repo root**
+- the default output root is `src`
+- snapshots therefore land under `src/data/snapshots/...`
+- the top-level `macro_screener/` package exists specifically so you do **not** have to run from inside `src`
+
 ### 2) Scheduled-style run
 
 ```bash
-python3 -m macro_screener.cli scheduled-run \
-  --output-dir ./out \
+./.venv/Scripts/python.exe -m macro_screener scheduled-run \
   --trading-date 2026-03-23 \
   --run-type pre_open
 ```
@@ -318,8 +336,7 @@ python3 -m macro_screener.cli scheduled-run \
 ### 3) Backtest / replay
 
 ```bash
-python3 -m macro_screener.cli backtest-run \
-  --output-dir ./out \
+./.venv/Scripts/python.exe -m macro_screener backtest-run \
   --start-date 2026-03-20 \
   --end-date 2026-03-23
 ```
@@ -327,9 +344,14 @@ python3 -m macro_screener.cli backtest-run \
 If you need the explicit zero-baseline/fallback path instead of the ordinary live-provider path, use:
 
 ```bash
-python3 -m macro_screener.cli manual-run \
-  --output-dir ./out \
+./.venv/Scripts/python.exe -m macro_screener manual-run \
   --macro-source manual
+```
+
+To inspect the effective runtime config:
+
+```bash
+./.venv/Scripts/python.exe -m macro_screener show-config
 ```
 
 If you want strict live-provider behavior, use a config that sets:
@@ -413,6 +435,16 @@ A published run writes:
 - snapshot JSON
 - latest pointer JSON
 - SQLite records for snapshots / published windows / watermarks / channel-state snapshots
+
+In the current verified runtime, a successful `manual-run` produces:
+- `industry_scores.csv`
+- `industry_scores.parquet`
+- `screened_stock_list.csv`
+- `screened_stocks_by_score.json`
+- `screened_stocks_by_industry.json`
+- `snapshot.json`
+- `stock_scores.parquet`
+- `src/data/snapshots/latest.json`
 
 Important status semantics:
 - `published` = normal successful snapshot

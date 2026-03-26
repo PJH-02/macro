@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -217,19 +217,53 @@ class DARTClient:
             "bgn_de": start_date.strftime("%Y%m%d"),
             "end_de": input_cutoff.strftime("%Y%m%d"),
             "last_reprt_at": "Y",
-            "page_no": 1,
             "page_count": 100,
         }
         last_exc: Exception | None = None
         for _ in range(max(retries, 1)):
             try:
                 with httpx.Client(timeout=self.timeout_seconds) as client:
-                    payload = client.get(
-                        self.api_url,
-                        params={key: str(value) for key, value in params.items()},
-                    ).raise_for_status().json()
-                items = payload.get("list", [])
-                disclosures = [self._normalize_live_item(item, input_cutoff) for item in items]
+                    total_pages = 1
+                    page_no = 1
+                    disclosures: list[dict[str, Any] | None] = []
+                    current_key = None if cursor is None else cursor.sort_key()
+                    while page_no <= total_pages:
+                        payload = client.get(
+                            self.api_url,
+                            params={
+                                **{key: str(value) for key, value in params.items()},
+                                "page_no": str(page_no),
+                            },
+                        ).raise_for_status().json()
+                        status = str(payload.get("status") or "000")
+                        if status not in {"000", "013"}:
+                            raise RuntimeError(
+                                f"dart_api_status_error:{status}:{payload.get('message')}"
+                            )
+                        items = payload.get("list", [])
+                        disclosures.extend(
+                            self._normalize_live_item(item, input_cutoff) for item in items
+                        )
+                        if status == "013" or not items:
+                            break
+                        if (
+                            current_key is not None
+                            and cursor is not None
+                            and not self._is_legacy_cutoff_cursor(cursor)
+                        ):
+                            page_visible = [
+                                item
+                                for item in disclosures[-len(items) :]
+                                if item is not None
+                            ]
+                            if self._page_is_at_or_before_cursor(
+                                page_visible,
+                                current_key=current_key,
+                                input_cutoff=input_cutoff,
+                            ):
+                                break
+                        total_pages = max(int(payload.get("total_page") or 1), 1)
+                        page_no += 1
                 normalized = [item for item in disclosures if item is not None]
                 visible = self._filter_visible_disclosures(normalized, input_cutoff)
                 new_items = self._filter_items_after_cursor(visible, cursor)
@@ -247,12 +281,12 @@ class DARTClient:
         input_cutoff: datetime,
     ) -> datetime:
         """워터마크 기준 시작일을 계산한다."""
-        if cursor is None:
-            return input_cutoff - timedelta(days=30)
+        if cursor is None or DARTClient._is_legacy_cutoff_cursor(cursor):
+            return input_cutoff
         try:
-            return parse_datetime(cursor.accepted_at)
+            return min(parse_datetime(cursor.accepted_at), input_cutoff)
         except ValueError:
-            return input_cutoff - timedelta(days=30)
+            return input_cutoff
 
     @staticmethod
     def _normalize_live_item(item: dict[str, Any], input_cutoff: datetime) -> dict[str, Any] | None:
@@ -262,10 +296,7 @@ class DARTClient:
             return None
         filed_date = str(item.get("rcept_dt") or "")
         receipt_no = str(item.get("rcept_no") or "").strip() or None
-        if len(filed_date) == 8:
-            accepted_at = f"{filed_date[:4]}-{filed_date[4:6]}-{filed_date[6:8]}T18:00:00+09:00"
-        else:
-            accepted_at = input_cutoff.isoformat()
+        accepted_at = DARTClient._accepted_at_for_live_item(filed_date, input_cutoff)
         elapsed_days = max((input_cutoff.date() - parse_datetime(accepted_at).date()).days, 0)
         return {
             "stock_code": stock_code.zfill(6),
@@ -276,6 +307,16 @@ class DARTClient:
             "rcept_dt": filed_date or None,
             "rcept_no": receipt_no,
         }
+
+    @staticmethod
+    def _accepted_at_for_live_item(filed_date: str, input_cutoff: datetime) -> str:
+        """공시 수리일을 현재 컷오프 기준 visible 시각으로 정규화한다."""
+        if len(filed_date) != 8:
+            return input_cutoff.isoformat()
+        cutoff_date = input_cutoff.strftime("%Y%m%d")
+        if filed_date == cutoff_date:
+            return input_cutoff.isoformat()
+        return f"{filed_date[:4]}-{filed_date[4:6]}-{filed_date[6:8]}T18:00:00+09:00"
 
     @staticmethod
     def _load_local_file(path: Path) -> list[dict[str, Any]]:
@@ -324,6 +365,8 @@ class DARTClient:
         """커서 이후 공시만 남긴다."""
         if cursor is None:
             return [dict(item) for item in disclosures]
+        if cls._is_legacy_cutoff_cursor(cursor):
+            return [dict(item) for item in disclosures]
         filtered: list[dict[str, Any]] = []
         current_key = cursor.sort_key()
         for disclosure in disclosures:
@@ -344,14 +387,39 @@ class DARTClient:
         current: DARTDisclosureCursor | None,
     ) -> DARTDisclosureCursor:
         """다음 커서를 계산한다."""
-        cursor_candidates = [cls._cursor_for_cutoff(input_cutoff)]
-        if current is not None:
+        if not disclosures:
+            return current if current is not None else cls._cursor_for_cutoff(input_cutoff)
+        cursor_candidates = []
+        if current is not None and not cls._is_legacy_cutoff_cursor(current):
             cursor_candidates.append(current)
         for disclosure in disclosures:
             candidate = cls._cursor_from_disclosure(disclosure, input_cutoff.isoformat())
             if candidate is not None:
                 cursor_candidates.append(candidate)
         return max(cursor_candidates, key=lambda item: item.sort_key())
+
+    @staticmethod
+    def _is_legacy_cutoff_cursor(cursor: DARTDisclosureCursor) -> bool:
+        """수리번호/수리일이 없는 과거 cutoff-only cursor인지 판별한다."""
+        return cursor.rcept_dt is None and cursor.rcept_no is None
+
+    @classmethod
+    def _page_is_at_or_before_cursor(
+        cls,
+        disclosures: list[dict[str, Any]],
+        *,
+        current_key: tuple[str, str],
+        input_cutoff: datetime,
+    ) -> bool:
+        """현재 페이지가 이미 cursor 이하로 내려왔는지 판별한다."""
+        cursors = [
+            cls._cursor_from_disclosure(disclosure, input_cutoff.isoformat())
+            for disclosure in disclosures
+        ]
+        materialized = [cursor for cursor in cursors if cursor is not None]
+        if not materialized:
+            return False
+        return min(cursor.sort_key() for cursor in materialized) <= current_key
 
     @staticmethod
     def _cursor_for_cutoff(input_cutoff: datetime) -> DARTDisclosureCursor:
