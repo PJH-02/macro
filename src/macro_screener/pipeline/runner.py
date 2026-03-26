@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import inspect
+import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Mapping
+from uuid import uuid4
 from zoneinfo import ZoneInfo
 
 from macro_screener.config import AppConfig, load_config
@@ -37,6 +39,12 @@ DEFAULT_CONFIG_VERSION = "mvp-1"
 KST = ZoneInfo("Asia/Seoul")
 
 
+def _build_auto_manual_run_id(published_at: datetime) -> str:
+    """자동 수동 실행 run id를 충돌 없이 생성한다."""
+    timestamp = published_at.astimezone(KST).strftime("%Y%m%dT%H%M%S%z")
+    return f"manual-{timestamp}-{uuid4().hex[:8]}"
+
+
 def build_manual_context(
     *,
     run_id: str | None = None,
@@ -49,7 +57,7 @@ def build_manual_context(
     as_of_dt = parse_datetime(as_of_timestamp) if as_of_timestamp is not None else datetime.now(KST)
     cutoff_dt = parse_datetime(input_cutoff) if input_cutoff is not None else as_of_dt
     published_dt = parse_datetime(published_at) if published_at is not None else as_of_dt
-    resolved_run_id = run_id or f"manual-{published_dt.astimezone(KST).strftime('%Y%m%dT%H%M%S%z')}"
+    resolved_run_id = run_id or _build_auto_manual_run_id(published_dt)
     return {
         "run_id": resolved_run_id,
         "run_type": run_type,
@@ -693,6 +701,7 @@ def run_pipeline_context(
 
     latest_payload: dict[str, str] | None = None
     publish_error: Exception | None = None
+    snapshot_root = config.paths.resolve(config.paths.snapshot_dir, output_root) / snapshot.run_id
     for _ in range(2):
         try:
             latest_payload = publish_snapshot(
@@ -704,8 +713,12 @@ def run_pipeline_context(
             )
             publish_error = None
             break
+        except FileExistsError as exc:
+            publish_error = exc
+            break
         except Exception as exc:
             publish_error = exc
+            shutil.rmtree(snapshot_root, ignore_errors=True)
     if publish_error is not None:
         raise publish_error
 
