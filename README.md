@@ -1,32 +1,28 @@
 # macro-screener
 
-A batch Korean equity screener with:
-- **Stage 1**: macro channel -> grouped-sector scoring
-- **Stage 2**: DART disclosure scoring for the full stock universe, then sector-context adjustment
-- **Output**: immutable snapshot artifacts under `src/data/` by default
+[한국어 버전](README.ko.md)
+
+`macro-screener` is a batch Korean equity screener with a two-stage model:
+
+1. **Stage 1** converts five macro channel states (`G`, `IC`, `FC`, `ED`, `FX`) into grouped-sector scores.
+2. **Stage 2** scores the full stock universe from DART disclosures, then adds the matched Stage 1 sector score.
+3. The pipeline publishes an immutable snapshot plus a `latest.json` pointer and SQLite registry updates.
+
+If you only want the compact context set for another engineer or agent, start with:
+- `doc/program-context.md`
+- `doc/repository-orientation.md`
+- `doc/code-context.md`
 
 ## Current model
 
 ### Stage 1
-- Channels: `G`, `IC`, `FC`, `ED`, `FX`
-- Runtime currently resolves macro signals into signed channel states/scores
-- Sector scores are computed by **direct channel-score × sector-exposure multiplication**
-- Taxonomy is the grouped sector model defined in `doc/plan.md`
+- Config version: `sector-v2`
+- Stage 1 input artifact: `config/macro_sector_exposure.v2.json`
+- Taxonomy/exposure helpers: `src/macro_screener/data/reference.py`
+- Runtime scoring path: **direct channel-state × grouped-sector exposure multiplication**
+- Output type: ranked `industry_scores` rows (the field name stays `industry_*` for compatibility, but the business concept is a grouped sector)
 
-### Stage 2
-- Full-universe stock scoring; no Stage 1 sector gating
-- Current stock-score composition:
-
-```text
-final_stock_score = stage2_individual_stock_score + stage1_sector_score
-```
-
-- Current `stage2_individual_stock_score` is DART-driven
-- Current `stage1_sector_score` is the matched grouped-sector score from Stage 1
-
-## Taxonomy
-
-The program collapses current stock-classification labels into grouped sectors such as:
+The grouped sector universe currently includes sectors such as:
 - `반도체`
 - `자동차/부품`
 - `조선`
@@ -35,23 +31,55 @@ The program collapses current stock-classification labels into grouped sectors s
 - `유통/소매`
 - `필수소비재(음식료)`
 
-See `doc/plan.md` for the authoritative mapping and exhaustive appendix.
+### Stage 2
+- Full-universe stock scoring; Stage 1 does **not** gate which stocks enter Stage 2
+- DART events are classified, decayed, and aggregated into a raw DART score
+- Raw DART scores are z-scored across the universe
+- The final stock score is:
 
-## Main paths
+```text
+final_score = normalized_dart_score + stage1_sector_score
+```
 
+- `normalized_financial_score` remains present in the model contract, but is currently fixed at `0.0`
+
+## Runtime entrypoints
+
+Main code paths:
 - CLI: `src/macro_screener/cli.py`
-- Pipeline: `src/macro_screener/pipeline/runner.py`
+- Pipeline orchestration: `src/macro_screener/pipeline/runner.py`
 - Publication: `src/macro_screener/pipeline/publisher.py`
-- Taxonomy/exposure: `src/macro_screener/data/reference.py`
-- Stock universe/exposure loading: `src/macro_screener/data/krx_client.py`
-- Stage 1: `src/macro_screener/stage1/ranking.py`
-- Stage 2: `src/macro_screener/stage2/ranking.py`
+- Macro loading/classification: `src/macro_screener/data/macro_client.py`
+- KRX stock universe + exposure loading: `src/macro_screener/data/krx_client.py`
+- DART ingestion/cursor/cache: `src/macro_screener/data/dart_client.py`
+- Stage 1 scoring: `src/macro_screener/stage1/ranking.py`
+- Stage 2 scoring: `src/macro_screener/stage2/ranking.py`
 
-## Default outputs
+Supported CLI commands:
+- `show-config`
+- `demo-run`
+- `manual-run`
+- `scheduled-run`
+- `backtest-run`
+- `backtest-stub`
 
-Default CLI output root is `src`, so snapshots land under `src/data/...`.
+## Default inputs and outputs
 
-Important artifact names are intentionally kept stable:
+Default config lives at `config/default.yaml`.
+
+Important default paths from that config:
+- `stock_classification.csv`
+- `data/reference/industry_master.csv`
+- `config/macro_sector_exposure.v2.json`
+- `data/snapshots/latest.json`
+- `data/macro_screener.sqlite3`
+
+Important practical detail:
+- config paths are relative to the chosen output root
+- the CLI default output root is `repo_root/src`
+- so a default CLI run writes to `src/data/...`
+
+Published artifact filenames currently include:
 - `industry_scores.csv`
 - `industry_scores.parquet`
 - `screened_stock_list.csv`
@@ -60,27 +88,20 @@ Important artifact names are intentionally kept stable:
 - `snapshot.json`
 - `stock_scores.parquet`
 
-`industry_*` filenames are retained for compatibility even though the active business concept is now **grouped sector**.
+The `industry_*` filenames are intentionally kept for compatibility even though the active taxonomy is grouped-sector based.
 
 ## Run
 
 ```bash
-python -m macro_screener show-config
-python -m macro_screener demo-run
-python -m macro_screener manual-run
-python -m macro_screener scheduled-run
+PYTHONPATH=src:. python -m macro_screener show-config
+PYTHONPATH=src:. python -m macro_screener demo-run
+PYTHONPATH=src:. python -m macro_screener manual-run
+PYTHONPATH=src:. python -m macro_screener scheduled-run
 ```
 
 ## Verify
 
 ```bash
 PYTHONPATH=src:. pytest -q
-PYTHONPATH=src:. python3 -m macro_screener demo-run --output-dir /tmp/macro-demo
+PYTHONPATH=src:. python -m macro_screener demo-run --output-dir /tmp/macro-demo
 ```
-
-## Docs
-
-- `doc/program-context.md`
-- `doc/repository-orientation.md`
-- `doc/code-context.md`
-- `doc/plan.md`
