@@ -152,6 +152,9 @@ Rules:
 - `worker` is a team-runtime surface, not a general-purpose child role.
 - Child agents should report recommended handoffs upward.
 - Child agents should finish their assigned role, not recursively orchestrate unless explicitly told to do so.
+- Prefer inheriting the leader model by omitting `spawn_agent.model` unless a task truly requires a different model.
+- Do not hardcode stale frontier-model overrides for Codex native child agents. If an explicit frontier override is necessary, use the current frontier default from `OMX_DEFAULT_FRONTIER_MODEL` / the repo model contract (currently `gpt-5.4`), not older values such as `gpt-5.2`.
+- Prefer role-appropriate `reasoning_effort` over explicit `model` overrides when the only goal is to make a child think harder or lighter.
 </child_agent_protocol>
 
 <invocation_conventions>
@@ -165,6 +168,8 @@ Match role to task shape:
 - Low complexity: `explore`, `style-reviewer`, `writer`
 - Standard: `executor`, `debugger`, `test-engineer`
 - High complexity: `architect`, `executor`, `critic`
+
+For Codex native child agents, model routing defaults to inheritance/current repo defaults unless the caller has a concrete reason to override it.
 </model_routing>
 
 ---
@@ -326,22 +331,31 @@ Broad Request Detection:
 A request is broad when it uses vague verbs without targets, names no specific file or function, touches 3+ areas, or is a single sentence without a clear deliverable. For broad work: explore first, then plan if needed.
 
 Command Routing:
-- When `USE_OMX_EXPLORE_CMD` enables advisory routing, prefer `omx explore` as the default surface for simple read-only repository lookup tasks (files, symbols, patterns, relationships).
+- When `USE_OMX_EXPLORE_CMD` enables advisory routing, strongly prefer `omx explore` as the default surface for simple read-only repository lookup tasks (files, symbols, patterns, relationships).
+- For simple file/symbol lookups, use `omx explore` FIRST before attempting full code analysis.
 - Keep ambiguous, implementation-heavy, edit-heavy, or non-shell-only work on the normal Codex path.
 - If `omx explore` is unavailable or fails, gracefully fall back to the normal path.
 - Let `omx explore` keep direct inspection by default and use `omx sparkshell` only as an adaptive backend for qualifying read-only shell-native tasks.
 - For explicit tmux-pane / worker / leader / HUD inspection, prefer `omx sparkshell --tmux-pane ...` when a larger-tail read or bounded summary is useful. Sparkshell pane mode is explicit opt-in, not always-on.
 
+When to use what:
+- If the task is a simple read-only file/symbol/pattern/relationship lookup -> use `omx explore` first.
+- If the task is a noisy read-only shell command, verification run, repo-wide search/listing, or tmux-pane summary -> use `omx sparkshell`.
+- If the task needs edits, tests with exact raw stderr, MCP/web access, complex shell composition, or broad ambiguous analysis -> stay on the richer normal Codex path.
+- If `omx explore` or `omx sparkshell` returns incomplete or ambiguous results -> retry with a narrower prompt/command, then fall back to the normal path.
+
 Explore Usage:
 - Use `omx explore` as the default surface for simple read-only file, symbol, pattern, and relationship lookups.
 - Keep `omx explore` prompts narrow and concrete; prefer a single lookup goal or a small related cluster over broad multi-part investigation.
-- Prefer `omx explore --prompt ...` for quick one-off lookups and `omx explore --prompt-file ...` when the search brief is longer or reusable.
+- Prefer `omx explore --prompt ...` for quick one-off lookups and `omx explore --prompt-file ...` for longer reusable briefs.
+- Good explore examples: `omx explore --prompt "which files define TeamPolicy"` and `omx explore --prompt "find usages of buildExploreRoutingGuidance"`.
 - Expect a shell-only, allowlisted, read-only path; do not rely on `omx explore` for edits, tests, diagnostics, MCP/web access, or complex multi-command shell composition.
 - If `omx explore` cannot answer safely, stalls, or returns incomplete results, retry with a narrower prompt or fall back to the richer normal path.
 
 Sparkshell Usage:
-- Protect context budget by default: prefer `omx sparkshell` for noisy read-only and verification commands where full raw output is usually wasteful.
+- Protect context budget by default: strongly prefer `omx sparkshell` for noisy read-only and verification commands where full raw output is usually wasteful.
 - Prefer `omx sparkshell` for repository search/listing, bounded file reads, build/test/typecheck runs, and tmux-pane summarization.
+- Good sparkshell examples: `omx sparkshell -- rg -n "TeamPolicy" src`, `omx sparkshell -- npm test`, and `omx sparkshell --tmux-pane %12`.
 - Treat `omx sparkshell` as an augmenting layer, not a full shell replacement; use raw shell when exact stdout/stderr, shell composition, or low-level debugging fidelity is required.
 - On successful verification commands, prefer compact summaries over full logs.
 - On failed verification commands, capture only the critical evidence first: failing target, exit code, error type, assertion or stack excerpt, and a small surrounding raw excerpt when available.
