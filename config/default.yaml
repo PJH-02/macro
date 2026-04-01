@@ -11,7 +11,7 @@ paths:
 schedule:
   timezone: "Asia/Seoul"
   pre_open_time: "08:30"
-  post_close_time: "15:45"
+  post_close_time: "18:00"
 
 universe:
   markets:

@@ -202,6 +202,29 @@ def load_stage1_artifact(path: Path) -> dict[str, Any]:
     return payload
 
 
+def build_grouped_sector_rank_table_compat_artifact() -> dict[str, Any]:
+    sector_rank_tables = {
+        channel: {
+            "pos": list(sector_scores),
+            "neg": list(reversed(list(sector_scores))),
+        }
+        for channel, sector_scores in GROUPED_SECTOR_EXPOSURE_MATRIX.items()
+    }
+    return {
+        "artifact_version": "stage1-grouped-sector-compat-v1",
+        "artifact_status": "compatibility",
+        "artifact_note": (
+            "Compatibility rank-table view derived from config/macro_sector_exposure.v2.json. "
+            "Stage 1 final sector scores are calculated from the exposure values in that file, "
+            "not from this artifact."
+        ),
+        "source_artifact_path": "config/macro_sector_exposure.v2.json",
+        "channel_weights": dict(DEFAULT_CHANNEL_WEIGHTS),
+        "neutral_bands": dict(DEFAULT_NEUTRAL_BANDS),
+        "sector_rank_tables": sector_rank_tables,
+    }
+
+
 def build_provisional_stage1_artifact(industry_master_path: Path, *, generated_at: str | None = None) -> dict[str, Any]:
     industries = load_industry_master_records(industry_master_path)
     if not industries:

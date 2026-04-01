@@ -105,7 +105,7 @@ Their job is to define:
 ### 3.4 Scheduled behavior
 `src/macro_screener/pipeline/scheduler.py` defines:
 - `pre_open` runs at `08:30:00+09:00`
-- `post_close` runs at `15:45:00+09:00`
+- `post_close` runs at `18:00:00+09:00`
 
 For `pre_open` runs:
 - the input cutoff is the previous trading day at `18:00:00+09:00`

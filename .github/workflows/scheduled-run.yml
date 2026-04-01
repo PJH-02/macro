@@ -1,0 +1,92 @@
+name: scheduled-run
+
+on:
+  schedule:
+    # 08:30 KST Monday-Friday = 23:30 UTC Sunday-Thursday
+    - cron: "30 23 * * 0-4"
+    # 18:00 KST Monday-Friday = 09:00 UTC Monday-Friday
+    - cron: "0 9 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      run_type:
+        description: "Scheduled run type to execute"
+        required: true
+        type: choice
+        options:
+          - pre_open
+          - post_close
+      trading_date:
+        description: "Optional KST trading date override (YYYY-MM-DD)"
+        required: false
+        type: string
+
+jobs:
+  scheduled-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Resolve scheduled run context
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          EVENT_NAME="${{ github.event_name }}"
+          EVENT_SCHEDULE="${{ github.event.schedule }}"
+          INPUT_RUN_TYPE="${{ github.event.inputs.run_type || '' }}"
+          INPUT_TRADING_DATE="${{ github.event.inputs.trading_date || '' }}"
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            RUN_TYPE="$INPUT_RUN_TYPE"
+            TRADING_DATE="${INPUT_TRADING_DATE:-$(TZ=Asia/Seoul date +%F)}"
+          else
+            case "$EVENT_SCHEDULE" in
+              "30 23 * * 0-4")
+                RUN_TYPE="pre_open"
+                ;;
+              "0 9 * * 1-5")
+                RUN_TYPE="post_close"
+                ;;
+              *)
+                echo "Unsupported schedule: $EVENT_SCHEDULE" >&2
+                exit 1
+                ;;
+            esac
+            TRADING_DATE="$(TZ=Asia/Seoul date +%F)"
+          fi
+
+          ATTEMPTED_AT="$(TZ=Asia/Seoul date --iso-8601=seconds)"
+
+          {
+            echo "RUN_TYPE=$RUN_TYPE"
+            echo "TRADING_DATE=$TRADING_DATE"
+            echo "ATTEMPTED_AT=$ATTEMPTED_AT"
+          } >> "$GITHUB_ENV"
+
+      - name: Run macro screener scheduled pipeline
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
+          KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src:. python -m macro_screener scheduled-run \
+            --trading-date "$TRADING_DATE" \
+            --run-type "$RUN_TYPE" \
+            --attempted-at "$ATTEMPTED_AT"

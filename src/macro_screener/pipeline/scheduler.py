@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 from macro_screener.backtest.calendar import is_trading_day, previous_trading_day
 from macro_screener.serialization import parse_datetime
 
-SCHEDULED_RUN_TIMES = {"pre_open": "08:30:00+09:00", "post_close": "15:45:00+09:00"}
+SCHEDULED_RUN_TIMES = {"pre_open": "08:30:00+09:00", "post_close": "18:00:00+09:00"}
 DEFAULT_TIMEZONE = ZoneInfo("Asia/Seoul")
 
 
