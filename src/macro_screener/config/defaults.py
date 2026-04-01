@@ -60,6 +60,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "stage1_only_on_stage2_failure": True,
         "stale_dart_after_retries": True,
         "reuse_last_known_channel_states": True,
+        "allow_last_known_channel_states_in_live_mode": False,
         "unknown_dart_ratio_warning_threshold": 0.2,
         "max_runtime_minutes_warning": 5,
     },

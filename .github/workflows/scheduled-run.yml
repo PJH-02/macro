@@ -70,14 +70,22 @@ jobs:
           fi
 
           ATTEMPTED_AT="$(TZ=Asia/Seoul date --iso-8601=seconds)"
+          IS_TRADING_DAY="$(TRADING_DATE="$TRADING_DATE" PYTHONPATH=src:. python3 -c 'from datetime import date; import os; from macro_screener.backtest.calendar import is_trading_day; print("true" if is_trading_day(date.fromisoformat(os.environ["TRADING_DATE"])) else "false")')"
 
           {
             echo "RUN_TYPE=$RUN_TYPE"
             echo "TRADING_DATE=$TRADING_DATE"
             echo "ATTEMPTED_AT=$ATTEMPTED_AT"
+            echo "IS_TRADING_DAY=$IS_TRADING_DAY"
           } >> "$GITHUB_ENV"
 
+      - name: Skip non-trading day
+        if: env.IS_TRADING_DAY != 'true'
+        run: |
+          echo "Skipping scheduled run for non-trading day: $TRADING_DATE"
+
       - name: Run macro screener scheduled pipeline
+        if: env.IS_TRADING_DAY == 'true'
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
@@ -86,7 +94,8 @@ jobs:
           KRX_API_KEY: ${{ secrets.KRX_API_KEY }}
         run: |
           set -euo pipefail
-          PYTHONPATH=src:. python -m macro_screener scheduled-run \
+          PYTHONPATH=src:. python3 -m macro_screener scheduled-run \
+            --config config/github-actions.yaml \
             --trading-date "$TRADING_DATE" \
             --run-type "$RUN_TYPE" \
             --attempted-at "$ATTEMPTED_AT"

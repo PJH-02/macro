@@ -1,0 +1,2 @@
+runtime:
+  allow_last_known_channel_states_in_live_mode: true

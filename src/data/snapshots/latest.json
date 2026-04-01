@@ -1,13 +1,13 @@
 {
-  "industry_csv": "C:\\Users\\박제형\\Desktop\\macro\\src\\data\\snapshots\\manual-20260401T091723+0900-7d969928\\industry_scores.csv",
-  "industry_parquet": "C:\\Users\\박제형\\Desktop\\macro\\src\\data\\snapshots\\manual-20260401T091723+0900-7d969928\\industry_scores.parquet",
-  "published_at": "2026-04-01T09:17:23.582413+09:00",
-  "run_id": "manual-20260401T091723+0900-7d969928",
-  "run_type": "manual",
-  "screened_stock_csv": "C:\\Users\\박제형\\Desktop\\macro\\src\\data\\snapshots\\manual-20260401T091723+0900-7d969928\\screened_stock_list.csv",
-  "screened_stocks_by_industry_json": "C:\\Users\\박제형\\Desktop\\macro\\src\\data\\snapshots\\manual-20260401T091723+0900-7d969928\\screened_stocks_by_industry.json",
-  "screened_stocks_by_score_json": "C:\\Users\\박제형\\Desktop\\macro\\src\\data\\snapshots\\manual-20260401T091723+0900-7d969928\\screened_stocks_by_score.json",
-  "snapshot_json": "C:\\Users\\박제형\\Desktop\\macro\\src\\data\\snapshots\\manual-20260401T091723+0900-7d969928\\snapshot.json",
+  "industry_csv": "/mnt/c/Users/박제형/Desktop/macro/src/data/snapshots/2026-03-27-pre_open-20260401T193200+0900/industry_scores.csv",
+  "industry_parquet": "/mnt/c/Users/박제형/Desktop/macro/src/data/snapshots/2026-03-27-pre_open-20260401T193200+0900/industry_scores.parquet",
+  "published_at": "2026-04-01T19:32:00+09:00",
+  "run_id": "2026-03-27-pre_open-20260401T193200+0900",
+  "run_type": "pre_open",
+  "screened_stock_csv": "/mnt/c/Users/박제형/Desktop/macro/src/data/snapshots/2026-03-27-pre_open-20260401T193200+0900/screened_stock_list.csv",
+  "screened_stocks_by_industry_json": "/mnt/c/Users/박제형/Desktop/macro/src/data/snapshots/2026-03-27-pre_open-20260401T193200+0900/screened_stocks_by_industry.json",
+  "screened_stocks_by_score_json": "/mnt/c/Users/박제형/Desktop/macro/src/data/snapshots/2026-03-27-pre_open-20260401T193200+0900/screened_stocks_by_score.json",
+  "snapshot_json": "/mnt/c/Users/박제형/Desktop/macro/src/data/snapshots/2026-03-27-pre_open-20260401T193200+0900/snapshot.json",
   "status": "published",
-  "stock_parquet": "C:\\Users\\박제형\\Desktop\\macro\\src\\data\\snapshots\\manual-20260401T091723+0900-7d969928\\stock_scores.parquet"
+  "stock_parquet": "/mnt/c/Users/박제형/Desktop/macro/src/data/snapshots/2026-03-27-pre_open-20260401T193200+0900/stock_scores.parquet"
 }

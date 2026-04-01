@@ -255,7 +255,10 @@ def _enforce_macro_source_policy(
         raise RuntimeError(
             f"manual_macro_source_forbidden_in_production_live_mode:{macro_result.source_name}"
         )
-    if macro_result.fallback_mode == "last_known_channel_states":
+    if (
+        macro_result.fallback_mode == "last_known_channel_states"
+        and not config.runtime.allow_last_known_channel_states_in_live_mode
+    ):
         raise RuntimeError("last_known_macro_fallback_requires_degraded_mode")
 
 

@@ -198,6 +198,7 @@ class RuntimePolicyConfig(SerializableMixin):
     stage1_only_on_stage2_failure: bool = True
     stale_dart_after_retries: bool = True
     reuse_last_known_channel_states: bool = True
+    allow_last_known_channel_states_in_live_mode: bool = False
     unknown_dart_ratio_warning_threshold: float = 0.2
     max_runtime_minutes_warning: int = 5
 
@@ -233,6 +234,9 @@ class RuntimePolicyConfig(SerializableMixin):
             stale_dart_after_retries=bool(payload.get("stale_dart_after_retries", True)),
             reuse_last_known_channel_states=bool(
                 payload.get("reuse_last_known_channel_states", True)
+            ),
+            allow_last_known_channel_states_in_live_mode=bool(
+                payload.get("allow_last_known_channel_states_in_live_mode", False)
             ),
             unknown_dart_ratio_warning_threshold=float(
                 payload.get("unknown_dart_ratio_warning_threshold", 0.2)
