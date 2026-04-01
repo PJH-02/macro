@@ -25,11 +25,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -99,3 +101,37 @@ jobs:
             --trading-date "$TRADING_DATE" \
             --run-type "$RUN_TYPE" \
             --attempted-at "$ATTEMPTED_AT"
+
+      - name: Persist generated src/data outputs
+        if: env.IS_TRADING_DAY == 'true'
+        shell: bash
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$(git status --porcelain -- src/data)" ]]; then
+            echo "No src/data changes detected after scheduled run."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A src/data
+          {
+            printf '%s\n' 'Persist scheduled macro outputs' ''
+            printf '%s\n' 'GitHub-hosted runners are ephemeral, so the scheduled pipeline'
+            printf '%s\n' 'must write tracked src/data outputs back to the branch or the'
+            printf '%s\n' 'manual-run-equivalent artifacts disappear after the job ends.' ''
+            printf '%s\n' 'Constraint: GitHub-hosted runners are ephemeral, so generated src/data files disappear unless written back to the repository'
+            printf '%s\n' 'Rejected: Upload artifacts only | does not update tracked src/data outputs in the repository'
+            printf '%s\n' 'Confidence: high'
+            printf '%s\n' 'Scope-risk: narrow'
+            printf '%s\n' 'Directive: Keep scheduled-run output paths aligned with the manual CLI output root so repo snapshots stay comparable'
+            printf '%s\n' 'Tested: scheduled workflow path inspection'
+            printf '%s\n' 'Not-tested: concurrent push conflict handling'
+          } > /tmp/scheduled-run-commit-message.txt
+          git commit -F /tmp/scheduled-run-commit-message.txt
+          git pull --rebase origin "$BRANCH_NAME"
+          git push origin "HEAD:$BRANCH_NAME"
