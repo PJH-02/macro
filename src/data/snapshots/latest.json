@@ -1,13 +1,13 @@
 {
-  "industry_csv": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-06-post_close-20260406T190658+0900/industry_scores.csv",
-  "industry_parquet": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-06-post_close-20260406T190658+0900/industry_scores.parquet",
-  "published_at": "2026-04-06T19:06:58+09:00",
-  "run_id": "2026-04-06-post_close-20260406T190658+0900",
-  "run_type": "post_close",
-  "screened_stock_csv": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-06-post_close-20260406T190658+0900/screened_stock_list.csv",
-  "screened_stocks_by_industry_json": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-06-post_close-20260406T190658+0900/screened_stocks_by_industry.json",
-  "screened_stocks_by_score_json": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-06-post_close-20260406T190658+0900/screened_stocks_by_score.json",
-  "snapshot_json": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-06-post_close-20260406T190658+0900/snapshot.json",
+  "industry_csv": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-07-pre_open-20260407T085539+0900/industry_scores.csv",
+  "industry_parquet": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-07-pre_open-20260407T085539+0900/industry_scores.parquet",
+  "published_at": "2026-04-07T08:55:39+09:00",
+  "run_id": "2026-04-07-pre_open-20260407T085539+0900",
+  "run_type": "pre_open",
+  "screened_stock_csv": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-07-pre_open-20260407T085539+0900/screened_stock_list.csv",
+  "screened_stocks_by_industry_json": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-07-pre_open-20260407T085539+0900/screened_stocks_by_industry.json",
+  "screened_stocks_by_score_json": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-07-pre_open-20260407T085539+0900/screened_stocks_by_score.json",
+  "snapshot_json": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-07-pre_open-20260407T085539+0900/snapshot.json",
   "status": "published",
-  "stock_parquet": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-06-post_close-20260406T190658+0900/stock_scores.parquet"
+  "stock_parquet": "/home/runner/work/macro/macro/src/data/snapshots/2026-04-07-pre_open-20260407T085539+0900/stock_scores.parquet"
 }
