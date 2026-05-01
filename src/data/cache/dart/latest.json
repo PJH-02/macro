@@ -1,15 +1,5 @@
 {
-  "disclosures": [
-    {
-      "accepted_at": "2026-04-30T18:00:00+09:00",
-      "event_code": null,
-      "rcept_dt": "20260430",
-      "rcept_no": "20260430902114",
-      "stock_code": "418250",
-      "title": "기타시장안내              (개선기간 종료에 따른 상장폐지 여부 결정 안내)",
-      "trading_days_elapsed": 0
-    }
-  ],
+  "disclosures": [],
   "source": "live",
   "watermark": "{\"accepted_at\": \"2026-04-30T18:00:00+09:00\", \"input_cutoff\": \"2026-04-30T18:00:00+09:00\", \"rcept_dt\": \"20260430\", \"rcept_no\": \"20260430902114\"}"
 }
