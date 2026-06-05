@@ -1,5 +1,4803 @@
 {
-  "disclosures": [],
+  "disclosures": [
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900966",
+      "stock_code": "291810",
+      "title": "불성실공시법인지정              (공시번복 4건)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900948",
+      "stock_code": "065420",
+      "title": "소송등의제기ㆍ신청(경영권분쟁소송)              (회계의장부와 서류에 대한 가처분)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900930",
+      "stock_code": "464440",
+      "title": "주권매매거래정지              (상장폐지 사유발생)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900910",
+      "stock_code": "027040",
+      "title": "소송등의판결ㆍ결정(일정금액이상의청구)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900928",
+      "stock_code": "068240",
+      "title": "불성실공시법인지정예고              (공시번복 6건, 공시불이행 1건, 공시변경 1건)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000654",
+      "stock_code": "032680",
+      "title": "주요사항보고서(유상증자결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000665",
+      "stock_code": "049470",
+      "title": "주요사항보고서(유형자산양수결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000666",
+      "stock_code": "267320",
+      "title": "주요사항보고서(제3자의전환사채매수선택권행사)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000660",
+      "stock_code": "049470",
+      "title": "[기재정정]주요사항보고서(전환사채권발행결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000664",
+      "stock_code": "007370",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000663",
+      "stock_code": "053210",
+      "title": "증권신고서(채무증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000662",
+      "stock_code": "267320",
+      "title": "주요사항보고서(전환사채매수선택권행사자지정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900917",
+      "stock_code": "068240",
+      "title": "주권매매거래정지기간변경              (상장적격성 실질심사 대상 결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000649",
+      "stock_code": "069540",
+      "title": "[첨부정정]주요사항보고서(회사합병결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900880",
+      "stock_code": "078590",
+      "title": "주주명부폐쇄기간또는기준일설정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900878",
+      "stock_code": "038880",
+      "title": "주권매매거래정지              (주식의 병합, 분할 등 전자등록 변경, 말소)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000659",
+      "stock_code": "108490",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000658",
+      "stock_code": "007370",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000647",
+      "stock_code": "049470",
+      "title": "[기재정정]주요사항보고서(전환사채권발행결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000656",
+      "stock_code": "177900",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000653",
+      "stock_code": "024850",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800895",
+      "stock_code": "002780",
+      "title": "[기재정정]단일판매ㆍ공급계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000651",
+      "stock_code": "489790",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000640",
+      "stock_code": "241710",
+      "title": "[첨부정정]주요사항보고서(유형자산양수결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000650",
+      "stock_code": "278650",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900861",
+      "stock_code": "123010",
+      "title": "[기재정정]최대주주변경을수반하는주식양수도계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000648",
+      "stock_code": "348340",
+      "title": "임원ㆍ주요주주특정증권등거래계획보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000645",
+      "stock_code": "069540",
+      "title": "[기재정정]분기보고서 (2026.03)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000639",
+      "stock_code": "483650",
+      "title": "[기재정정]주요사항보고서(자기주식취득신탁계약체결결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000643",
+      "stock_code": "203650",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000642",
+      "stock_code": "039490",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000641",
+      "stock_code": "009160",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000638",
+      "stock_code": "483650",
+      "title": "[첨부정정]주요사항보고서(자기주식취득신탁계약해지결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000637",
+      "stock_code": "095720",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000636",
+      "stock_code": "0101C0",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800839",
+      "stock_code": "003580",
+      "title": "[기재정정]금전대여결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000635",
+      "stock_code": "095720",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000634",
+      "stock_code": "001750",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000633",
+      "stock_code": "006570",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000631",
+      "stock_code": "382800",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000630",
+      "stock_code": "003450",
+      "title": "[기재정정]투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000629",
+      "stock_code": "095720",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000628",
+      "stock_code": "003530",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000627",
+      "stock_code": "082210",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900840",
+      "stock_code": "078590",
+      "title": "주주총회소집결의              (임시주주총회)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000626",
+      "stock_code": "095720",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800874",
+      "stock_code": "001390",
+      "title": "타법인주식및출자증권처분결정(종속회사의주요경영사항)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000623",
+      "stock_code": "003530",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000622",
+      "stock_code": "456160",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000621",
+      "stock_code": "450080",
+      "title": "임원ㆍ주요주주특정증권등거래계획철회보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000619",
+      "stock_code": "032800",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000618",
+      "stock_code": "488280",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000617",
+      "stock_code": "003450",
+      "title": "[기재정정]일괄신고추가서류(파생결합사채-주가연계파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000616",
+      "stock_code": "095720",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000615",
+      "stock_code": "003530",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000571",
+      "stock_code": "006740",
+      "title": "[기재정정]주요사항보고서(전환사채권발행결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000614",
+      "stock_code": "003530",
+      "title": "일괄신고추가서류(파생결합사채-주가연계파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000612",
+      "stock_code": "456160",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000611",
+      "stock_code": "069460",
+      "title": "[기재정정]의결권대리행사권유참고서류",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900813",
+      "stock_code": "391710",
+      "title": "투자판단관련주요경영사항              ([국책과제 선정] 상용면적 페로브스카이트/결정질 실리콘 탠덤 모듈 기술개발 및 실증 사업(기후에너지환경부))",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900799",
+      "stock_code": "307870",
+      "title": "[기재정정]최대주주변경을수반하는주식양수도계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000588",
+      "stock_code": "148250",
+      "title": "[기재정정]주요사항보고서(타법인주식및출자증권양도결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900797",
+      "stock_code": "342870",
+      "title": "임시주주총회결과",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000565",
+      "stock_code": "342870",
+      "title": "[기재정정]주요사항보고서(회사분할결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800852",
+      "stock_code": "005320",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000604",
+      "stock_code": "456160",
+      "title": "[기재정정]주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000603",
+      "stock_code": "006570",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900810",
+      "stock_code": "183300",
+      "title": "기업가치제고계획(자율공시)              (2025년 이행현황)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000600",
+      "stock_code": "001510",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000599",
+      "stock_code": "006800",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000576",
+      "stock_code": "261780",
+      "title": "[기재정정]주요사항보고서(전환사채권발행결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000597",
+      "stock_code": "456160",
+      "title": "[기재정정]주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000596",
+      "stock_code": "056080",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000595",
+      "stock_code": "003530",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000594",
+      "stock_code": "045340",
+      "title": "자기주식취득결과보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000593",
+      "stock_code": "267320",
+      "title": "[첨부정정]주요사항보고서(전환사채권발행결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000592",
+      "stock_code": "001520",
+      "title": "의결권대리행사권유참고서류",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000591",
+      "stock_code": "032350",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000587",
+      "stock_code": "456160",
+      "title": "[기재정정]주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000586",
+      "stock_code": "005930",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000585",
+      "stock_code": "001520",
+      "title": "주주총회소집공고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000584",
+      "stock_code": "008560",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000582",
+      "stock_code": "008560",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000581",
+      "stock_code": "060560",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000579",
+      "stock_code": "056080",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000578",
+      "stock_code": "200130",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900794",
+      "stock_code": "068240",
+      "title": "기타시장안내              (상장적격성 실질심사 대상 결정 )",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000577",
+      "stock_code": "0099W0",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900769",
+      "stock_code": "372800",
+      "title": "[기재정정]단일판매ㆍ공급계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000573",
+      "stock_code": "003530",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000572",
+      "stock_code": "042940",
+      "title": "[기재정정]증권신고서(지분증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800791",
+      "stock_code": "011810",
+      "title": "[기재정정]투자판단관련주요경영사항",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000569",
+      "stock_code": "111110",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000568",
+      "stock_code": "229000",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000567",
+      "stock_code": "096240",
+      "title": "의결권대리행사권유참고서류",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000566",
+      "stock_code": "389470",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000564",
+      "stock_code": "024720",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900786",
+      "stock_code": "064290",
+      "title": "전환사채(해외전환사채포함)발행후만기전사채취득",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900763",
+      "stock_code": "0009K0",
+      "title": "주주명부폐쇄기간또는기준일설정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900756",
+      "stock_code": "0009K0",
+      "title": "주주총회소집결의              (임시주주총회)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000561",
+      "stock_code": "096240",
+      "title": "주주총회소집공고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000560",
+      "stock_code": "016610",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900755",
+      "stock_code": "290690",
+      "title": "증권발행결과(자율공시)              (제9회차 CB)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000559",
+      "stock_code": "355690",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900739",
+      "stock_code": "096240",
+      "title": "[기재정정]최대주주변경을수반하는주식담보제공계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000556",
+      "stock_code": "001540",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000554",
+      "stock_code": "000010",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800738",
+      "stock_code": "008500",
+      "title": "기업가치제고계획(자율공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900750",
+      "stock_code": "178320",
+      "title": "[기재정정]최대주주변경을수반하는주식담보제공계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000550",
+      "stock_code": "000540",
+      "title": "[기재정정]대규모기업집단현황공시[연1회공시및1/4분기용(개별회사)]",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000549",
+      "stock_code": "056080",
+      "title": "[기재정정]임원ㆍ주요주주특정증권등거래계획보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000547",
+      "stock_code": "0097F0",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000546",
+      "stock_code": "227610",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900761",
+      "stock_code": "262260",
+      "title": "주주명부폐쇄기간또는기준일설정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000544",
+      "stock_code": "090360",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800726",
+      "stock_code": "363280",
+      "title": "단일판매ㆍ공급계약체결(자회사의 주요경영사항)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000542",
+      "stock_code": "187790",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000540",
+      "stock_code": "138250",
+      "title": "특수관계인에대한출자",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900751",
+      "stock_code": "261780",
+      "title": "증권발행결과(자율공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800744",
+      "stock_code": "480370",
+      "title": "주주명부폐쇄기간또는기준일설정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900743",
+      "stock_code": "262260",
+      "title": "주주총회소집결의              (임시주주총회)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000536",
+      "stock_code": "003470",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000533",
+      "stock_code": "310870",
+      "title": "[기재정정]주식매수선택권부여에관한신고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000530",
+      "stock_code": "105550",
+      "title": "사외이사의선임ㆍ해임또는중도퇴임에관한신고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800737",
+      "stock_code": "003470",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800719",
+      "stock_code": "480370",
+      "title": "주주총회소집결의",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000528",
+      "stock_code": "007280",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800729",
+      "stock_code": "298050",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800727",
+      "stock_code": "017800",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800695",
+      "stock_code": "009410",
+      "title": "단일판매ㆍ공급계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000525",
+      "stock_code": "138250",
+      "title": "[기재정정]영업양수결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000524",
+      "stock_code": "287840",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800724",
+      "stock_code": "170900",
+      "title": "지속가능경영보고서등관련사항(자율공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000522",
+      "stock_code": "254490",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000520",
+      "stock_code": "298050",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800721",
+      "stock_code": "002880",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000519",
+      "stock_code": "417840",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000518",
+      "stock_code": "287840",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800717",
+      "stock_code": "012630",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000517",
+      "stock_code": "003240",
+      "title": "[기재정정]대규모기업집단현황공시[연1회공시및1/4분기용(대표회사)]",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000516",
+      "stock_code": "003530",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000515",
+      "stock_code": "001720",
+      "title": "[기재정정]증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000490",
+      "stock_code": "309930",
+      "title": "[기재정정]주요사항보고서(무상증자결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000512",
+      "stock_code": "012630",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800706",
+      "stock_code": "006570",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800705",
+      "stock_code": "487570",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000508",
+      "stock_code": "009730",
+      "title": "증권신고서(지분증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000507",
+      "stock_code": "123840",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000505",
+      "stock_code": "487570",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000503",
+      "stock_code": "041190",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000502",
+      "stock_code": "006800",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000501",
+      "stock_code": "004710",
+      "title": "[기재정정]투자설명서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000499",
+      "stock_code": "179530",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000497",
+      "stock_code": "086960",
+      "title": "주요사항보고서(제3자의전환사채매수선택권행사)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900633",
+      "stock_code": "273060",
+      "title": "주주총회소집결의              (임시주주총회)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000496",
+      "stock_code": "205470",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000495",
+      "stock_code": "090710",
+      "title": "소액공모실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000494",
+      "stock_code": "004560",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800656",
+      "stock_code": "037710",
+      "title": "풍문또는보도에대한해명(미확정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000493",
+      "stock_code": "006800",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000492",
+      "stock_code": "004710",
+      "title": "[기재정정]증권신고서(지분증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000488",
+      "stock_code": "205470",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000487",
+      "stock_code": "013580",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000486",
+      "stock_code": "003060",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000485",
+      "stock_code": "179530",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000484",
+      "stock_code": "378340",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900680",
+      "stock_code": "070300",
+      "title": "주주명부폐쇄기간또는기준일설정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800623",
+      "stock_code": "003030",
+      "title": "[기재정정]타인에대한채무보증결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900639",
+      "stock_code": "267980",
+      "title": "주주총회소집결의              (임시주주총회)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000483",
+      "stock_code": "082270",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000450",
+      "stock_code": "290660",
+      "title": "주요사항보고서(유형자산양수결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800678",
+      "stock_code": "122900",
+      "title": "기업설명회(IR)개최(안내공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800677",
+      "stock_code": "021240",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900621",
+      "stock_code": "090710",
+      "title": "증권발행결과(자율공시)              (일반공모증자-소액공모)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800675",
+      "stock_code": "000720",
+      "title": "타인에대한채무보증결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900640",
+      "stock_code": "070300",
+      "title": "주주총회소집결의              (임시주주총회)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000481",
+      "stock_code": "060980",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800672",
+      "stock_code": "122900",
+      "title": "기업설명회(IR)개최(안내공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900646",
+      "stock_code": "258830",
+      "title": "불성실공시법인지정예고              (공시번복)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000480",
+      "stock_code": "109960",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000479",
+      "stock_code": "001510",
+      "title": "일괄신고추가서류(파생결합사채-주가연계파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800630",
+      "stock_code": "357430",
+      "title": "주주총회소집결의",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000478",
+      "stock_code": "003060",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000476",
+      "stock_code": "205500",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900614",
+      "stock_code": "290690",
+      "title": "단일판매ㆍ공급계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000475",
+      "stock_code": "006620",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900618",
+      "stock_code": "290690",
+      "title": "단일판매ㆍ공급계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000474",
+      "stock_code": "177830",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000473",
+      "stock_code": "003490",
+      "title": "[발행조건확정]증권신고서(채무증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000472",
+      "stock_code": "003540",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900653",
+      "stock_code": "210120",
+      "title": "주권매매거래정지              (주식의 병합, 분할 등 전자등록 변경, 말소)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000435",
+      "stock_code": "009730",
+      "title": "[기재정정]주요사항보고서(유상증자결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900586",
+      "stock_code": "071850",
+      "title": "기타경영사항(자율공시)              (주주총회결의무효확인 등 소송 판결에 대한 상고제기)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000470",
+      "stock_code": "378340",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000468",
+      "stock_code": "003540",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000467",
+      "stock_code": "000010",
+      "title": "일괄신고추가서류",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000466",
+      "stock_code": "008670",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900607",
+      "stock_code": "083650",
+      "title": "[기재정정]단일판매ㆍ공급계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000464",
+      "stock_code": "003540",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000463",
+      "stock_code": "420770",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000462",
+      "stock_code": "031440",
+      "title": "의결권대리행사권유참고서류",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900626",
+      "stock_code": "049080",
+      "title": "주권매매거래정지              (주식의 병합, 분할 등 전자등록 변경, 말소)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000461",
+      "stock_code": "451800",
+      "title": "합병등종료보고서(자산양수도)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000460",
+      "stock_code": "199290",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000458",
+      "stock_code": "323410",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900604",
+      "stock_code": "009730",
+      "title": "임시주주총회결과",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000456",
+      "stock_code": "079900",
+      "title": "[기재정정]사업보고서 (2025.12)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000457",
+      "stock_code": "065370",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000455",
+      "stock_code": "002720",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000452",
+      "stock_code": "003530",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900616",
+      "stock_code": "033830",
+      "title": "주권매매거래정지              (주식의 병합, 분할 등 전자등록 변경, 말소)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000449",
+      "stock_code": "031440",
+      "title": "주주총회소집공고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000448",
+      "stock_code": "290650",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900613",
+      "stock_code": "467930",
+      "title": "기타시장안내(관리종목지정우려종목)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900632",
+      "stock_code": "267980",
+      "title": "주주명부폐쇄기간또는기준일설정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000446",
+      "stock_code": "021240",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000444",
+      "stock_code": "104830",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000443",
+      "stock_code": "199480",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900624",
+      "stock_code": "290660",
+      "title": "증권발행결과(자율공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000442",
+      "stock_code": "008670",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000441",
+      "stock_code": "290650",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900620",
+      "stock_code": "273060",
+      "title": "주주명부폐쇄기간또는기준일설정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000403",
+      "stock_code": "042940",
+      "title": "[기재정정]주요사항보고서(유상증자결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000440",
+      "stock_code": "175330",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000439",
+      "stock_code": "013580",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000438",
+      "stock_code": "084850",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000436",
+      "stock_code": "023910",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900591",
+      "stock_code": "065650",
+      "title": "주주명부폐쇄기간또는기준일설정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900593",
+      "stock_code": "065650",
+      "title": "주주총회소집결의",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000433",
+      "stock_code": "003540",
+      "title": "일괄신고추가서류(기타파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000432",
+      "stock_code": "005420",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800601",
+      "stock_code": "013570",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000431",
+      "stock_code": "003540",
+      "title": "일괄신고추가서류(파생결합사채-주가연계파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000430",
+      "stock_code": "192520",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900598",
+      "stock_code": "123010",
+      "title": "전환청구권행사",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000429",
+      "stock_code": "293490",
+      "title": "주주총회소집공고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000428",
+      "stock_code": "003530",
+      "title": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000427",
+      "stock_code": "150900",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000425",
+      "stock_code": "034310",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900578",
+      "stock_code": "950220",
+      "title": "[기재정정]코스닥시장상장외국법인외부감사인선임ㆍ해임신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000424",
+      "stock_code": "001510",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000423",
+      "stock_code": "013570",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800572",
+      "stock_code": "102260",
+      "title": "주주명부폐쇄기간또는기준일설정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000421",
+      "stock_code": "013570",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000420",
+      "stock_code": "008560",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900579",
+      "stock_code": "321820",
+      "title": "주주총회소집결의              (임시주주총회)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000397",
+      "stock_code": "459550",
+      "title": "주요사항보고서(자기주식취득신탁계약체결결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000418",
+      "stock_code": "008560",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000392",
+      "stock_code": "377030",
+      "title": "주요사항보고서(자기전환사채만기전취득결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000417",
+      "stock_code": "008670",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000416",
+      "stock_code": "000270",
+      "title": "의결권대리행사권유참고서류",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900584",
+      "stock_code": "321820",
+      "title": "주주명부폐쇄기간또는기준일설정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800581",
+      "stock_code": "214330",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000413",
+      "stock_code": "005960",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000412",
+      "stock_code": "029780",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000411",
+      "stock_code": "021240",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800573",
+      "stock_code": "013580",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000408",
+      "stock_code": "222800",
+      "title": "주요사항보고서(제3자의전환사채매수선택권행사)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000407",
+      "stock_code": "008670",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000406",
+      "stock_code": "000270",
+      "title": "주주총회소집공고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800568",
+      "stock_code": "010120",
+      "title": "[기재정정]단일판매ㆍ공급계약체결(자율공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900543",
+      "stock_code": "036710",
+      "title": "주권관련사채권의취득결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000402",
+      "stock_code": "008560",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800561",
+      "stock_code": "010120",
+      "title": "[기재정정]단일판매ㆍ공급계약체결(자율공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000401",
+      "stock_code": "008670",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000400",
+      "stock_code": "339770",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000396",
+      "stock_code": "145270",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900540",
+      "stock_code": "244460",
+      "title": "기타시장안내              (회생절차 개시결정 관련 시장안내)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800555",
+      "stock_code": "000100",
+      "title": "기업설명회(IR)개최(안내공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000394",
+      "stock_code": "068930",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800533",
+      "stock_code": "013580",
+      "title": "단일판매ㆍ공급계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900519",
+      "stock_code": "244460",
+      "title": "회생절차개시결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900528",
+      "stock_code": "012210",
+      "title": "전환청구권행사              (제1회차)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000391",
+      "stock_code": "008670",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800551",
+      "stock_code": "090350",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000389",
+      "stock_code": "020180",
+      "title": "의결권대리행사권유참고서류",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900527",
+      "stock_code": "331740",
+      "title": "임시주주총회결과",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000384",
+      "stock_code": "052400",
+      "title": "[기재정정]주요사항보고서(자기주식취득결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000388",
+      "stock_code": "048470",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800545",
+      "stock_code": "000100",
+      "title": "기업설명회(IR)개최(안내공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900542",
+      "stock_code": "001540",
+      "title": "생산재개(자율공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000380",
+      "stock_code": "048470",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000378",
+      "stock_code": "020180",
+      "title": "주주총회소집공고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000374",
+      "stock_code": "026040",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000373",
+      "stock_code": "019570",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900501",
+      "stock_code": "443250",
+      "title": "중간(분기)배당을위한주주명부폐쇄(기준일)결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000371",
+      "stock_code": "003530",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000370",
+      "stock_code": "030610",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000369",
+      "stock_code": "028670",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000367",
+      "stock_code": "003450",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000366",
+      "stock_code": "005940",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900505",
+      "stock_code": "079970",
+      "title": "주권매매거래정지              (투자자 보호)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000364",
+      "stock_code": "003450",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000363",
+      "stock_code": "258610",
+      "title": "임원ㆍ주요주주특정증권등거래계획보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900493",
+      "stock_code": "079970",
+      "title": "기타시장안내              (정리매매 보류 관련)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900468",
+      "stock_code": "079970",
+      "title": "기타경영사항(자율공시)              (상장폐지결정 효력정지 가처분신청)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000362",
+      "stock_code": "003450",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000361",
+      "stock_code": "039490",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000360",
+      "stock_code": "258610",
+      "title": "임원ㆍ주요주주특정증권등거래계획보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800515",
+      "stock_code": "107590",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000358",
+      "stock_code": "000520",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000357",
+      "stock_code": "030610",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000355",
+      "stock_code": "001500",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000353",
+      "stock_code": "003450",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000352",
+      "stock_code": "039490",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800481",
+      "stock_code": "029780",
+      "title": "풍문또는보도에대한해명(미확정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000351",
+      "stock_code": "008670",
+      "title": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000350",
+      "stock_code": "107590",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800460",
+      "stock_code": "006840",
+      "title": "[기재정정]금전대여결정(자회사의 주요경영사항)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000349",
+      "stock_code": "039490",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000348",
+      "stock_code": "030610",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000316",
+      "stock_code": "193250",
+      "title": "주요사항보고서(타법인주식및출자증권양도결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000347",
+      "stock_code": "155650",
+      "title": "[기재정정]주식매수선택권부여에관한신고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000346",
+      "stock_code": "003450",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000345",
+      "stock_code": "003450",
+      "title": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000342",
+      "stock_code": "003450",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000340",
+      "stock_code": "008670",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900464",
+      "stock_code": "443250",
+      "title": "주식소각결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000339",
+      "stock_code": "155650",
+      "title": "[기재정정]주식매수선택권부여에관한신고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800494",
+      "stock_code": "003160",
+      "title": "기업설명회(IR)개최(안내공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000338",
+      "stock_code": "368970",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000337",
+      "stock_code": "003450",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000336",
+      "stock_code": "005940",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000335",
+      "stock_code": "003450",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000334",
+      "stock_code": "003160",
+      "title": "[기재정정]사업보고서 (2025.12)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900469",
+      "stock_code": "082210",
+      "title": "주주총회소집결의              (임시주주총회)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900465",
+      "stock_code": "082210",
+      "title": "주주명부폐쇄기간또는기준일설정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900441",
+      "stock_code": "315640",
+      "title": "임시주주총회결과",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000303",
+      "stock_code": "146060",
+      "title": "[기재정정]주요사항보고서(전환사채권발행결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000333",
+      "stock_code": "005940",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000332",
+      "stock_code": "001500",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000330",
+      "stock_code": "008670",
+      "title": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000329",
+      "stock_code": "016610",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000327",
+      "stock_code": "110020",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000326",
+      "stock_code": "003450",
+      "title": "일괄신고추가서류(파생결합사채-주가연계파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800483",
+      "stock_code": "042700",
+      "title": "기업설명회(IR)개최(안내공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000324",
+      "stock_code": "005940",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800480",
+      "stock_code": "069730",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000321",
+      "stock_code": "107590",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000319",
+      "stock_code": "039490",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000318",
+      "stock_code": "003450",
+      "title": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800477",
+      "stock_code": "042700",
+      "title": "기업설명회(IR)개최(안내공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000317",
+      "stock_code": "225430",
+      "title": "주주총회소집공고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000315",
+      "stock_code": "110020",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000314",
+      "stock_code": "003160",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000311",
+      "stock_code": "039490",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900467",
+      "stock_code": "024850",
+      "title": "기업설명회(IR)개최",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000308",
+      "stock_code": "003530",
+      "title": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000306",
+      "stock_code": "001500",
+      "title": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000302",
+      "stock_code": "005940",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900456",
+      "stock_code": "099440",
+      "title": "기업설명회(IR)개최",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000299",
+      "stock_code": "099440",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000296",
+      "stock_code": "358570",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000295",
+      "stock_code": "099440",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000290",
+      "stock_code": "005940",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000289",
+      "stock_code": "104540",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000288",
+      "stock_code": "358570",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900419",
+      "stock_code": "206400",
+      "title": "단일판매ㆍ공급계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800446",
+      "stock_code": "010580",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000286",
+      "stock_code": "025560",
+      "title": "의결권대리행사권유참고서류",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000285",
+      "stock_code": "358570",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000284",
+      "stock_code": "008670",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800422",
+      "stock_code": "011930",
+      "title": "단일판매ㆍ공급계약체결(자율공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000283",
+      "stock_code": "016610",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000282",
+      "stock_code": "006800",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000281",
+      "stock_code": "016610",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000280",
+      "stock_code": "025560",
+      "title": "주주총회소집공고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000278",
+      "stock_code": "030610",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000277",
+      "stock_code": "006800",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000276",
+      "stock_code": "016610",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000275",
+      "stock_code": "161000",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000274",
+      "stock_code": "089590",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800410",
+      "stock_code": "000210",
+      "title": "단일판매ㆍ공급계약체결(자회사의 주요경영사항)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000273",
+      "stock_code": "030610",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000266",
+      "stock_code": "348030",
+      "title": "주요사항보고서(자기주식취득신탁계약체결결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000270",
+      "stock_code": "393970",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000269",
+      "stock_code": "030610",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900386",
+      "stock_code": "066790",
+      "title": "소송등의제기ㆍ신청(경영권분쟁소송)              (임시주주총회 개최금지 가처분-즉시항고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800388",
+      "stock_code": "375500",
+      "title": "단일판매ㆍ공급계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800406",
+      "stock_code": "103590",
+      "title": "[기재정정]단일판매ㆍ공급계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800404",
+      "stock_code": "005870",
+      "title": "단일판매ㆍ공급계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000261",
+      "stock_code": "016360",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000257",
+      "stock_code": "119610",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000253",
+      "stock_code": "006800",
+      "title": "일괄신고추가서류(파생결합사채-주가연계파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000252",
+      "stock_code": "006800",
+      "title": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900385",
+      "stock_code": "098070",
+      "title": "[기재정정]단일판매ㆍ공급계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800390",
+      "stock_code": "002810",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000243",
+      "stock_code": "066790",
+      "title": "[첨부정정]주요사항보고서(감자결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000246",
+      "stock_code": "143160",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000222",
+      "stock_code": "004080",
+      "title": "주요사항보고서(자기주식취득결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000245",
+      "stock_code": "332370",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000244",
+      "stock_code": "199290",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800380",
+      "stock_code": "014990",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000240",
+      "stock_code": "008670",
+      "title": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000239",
+      "stock_code": "090080",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000237",
+      "stock_code": "003470",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800374",
+      "stock_code": "090080",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800372",
+      "stock_code": "072710",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000232",
+      "stock_code": "016360",
+      "title": "일괄신고추가서류(파생결합사채-주가연계파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000231",
+      "stock_code": "014990",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000229",
+      "stock_code": "247540",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000224",
+      "stock_code": "009150",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000221",
+      "stock_code": "483650",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000219",
+      "stock_code": "085310",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900356",
+      "stock_code": "007390",
+      "title": "기업설명회(IR)개최",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000217",
+      "stock_code": "128940",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000215",
+      "stock_code": "006650",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000209",
+      "stock_code": "384470",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000208",
+      "stock_code": "101240",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000205",
+      "stock_code": "101240",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800347",
+      "stock_code": "105560",
+      "title": "기업설명회(IR)개최(안내공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000203",
+      "stock_code": "039490",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000200",
+      "stock_code": "950220",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000199",
+      "stock_code": "065150",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000198",
+      "stock_code": "010580",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000197",
+      "stock_code": "352910",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000196",
+      "stock_code": "214330",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000195",
+      "stock_code": "352910",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000193",
+      "stock_code": "348030",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000191",
+      "stock_code": "348030",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000190",
+      "stock_code": "048830",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800336",
+      "stock_code": "004150",
+      "title": "유형자산처분결정(자회사의 주요경영사항)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800335",
+      "stock_code": "004710",
+      "title": "유형자산처분결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000189",
+      "stock_code": "183490",
+      "title": "[기재정정]주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000188",
+      "stock_code": "358570",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000187",
+      "stock_code": "358570",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000186",
+      "stock_code": "183490",
+      "title": "[기재정정]주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000185",
+      "stock_code": "358570",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000184",
+      "stock_code": "080220",
+      "title": "[첨부정정]의결권대리행사권유참고서류",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000181",
+      "stock_code": "432430",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000179",
+      "stock_code": "0010F0",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900317",
+      "stock_code": "060230",
+      "title": "임시주주총회결과",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000178",
+      "stock_code": "014990",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800305",
+      "stock_code": "009070",
+      "title": "[기재정정]타법인주식및출자증권취득결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000174",
+      "stock_code": "080220",
+      "title": "[기재정정]주주총회소집공고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000173",
+      "stock_code": "002840",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000172",
+      "stock_code": "403490",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900298",
+      "stock_code": "289930",
+      "title": "신규시설투자등",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000169",
+      "stock_code": "204020",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000168",
+      "stock_code": "204020",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000150",
+      "stock_code": "148930",
+      "title": "주요사항보고서(자기주식취득신탁계약체결결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800303",
+      "stock_code": "002840",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000158",
+      "stock_code": "011300",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900284",
+      "stock_code": "475580",
+      "title": "금전대여결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900283",
+      "stock_code": "095610",
+      "title": "단일판매ㆍ공급계약체결(자율공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000156",
+      "stock_code": "278990",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000155",
+      "stock_code": "028670",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000153",
+      "stock_code": "352940",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900268",
+      "stock_code": "347850",
+      "title": "기업설명회(IR)개최",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000146",
+      "stock_code": "177830",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900274",
+      "stock_code": "095270",
+      "title": "임시주주총회결과",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800271",
+      "stock_code": "210980",
+      "title": "주주명부폐쇄기간또는기준일설정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000140",
+      "stock_code": "004910",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000139",
+      "stock_code": "104540",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000134",
+      "stock_code": "089970",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800242",
+      "stock_code": "210980",
+      "title": "주주총회소집결의",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900257",
+      "stock_code": "048870",
+      "title": "기타경영사항(자율공시)              (자기사채(제14회차 전환사채) 소각 결정의 건)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000127",
+      "stock_code": "139130",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900256",
+      "stock_code": "323280",
+      "title": "주주명부폐쇄기간또는기준일설정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000113",
+      "stock_code": "163730",
+      "title": "[기재정정]주요사항보고서(유상증자결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000124",
+      "stock_code": "225590",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900235",
+      "stock_code": "323280",
+      "title": "주주총회소집결의              (임시주주총회)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000121",
+      "stock_code": "043610",
+      "title": "[기재정정]사업보고서 (2025.12)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000120",
+      "stock_code": "377330",
+      "title": "주주총회소집공고",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000119",
+      "stock_code": "030610",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605600228",
+      "stock_code": "189350",
+      "title": "기업설명회(IR)개최",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000116",
+      "stock_code": "271560",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900221",
+      "stock_code": "365270",
+      "title": "[기재정정]투자판단관련주요경영사항              (이중항체 MT103 기술이전 계약 체결)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605600203",
+      "stock_code": "302920",
+      "title": "[기재정정]타법인주식및출자증권취득결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000111",
+      "stock_code": "015360",
+      "title": "[기재정정]사업보고서 (2025.12)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900226",
+      "stock_code": "033290",
+      "title": "기업설명회(IR)개최",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000110",
+      "stock_code": "310870",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000106",
+      "stock_code": "042520",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900216",
+      "stock_code": "080420",
+      "title": "기업설명회(IR)개최",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000105",
+      "stock_code": "053980",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000104",
+      "stock_code": "030610",
+      "title": "일괄신고추가서류(파생결합사채-주가연계파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900204",
+      "stock_code": "067370",
+      "title": "전환가액의조정              (제4회차)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900193",
+      "stock_code": "221840",
+      "title": "임시주주총회결과",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800200",
+      "stock_code": "095720",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000092",
+      "stock_code": "069460",
+      "title": "[기재정정]주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000089",
+      "stock_code": "039490",
+      "title": "일괄신고추가서류(파생결합사채-주가연계파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000088",
+      "stock_code": "187420",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000087",
+      "stock_code": "115450",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000085",
+      "stock_code": "063170",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000084",
+      "stock_code": "032850",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000083",
+      "stock_code": "003530",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000081",
+      "stock_code": "030610",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900172",
+      "stock_code": "206650",
+      "title": "단일판매ㆍ공급계약체결(자율공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000080",
+      "stock_code": "030610",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000076",
+      "stock_code": "006800",
+      "title": "[기재정정]투자설명서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000075",
+      "stock_code": "003530",
+      "title": "일괄신고추가서류(기타파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000074",
+      "stock_code": "039490",
+      "title": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000073",
+      "stock_code": "005930",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800163",
+      "stock_code": "005800",
+      "title": "[기재정정]기업지배구조보고서공시",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800173",
+      "stock_code": "002140",
+      "title": "타인에대한채무보증결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000071",
+      "stock_code": "030610",
+      "title": "일괄신고추가서류(파생결합사채-주가연계파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800164",
+      "stock_code": "004710",
+      "title": "유상증자신주발행가액(안내공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000068",
+      "stock_code": "030610",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000066",
+      "stock_code": "030610",
+      "title": "일괄신고추가서류(파생결합증권-주가연계증권)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000063",
+      "stock_code": "281820",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000062",
+      "stock_code": "030610",
+      "title": "일괄신고추가서류(기타파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800158",
+      "stock_code": "012510",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000061",
+      "stock_code": "005930",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900155",
+      "stock_code": "095340",
+      "title": "기업설명회(IR)개최",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800151",
+      "stock_code": "004150",
+      "title": "[기재정정]주요사항보고서(유상증자결정)(자회사의 주요경영사항)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000052",
+      "stock_code": "082210",
+      "title": "주식등의대량보유상황보고서(약식)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000028",
+      "stock_code": "004710",
+      "title": "[기재정정]주요사항보고서(유상증자결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000049",
+      "stock_code": "028670",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000047",
+      "stock_code": "053980",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000046",
+      "stock_code": "008560",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000045",
+      "stock_code": "030610",
+      "title": "투자설명서(일괄신고)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800146",
+      "stock_code": "271560",
+      "title": "기업설명회(IR)개최(안내공시)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605900108",
+      "stock_code": "140430",
+      "title": "단일판매ㆍ공급계약체결",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000044",
+      "stock_code": "030610",
+      "title": "일괄신고추가서류(파생결합사채-주가연계파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000041",
+      "stock_code": "003920",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000040",
+      "stock_code": "012650",
+      "title": "채무인수결정",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000037",
+      "stock_code": "001500",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000035",
+      "stock_code": "008560",
+      "title": "일괄신고추가서류(파생결합사채-주가연계파생결합사채)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000032",
+      "stock_code": "100090",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000029",
+      "stock_code": "003470",
+      "title": "증권발행실적보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000026",
+      "stock_code": "451700",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000015",
+      "stock_code": "005160",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605000011",
+      "stock_code": "192520",
+      "title": "투자설명서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260605800042",
+      "stock_code": "060980",
+      "title": "최대주주등소유주식변동신고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260519100002",
+      "stock_code": "327260",
+      "title": "효력발생안내( 2026.5.19. 제출 증권신고서(지분증권) )",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260527100012",
+      "stock_code": "032710",
+      "title": "효력발생안내( 2026.5.27. 제출 일괄신고서 )",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260604000658",
+      "stock_code": "060980",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260604000652",
+      "stock_code": "060980",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260604000667",
+      "stock_code": "366030",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260604000665",
+      "stock_code": "396470",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260604000660",
+      "stock_code": "396470",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260604000654",
+      "stock_code": "462350",
+      "title": "주요사항보고서(무상증자결정)",
+      "trading_days_elapsed": 0
+    },
+    {
+      "accepted_at": "2026-06-05T18:00:00+09:00",
+      "event_code": null,
+      "rcept_dt": "20260605",
+      "rcept_no": "20260604000655",
+      "stock_code": "032790",
+      "title": "[첨부정정]주요사항보고서(전환사채권발행결정)",
+      "trading_days_elapsed": 0
+    }
+  ],
   "source": "live",
-  "watermark": "{\"accepted_at\": \"2026-06-04T18:00:00+09:00\", \"input_cutoff\": \"2026-06-04T18:00:00+09:00\", \"rcept_dt\": \"20260604\", \"rcept_no\": \"20260604900901\"}"
+  "watermark": "{\"accepted_at\": \"2026-06-05T18:00:00+09:00\", \"input_cutoff\": \"2026-06-05T18:00:00+09:00\", \"rcept_dt\": \"20260605\", \"rcept_no\": \"20260605900966\"}"
 }
