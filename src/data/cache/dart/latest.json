@@ -1,24 +1,5 @@
 {
-  "disclosures": [
-    {
-      "accepted_at": "2026-04-02T18:00:00+09:00",
-      "event_code": null,
-      "rcept_dt": "20260402",
-      "rcept_no": "20260402901206",
-      "stock_code": "066790",
-      "title": "투자판단관련주요경영사항              (소액주주들에 의한 [일시 이사의 직무를 행할자의 선임에 관한 재판요청서] 기각결정에 대한 즉시항고장 접수)",
-      "trading_days_elapsed": 0
-    },
-    {
-      "accepted_at": "2026-04-02T18:00:00+09:00",
-      "event_code": null,
-      "rcept_dt": "20260402",
-      "rcept_no": "20260402901203",
-      "stock_code": "066790",
-      "title": "소송등의제기ㆍ신청(경영권분쟁소송)              (회계장부 열람등사 가처분)",
-      "trading_days_elapsed": 0
-    }
-  ],
+  "disclosures": [],
   "source": "live",
-  "watermark": "{\"accepted_at\": \"2026-04-02T18:00:00+09:00\", \"input_cutoff\": \"2026-04-02T18:00:00+09:00\", \"rcept_dt\": \"20260402\", \"rcept_no\": \"20260402901206\"}"
+  "watermark": "{\"accepted_at\": \"2026-06-09T18:00:00+09:00\", \"input_cutoff\": \"2026-06-09T18:00:00+09:00\", \"rcept_dt\": \"20260609\", \"rcept_no\": \"20260609900884\"}"
 }
